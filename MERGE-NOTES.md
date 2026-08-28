@@ -35,3 +35,12 @@ now reports no unresolved imports; the only files outside the transitive
 closure of `All.lean` are `AxiomAudit.lean` (the audit driver, standalone by
 design — it inspects the environment rather than joining it) and `Main.lean`
 (an executable entry point). Everything mathematical is inside the closure.
+
+## Repository packaging note
+
+The handoff checklist described earlier commission tarballs as kept in the
+repository root. They are omitted from the git repository (they are large,
+derivative, and reconstructible from the round documents); the repository is
+the live tree. Everything else in the checklist is present. `KindBox.lean`
+is wired into `All.lean` as of the initial commit, so the first CI run
+audits the closure including the box-dimension file.
