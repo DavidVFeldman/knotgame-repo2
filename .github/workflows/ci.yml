@@ -39,11 +39,19 @@ jobs:
       # throws if any axiom outside {propext, Classical.choice, Quot.sound}
       # occurs (in particular sorryAx). The audit is semantic: it inspects the
       # elaborated environment, never the text of the sources.
-      # -j1: the certificate modules are memory-heavy; building them serially
-      # keeps the peak inside the 7 GB of a private-repo runner. Slower in
-      # wall-clock, but each module built is banked by the cache step above.
-      - name: Build (includes the semantic axiom audit)
-        run: lake build -j1
+      # The certificate modules are memory-heavy; this Lake version has no
+      # jobs flag, so serialization is done by construction: one module per
+      # invocation, in topological order of the import graph, so each call
+      # compiles at most one new module and peak memory is a single module.
+      # Every completed module is banked by the cache step above. The final
+      # bare build covers All, AxiomAudit (the semantic axiom audit) and Main.
+      - name: Build (serial; includes the semantic axiom audit)
+        run: |
+          set -e
+          for m in Basic Branching BranchingContinuum BranchingCount Distinct ExpCount ExpCert ExpLower ExpMulti ExpMultiCert ExpSharpData ExpSharp ExpSharperData ExpSharper ExpSharpestData0 ExpSharpestData1 ExpSharpestData2 ExpSharpestData3 ExpSharpestData4 ExpSharpestData5 ExpSharpestData6 ExpSharpestData7 ExpSharpestData8 ExpSharpestData ExpSharpestChecks0 ExpSharpestChecks1 ExpSharpestChecks2 ExpSharpestChecks3 ExpSharpestChecks4 ExpSharpestChecks5 ExpSharpestChecks6 ExpSharpestChecks7 ExpSharpestChecks8 ExpSharpest ExpVar ExpAboveData0 ExpAboveData1 ExpAboveData10 ExpAboveData11 ExpAboveData2 ExpAboveData3 ExpAboveData4 ExpAboveData5 ExpAboveData6 ExpAboveData7 ExpAboveData8 ExpAboveData9 ExpAboveData ExpAboveChecks ExpAbove ExpWindowData ExpWindow Lucas FourierFloor FourierGeneral FourierReflect FourierEnclosure ReturnTail RunRational Suffix Littlewood Immortal Threshold Golden Pisot Gaps CircleForm Deficit GoldenEffective Plastic Overlap PlasticFourier PlasticOrbit PlasticIndex PlasticTbl PlasticCert PlasticConfig PlasticOrbitCount RecordLower Sqrt2 Supergolden SupergoldenFourier SurvivorSet Backward Candidates CandidateInstance Permanence Compactness Density DensityQuant PeriodicYield Ternary KindTree KindDim KindDimLower KindBox Mahler NoRecurrence Square Translation ImmortalMahler TransversalityBounds TransversalityChecker TransversalityCertificate TransversalitySound TransversalityCell Transversality CommonWindow PairCounting Tribonacci TribonacciFourier TwoStep RecordDepths PisotDecide RecordGaps WindowSharp; do
+            lake build RequestProject.$m
+          done
+          lake build
 
       # A belt-and-braces textual check. The audit above is what actually
       # guarantees soundness; this only catches a `sorry` in a declaration that
