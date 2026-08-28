@@ -10,8 +10,19 @@ jobs:
   build:
     name: Build and audit axioms
     runs-on: ubuntu-latest
+    timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
+
+      # Resume across runs: cache the project's own build products keyed on
+      # the sources, so a killed run continues instead of restarting.
+      - name: Cache project build
+        uses: actions/cache@v4
+        with:
+          path: .lake
+          key: lake-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ hashFiles('RequestProject/**') }}
+          restore-keys: |
+            lake-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
 
       - name: Install elan
         run: |
@@ -28,8 +39,11 @@ jobs:
       # throws if any axiom outside {propext, Classical.choice, Quot.sound}
       # occurs (in particular sorryAx). The audit is semantic: it inspects the
       # elaborated environment, never the text of the sources.
+      # -j1: the certificate modules are memory-heavy; building them serially
+      # keeps the peak inside the 7 GB of a private-repo runner. Slower in
+      # wall-clock, but each module built is banked by the cache step above.
       - name: Build (includes the semantic axiom audit)
-        run: lake build
+        run: lake build -j1
 
       # A belt-and-braces textual check. The audit above is what actually
       # guarantees soundness; this only catches a `sorry` in a declaration that
