@@ -1,0 +1,741 @@
+GITHUB HANDOFF CHECKLIST
+========================
+
+Project : formal verification of "Knot counts in an interval deletion game"
+Lean    : 4.28.0 (pinned by lean-toolchain)
+Mathlib : pinned by lake-manifest.json
+Source  : knotgame-commission(1).tar.gz, kept in the repository root
+
+
+1. WHAT IS IN THE TREE
+----------------------
+
+  [x] RequestProject/Basic.lean       Work Order 1  definitions
+  [x] RequestProject/Distinct.lean    Work Order 2  Lemma 1 (distinctness)
+  [x] RequestProject/Suffix.lean      Work Order 3  Lemma 2, Theorem 3
+  [x] RequestProject/Threshold.lean   Work Order 4  Proposition 10
+  [x] RequestProject/Golden.lean      Work Order 5  Theorem 8, Appendix B
+  [x] RequestProject/Plastic.lean     Work Order 6  partial; see PLASTIC-REPORT.md
+  [x] RequestProject/Pisot.lean       Work Order 7  Theorem 6
+  [x] RequestProject/Sqrt2.lean       Work Order 8  Propositions 18, 19
+  [x] RequestProject/Littlewood.lean  Work Order 9  Propositions 14, 16, Corollary 15
+  [x] RequestProject/All.lean         imports every module
+  [x] RequestProject/AxiomAudit.lean  the semantic axiom audit (constraint 2)
+  [x] RequestProject/Main.lean        pre-existing options stub, unchanged
+
+  [x] CENSUS.md                       Work Order 0, delivered with all flags
+  [x] PLASTIC-REPORT.md               Work Order 6 negative report + cost data
+  [x] GITHUB_HANDOFF_CHECKLIST        this file
+  [x] .github/workflows/ci.yml        build + semantic axiom audit on every push
+  [x] experiments/                    cost measurements only; outside the
+                                      library glob, never built by `lake build`
+
+
+2. STANDING CONSTRAINTS
+-----------------------
+
+  [x] 1. No sorry, admit, axiom or native_decide anywhere in RequestProject/.
+         Verified two ways: the semantic audit below, and a textual grep run in
+         CI. Permitted axioms only: propext, Classical.choice, Quot.sound.
+
+  [x] 2. CI audits axioms semantically. RequestProject/AxiomAudit.lean walks the
+         elaborated environment, selects every non-internal theorem whose name
+         begins with `KnotGame`, computes its axiom set with Lean.collectAxioms
+         (the machinery behind #print axioms) and throws if any axiom outside
+         the permitted three appears. It does not read the sources. It is part
+         of the default build target, so `lake build` fails if the audit fails.
+         Last run: "axiom audit passed: 181 theorems, axioms confined to
+         [propext, Classical.choice, Quot.sound]".
+         Negative control: injecting a theorem proved by `sorry` makes the audit
+         report `audit failed: [(KnotGame.test_sorry_detection, [sorryAx])]`.
+
+  [x] 3. Report rather than repair. Three items are reported, not repaired:
+         Corollary 15 (a hypothesis the paper's proof uses but does not state),
+         Proposition 19 (two hypotheses left implicit), and Proposition 9 (not
+         certified at all). See flags (A), (E), (C) of CENSUS.md.
+
+  [x] 4. Census first: CENSUS.md, one row per numbered statement, each marked
+         in scope / out of scope (computational) / deferred, with the flags.
+
+  [x] 5. Deliverables: this tree plus this checklist.
+
+
+3. HOW TO REPRODUCE
+-------------------
+
+    elan is required; the toolchain is picked up from lean-toolchain.
+
+    $ lake exe cache get        # Mathlib binaries
+    $ lake build                # builds the library AND runs the axiom audit
+
+    A clean run prints the audit line quoted above and nothing else of note.
+    Expect one harmless warning from lake about the manifest's record of the
+    source kind of the mathlib dependency.
+
+    Per-file feedback while developing:
+
+    $ lake env lean RequestProject/Golden.lean     # empty output = clean
+
+    The cost experiments are NOT part of the build. Run them by hand:
+
+    $ lake env lean experiments/PlasticCost.lean
+    $ lake env lean experiments/PlasticFinsetCost.lean
+
+
+4. STATE OF THE COMMISSION, ITEM BY ITEM
+----------------------------------------
+
+  [x] WO 0  census                     CENSUS.md
+  [x] WO 1  definitions                step total, no decidability side
+                                       conditions in statements, and
+                                       `volume_deleted` proves each deleted
+                                       interval has length g
+  [x] WO 2  Lemma 1                    act_injOn, act_M_ne_half, card_step
+  [x] WO 3  Lemma 2, Theorem 3         card_run, N_mono
+  [x] WO 4  Proposition 10             N_eq_one_iff, both directions
+  [x] WO 5  Theorem 8                  Golden.sup_N_phi, via the twelve-element
+                                       invariant `reach`; boundary equalities
+                                       p1_eq, p3_eq proved symbolically
+  [ ] WO 6  Proposition 9              NOT CERTIFIED - negative report;
+                                       Plastic.isPisot_rho and
+                                       Plastic.orb_rho_finite are certified
+  [x] WO 7  Theorem 6                  orb_finite, with the uniform conjugate
+                                       bound extracted as conj_bound
+  [x] WO 8  Propositions 18, 19        Sqrt2.*, Proposition 19 flagged
+  [x] WO 9  Propositions 14, 16,
+            Corollary 15               littlewood, N_unbounded_of_kind (no
+                                       extra hypothesis), no_return_to_half
+                                       (one added hypothesis, flagged)
+
+  Deferred, no work order: Proposition 4 (circle normal form), Corollary 7,
+  Lemma 11 (exact overlap).
+  Out of scope by the commission: all d(k) tables and "no run of length at most
+  n" claims, Proposition 13, Remarks 5, 12, 17, the Section 7 clustering data
+  and Definition 20, the RM parameter sweep, the Section 6 itinerary search.
+  None of these was found easy to certify as a by-product.
+
+
+5. DEVIATIONS WORTH A REVIEWER'S EYE
+------------------------------------
+
+  - Work Order 5 says "at this size `decide` should be unnecessary". The
+    twelve-element invariant is in fact closed by `decide` in
+    Golden.reach_closed / reach_card / empty_mem_reach: the statements are
+    quantified over an explicit Finset of Finsets of Fin 5 and kernel reduction
+    settles them instantly. `decide` is permitted (only `native_decide` is
+    not), and the mathematical content of the work order - the symbolic
+    transition table and the two boundary equalities - is proved by `ring`-style
+    reasoning modulo phi^2 = phi + 1 in survives_p, act_p, p1_eq, p3_eq, not by
+    computation.
+
+  - Configurations are plain `Finset ℝ`, with membership in the open unit
+    interval proved as an invariant rather than carried in the type; see flag
+    (D) of CENSUS.md.
+
+  - RequestProject/Main.lean is the stub that came with the skeleton. It sets
+    options only and is left untouched.
+
+
+6. BEFORE MERGING
+-----------------
+
+  [ ] Read CENSUS.md flag (A). It reports a genuine gap in the paper's proof of
+      Corollary 15, and the author should decide how to close it. The Lean
+      statement carries the missing step as an explicit hypothesis in the
+      meantime; it must not be dropped silently.
+  [ ] Read PLASTIC-REPORT.md and decide whether Proposition 9 is to be revisited
+      under different constraints (native_decide, or a verified reflective
+      procedure) or left as a computational claim outside the certified base.
+  [ ] Confirm CI is green on the default branch; the workflow needs no secrets.
+
+
+================================================================================
+ROUND 2 — ORDER, GAPS, AND THE SCHEDULING BOUND
+================================================================================
+
+Source : knotgame-commission2.tar.gz, kept in the repository root, together with
+         COMMISSION-knotgame2.md and paper-section-gaps.tex extracted from it.
+
+
+7. WHAT ROUND 2 ADDS TO THE TREE
+--------------------------------
+
+  [x] RequestProject/Gaps.lean            T1-T5: order, gap law, one service
+                                          per move, birth spacing, scheduling
+  [x] RequestProject/GoldenEffective.lean T6: N_phi <= 9
+  [x] RequestProject/PlasticOrbit.lean    T7: the 153-point orbit, N_rho <= 34
+  [x] RequestProject/All.lean             updated to import all three
+
+  [x] CENSUS-round2.md                    census of the round-1 tree against the
+                                          round-2 targets, plus the target map
+  [x] SCRUPLES-round2.md                  proved / reused / reported
+  [x] AXIOM-AUDIT-round2.md               audit output, automatic and per-target
+  [x] PLASTIC-REPORT.md                   round-2 addendum appended
+
+  No round-1 file was modified except All.lean (three added imports).
+
+
+8. STATE OF THE ROUND-2 COMMISSION, ITEM BY ITEM
+------------------------------------------------
+
+  [x] T1  order                     act_lt_act
+  [x] T2  gap law                   gap_law (with the predicate Straddles)
+  [x] T3  one service per move      straddles_unique, straddles_at_most_one
+  [x] T4  birth spacing             birth_head_ne_M,
+                                    two_mul_births_le_length_succ,
+                                    births_le_ceil_half
+                                    (census finding: round 1 did NOT certify
+                                    d >= 2k-1 or d(k+1) >= d(k)+2, contrary to
+                                    the commission's premise; proved fresh)
+  [x] T5  scheduling theorem        scheduling_bound, N_le_of_separated,
+                                    with the core card_le_length_succ
+  [x] T6  golden ratio, effective   Golden.N_phi_le_nine,
+                                    Golden.card_run_phi_le_nine, via the exact
+                                    identity Golden.phi_pow_five_mul_delta0
+  [x] T7  plastic, effective        Plastic.N_rho_le_34,
+                                    Plastic.card_run_rho_le_34,
+                                    Plastic.run_subset_OrbSet, Plastic.run_sep
+                                    (offered as an acceptable failure; it is not
+                                    one - the 153-point orbit closes in about
+                                    30 s of kernel time with `decide`)
+
+  Constraints: no sorry, no admit, no new axiom, no native_decide. The semantic
+  audit now reports "axiom audit passed: 247 theorems, axioms confined to
+  [propext, Classical.choice, Quot.sound]".
+
+
+9. ROUND-2 DEVIATIONS WORTH A REVIEWER'S EYE
+--------------------------------------------
+
+  - T5 does not carry delta > 0. It follows from 1 <= lam^W * delta, which is
+    also assumed, so stating it would state more than is used (SCRUPLES).
+    Likewise W = ceil(log_lam(1/delta)) is replaced by the equivalent,
+    logarithm-free 1 <= lam^W * delta, which is what T6 and T7 supply.
+
+  - "throughout the run" is formalised as a condition on every prefix of the
+    run word: run lam u is the configuration after the first |u| moves.
+
+  - The pigeonhole of T5 is carried out as an induction on the window word
+    (card_le_length_succ) rather than as an explicit injection from consecutive
+    pairs to moves. The two are the same argument: at a move with a straddling
+    pair, deleting the largest knot below the deleted interval both restores the
+    gap hypothesis for the image and drops the count by one, which is exactly
+    "this move services this pair, and no other".
+
+  - T7's finite verifications are closed by `decide`, i.e. by kernel reduction,
+    which the commission permits; `native_decide` is not used anywhere. The
+    orbit is stored as integer coordinate triples over Z[rho] and every
+    comparison is an integer inequality obtained from the certified enclosure
+    1324717957/10^9 <= rho <= 1324717958/10^9. See AXIOM-AUDIT-round2.md, 3.
+
+  - T7 certifies that every reachable knot position is on the 153-point list.
+    It does not certify that the list is minimal (that all 153 are attained),
+    and it certifies 239/100000 as a lower bound for the smallest gap rather
+    than the exact minimum. Neither is needed by the scheduling argument.
+
+
+10. BEFORE MERGING (ROUND 2)
+----------------------------
+
+  [ ] Read finding (R2-a) of CENSUS-round2.md: the commission's description of
+      what round 1 proved about birth spacing does not match the round-1 tree.
+      Nothing is broken by it, but the discrepancy should be resolved in the
+      commissioning notes.
+  [ ] Read finding (R2-b) of CENSUS-round2.md and the round-2 addendum to
+      PLASTIC-REPORT.md: T7 was expected to fail and did not. The round-1
+      negative report on the 25 525 configurations still stands.
+  [ ] The bounds 9 and 34 are consistency-checked against the paper's own
+      arithmetic (W = 5 and W = 22) and are strictly weaker than the true
+      values 2 and 7, as the paper says. Only 2 is certified (round 1); 7 is
+      not certified anywhere in this tree.
+
+
+11. ROUND 3 (T8, T9, T10)
+-------------------------
+
+  Status: all three targets are certified, sorry-free, and inside the axiom
+  audit. See CENSUS-round3.md, SCRUPLES-round3.md, AXIOM-AUDIT-round3.md.
+
+  [x] T8 (tribonacci): 7-point orbit, 20 reachable configurations
+      (reach_card_eq), maximum exactly 3 (Tribonacci.sup_N_lam), depths
+      d = 1, 3, 7 (d_one, d_two, d_three). No infeasibility report needed.
+  [x] T8 (supergolden): 43-point orbit, the 412 configurations stored with
+      their depths and verified by one kernel-checked boolean
+      (Supergolden.checkOK_true), maximum exactly 4 (Supergolden.sup_N_lam),
+      depths d = 1, 3, 5, 11. The infeasibility report the commission allowed
+      was not needed.
+  [x] T9: delta-transversality for the {-1,0,1} class on [1/2, 667/1000] at
+      delta = 1/1000 (Transversality.transversality, and
+      transversality_deriv for `deriv`). 27 cells, each closed by
+      `decide +kernel`; the cell list is a Lean definition and the tiling of
+      the window is proved (cells_chain, cells_lastEnd), so nothing about the
+      decomposition is taken on trust from the generating script.
+  [x] T10: the pair-counting proposition on the window certified by T9, with
+      Mathlib's Lebesgue measure — per pair (volume_close_le), summed over
+      pairs (sum_volume_close_le), summed over unordered pairs with the note's
+      own constant (sum_volume_close_le_unord), and as an integral of the
+      counting function (lintegral_pairCount_le).
+
+  Deviations worth reading before merging (all in SCRUPLES-round3.md):
+
+  - T10's summed and integral forms count ordered pairs, with constants exactly
+    twice the note's; the unordered form (sum_volume_close_le_unord) carries the
+    note's own constant, and the per-pair bound is the note's.
+  - T10 replaces the note's change of variables by a diameter argument, and the
+    note's exact pair count 2^(k-1) 4^(m-k) by the matching upper bound on
+    ordered pairs, proved by an explicit injection.
+  - For supergolden, what is certified about the 412-entry list is closure,
+    card <= 4 and the depth constraints; that the list has no repetitions, and
+    that every entry is attained, is not asserted.
+  - T10 says nothing about the survival constraint of the game: item (iii) of
+    the transversality note's programme remains open.
+
+12. ROUND 4 (T11, T12, T13)
+---------------------------
+
+  Status: all targets are certified, sorry-free, and inside the axiom audit.
+  See CENSUS-round4.md, SCRUPLES-round4.md, AXIOM-AUDIT-round4.md.
+
+  [x] T11a (no jumping): from x <= g the forced image satisfies lam*x < r
+      (Branching.no_jump_low); from x >= r it satisfies lam*x-(lam-1) > g
+      (Branching.no_jump_high). Both crossing inequalities are proved
+      *equivalent* to lam^2 >= lam+1 (lam_mul_g_lt_r_iff, no_jump_high_iff).
+  [x] T11b (sharpness): for lam >= phi the pair {1/(lam+1), lam/(lam+1)} is a
+      2-cycle of the forced dynamics, both points outside the window, with the
+      branch taken at each certified to be the forced one
+      (Branching.sharp_two_cycle).
+  [x] T11c (good child): the selected child of a window point lies in the
+      commission's interval (good_child_low, good_child_high) and at distance
+      at least eta = min(lam0-1, (2-lam1)/2) from {0,1} (good_child).
+  [x] T11d (bounded return): from [eta, g] under branch 0
+      (bounded_return_low) and from [r, 1-eta] under branch 1
+      (bounded_return_high), with the commission's hypothesis
+      g(lam1) < lam0^(B-1)*eta and conclusion k <= B.
+  [x] T12a (continuum): an explicit injection of (N -> Bool) into the survival
+      itineraries of 1/2 (Branching.continuum_of_survival_itineraries, via
+      theta_injective and theta_surviving). Proved for every lam < phi in
+      (1,2), not only on the anchor window - see SCRUPLES-round4.md section 6.
+  [x] T12b (linear count): m/(B+1) <= K lam m (Branching.K_ge), with K lam m
+      the number of length-m branch words along which 1/2 survives
+      (Branching.K, and K_eq_card_bSurvives for the list-recursive form).
+  [x] T13 (common window): CommonWindow.common_window - one identifier
+      asserting, for lam in [1000/667, 8/5], that the round-3 transversality
+      theorem applies at 1/lam in [5/8, 667/1000], that lam^2 < lam+1, that
+      3/2 lies in the window and 1/2 in the dynamical window (g,r), and that
+      T12a and m/4 <= K lam m hold throughout.
+
+  Deviations worth reading before merging (all in SCRUPLES-round4.md):
+
+  - The round-3 tree has no survival predicate for *branch* words (only for
+    words in the moves L, M, R); round 4 introduces Branching.BLegal for the
+    commission's own convention. Everything else is reused.
+  - T12a needs only finiteness of the forced return time, so it is stated for
+    all lam < phi rather than for the anchor window.
+  - T11d is transcribed with the commission's B-1 exponent and the side
+    condition 1 <= B; the proof in fact gives k <= B-1.
+  - Only m/(B+1) words are exhibited for T12b (one deviation per word); the
+    exponential bound is not claimed, since it needs the tail estimate the
+    commission excludes.
+  - The geometric tail bound, the renewal inequality and the integrated
+    exponential lower bound are not attempted, and no weakened variant of them
+    appears in the tree.
+
+13. ROUND 5 (T14 - T21)
+-----------------------
+
+  Status: all commissioned targets are certified, sorry-free, and inside the
+  axiom audit, except the explicitly optional hard half of T21 (see below).
+  See CENSUS-round5.md, SCRUPLES-round5.md, AXIOM-AUDIT-round5.md.
+
+  [x] T14 (survivor set): S(v) is the union of the disjoint open cells
+      cells lam v (inCells_cells, tidy_cells), at most 1 + #M(v) of them
+      (length_cells_le), of total Lebesgue measure exactly r^|v|
+      (cellsLen_cells, volume_survivorSet), so some cell has length at least
+      r^|v|/(|v|+1) (exists_long_cell).
+  [x] T15 (permanence): knots carry positions and ages (KnotAt); the
+      configuration after w is the set of knot positions (mem_run_iff); the
+      knots of c::v are those of v plus one of age |v| iff c = M and 1/2
+      survives v (knotAt_cons).
+  [x] T16 (one annihilation per step): the inverse branches are injective with
+      disjoint images, so x -> posAfter x v is injective on the survivors of v
+      (posAfter_inj) and at most one point reaches 1/2 (annihilation_unique).
+  [x] T17 (compactness): with left-infinite runs rendered as b : N -> Move read
+      as ever-longer suffixes, (i) <-> (ii)
+      (infinitelyManyKnots_iff_annihilations), (i) -> (iii)
+      (boundedAgeWitnesses_of_infinitelyManyKnots), (iii) -> (i)
+      (infinitelyManyKnots_of_boundedAgeWitnesses, by an ultrafilter limit),
+      and any of them gives N unbounded
+      (N_unbounded_of_infinitelyManyKnots).
+  [x] T18 (density): conditional on KindDense lam, some run carries infinitely
+      many simultaneous knots (infinitelyManyKnots_of_kindDense) and N is
+      unbounded (N_unbounded_of_kindDense). KindDense is certified for no
+      specific lambda, and the docstring says so.
+  [x] T19a (deficit law): deficit_law, with step_extremes supplying the
+      proviso (no death, no range-extending birth).
+  [x] T19b (free births): actsAs_M_R_iff, actsAs_M_L_iff for 1 < lam < 3/2,
+      with step_M_eq_of_actsAs; the converse is FALSE for lam >= 3/2
+      (actsAs_M_R_converse_fails) - reported, not repaired.
+  [x] T20 (candidate cells): the general partition lemma
+      (followsItin_partition), the exact cell interval at lam = 3/2
+      (followsItin_eq_Ioo), and the instance for w = MLMLMMMMMLMRLRMLMLM:
+      six live candidates of 2^11 (candidate_count) whose lengths sum to
+      (2/3)^19 (candidate_total_length), with
+      candidates_partition_survivorSet putting the two together.
+  [~] T21 (two-step containment), EASY HALF ONLY: record words for k = 2..6
+      and a 52-move word for k = 7 (record2 .. record7), their configurations
+      and knot counts by kernel arithmetic, the depth bounds
+      d(k) <= 3, 5, 9, 19, 23, 52, and the containments 2 c 3 c 5 c 7 and
+      4 c 6 (record_subset_*). prop:twostep is NOT labelled certified: the
+      hard half (exhaustiveness) is not attempted.
+  [+] Not commissioned: the exact depths d(2) = 3, d(3) = 5, d(4) = 9
+      (RecordDepths.lean), by kernel exhaustion of all 3^n words with n <= 8.
+
+  Deviations worth reading before merging (all in SCRUPLES-round5.md):
+
+  - T17 is rendered with b : N -> Move read as suffixes, and (i)/(ii) are the
+    forward and backward readings of one definition; the compactness step uses
+    a non-principal ultrafilter rather than a diagonal subsequence.
+  - T18 is conditional; KindDense holds for no lambda certified here, and is
+    false at every Pisot parameter.
+  - T19b's biconditionals need lam < 3/2; a counterexample is given for
+    lam >= 3/2.
+  - The paper's record words are not listed in the source materials; the words
+    used here were found by search over the exact integer model
+    (scripts/game32_bfs.py, game32_records.py, game32_beam.py) and are
+    re-verified in the kernel. The k = 7 word comes from a beam search and is
+    not certified to be a record.
+  - Minimality of the depths is certified only for k <= 4.
+  - The return-time tail bound, the renewal inequality and the exponential
+    lower bound on K_m remain absent, as in round 4.
+
+
+14. ROUND 6 (PROPOSITION 3.4, THE PLASTIC NUMBER)
+
+  Work order 6 of round 1 was filed as a negative report (PLASTIC-REPORT.md):
+  the configuration closure at lambda = rho was judged out of reach for the
+  kernel. It is now certified in full. See PROP9-PLASTIC.md.
+
+  [x] The orbit of 1/2 at rho has exactly 153 points: card_Orb_rho, with
+      Orb_rho_eq_OrbSet identifying it with the round-2 list. The converse of
+      the round-2 containment comes from 153 reachability records checked by
+      the kernel (PlasticOrbitCount.lean).
+  [x] There are exactly 25 525 reachable configurations:
+      card_reachable_configs (as sets of knots in Finset R), with
+      card_reachable_idx the same count in the index model.
+  [x] sup_n N_rho(n) = 7: sup_N_rho, with N_rho_le_seven for every n. This
+      strengthens the round-2 bound N rho n <= 34.
+  [x] The least lengths attaining k knots are 1, 3, 5, 7, 12, 17 for k <= 6:
+      d_rho_one .. d_rho_six. The next value, d rho 7 = 28 (d_rho_seven), is
+      certified too; the paper stops at k = 6.
+
+  How, in one paragraph: the breadth-first search is run outside Lean and its
+  result shipped as data (RequestProject/PlasticCert.lean, 1.4 MB, generated by
+  scripts/plastic_cert.py). Every node carries a configuration of orbit
+  indices, a depth tag, and a move plus configuration recording how it arises.
+  The kernel checks closure under the three moves with tags growing by at most
+  one, the size bounds, the parent records, and that the tree is correctly
+  keyed with 25 525 nodes. Closure gives the upper bounds, the tags give the
+  depth lower bounds, the parents give reachability, the keys give
+  distinctness. The transitions are byte-packed into three natural numbers
+  (one byte per orbit index) checked against the certified Z[rho] arithmetic
+  of round 2, and every traversal recurses on a depth-15 tree rather than on a
+  long list.
+
+  Constraints respected: no sorry, no admit, no axiom, no @[implemented_by],
+  no native_decide; kernel decide only. lake build passes with the semantic
+  audit ("axiom audit passed: 1009 theorems, axioms confined to [propext,
+  Classical.choice, Quot.sound]").
+
+  Cost: PlasticCert.lean elaborates in about 260 s, PlasticConfig.lean checks
+  in about 670 s, PlasticOrbitCount.lean in about 22 s. A full lake build from
+  a warm Mathlib cache is about 35 minutes.
+
+  Scruples (also in PROP9-PLASTIC.md):
+
+  - The count is of configurations as sets of knots; the empty configuration
+    (the value at the empty word) is one of the 25 525.
+  - Minimality of the record words is not read off the words: it comes from
+    the depth tags, which bound below the length of every word attaining k
+    knots.
+  - PlasticCert.lean is generated data, not hand-written; the generator reads
+    the transition tables out of PlasticIndex.lean, so what is shipped and what
+    is checked are the same. Nothing about the generator is trusted.
+  - The smallest gap of the orbit is still only bounded below (239/100000);
+    the exact value is not claimed.
+
+--------------------------------------------------------------------------
+ROUND 7 -- the three items the notes flag as open
+--------------------------------------------------------------------------
+
+  [x] Return-time tail bound (ReturnTail.lean). For every lam in (1, phi),
+      the set of window points whose discarded child needs more than t
+      forced steps to re-enter the window has Lebesgue measure at most
+      2 g / lam^(t+1) (return_time_tail). At lam = 3/2 this is
+      <= (2/3)^(t+2) (return_time_tail_three_halves), i.e.
+      <= (4/3)(2/3)^t times the measure of the window
+      (return_time_tail_prob_three_halves).
+  [x] Renewal inequality: proved in deterministic form. Inside an interval
+      with the doubling property, the localized count of surviving words at
+      least doubles every T steps (ExpCount.two_mul_kappa_le), which is what
+      the exponential bound uses. The empirical renewal inequality of the
+      notes, with the measured return-time law, is not proved.
+  [x] Exponential lower bound for K_m. At lam = 3/2:
+      2^(m/5) <= K (3/2) m (ExpLower.two_pow_le_K). Uniformly over the
+      common window: 2^(m/8) <= K lam m for every lam in [1000/667, 8/5]
+      (ExpWindow.two_pow_le_K_window). The same argument at multiplicity k
+      (ExpMulti.pow_le_K_of_mdoubling) sharpens the lam = 3/2 bound to
+      15^(m/12) <= K (3/2) m (ExpSharp.fifteen_pow_le_K), i.e. growth 1.2532
+      per step against the measured 1.3333.
+
+  How, in one paragraph: a branch word issued from x in (0,1) is legal
+  exactly when its final image is again in (0,1) (absorption), so only
+  images have to be controlled. If every point of a closed interval J
+  inside (0,1) containing 1/2 has two distinct branch words of a common
+  length T whose images stay in J, then the minimum over J of the number of
+  surviving words of length n at least doubles every T steps, giving
+  2^(m/T) <= K lam m. The doubling property is certified by a finite
+  rational computation: cells tiling J, each carrying two words, checked by
+  a one-sided interval enclosure that is monotone in the point and in the
+  parameter, so a single certificate serves a whole interval of parameters.
+  The window [1000/667, 8/5] is split into 24 parameter cells carrying 1333
+  interval cells in all (ExpWindowData.lean, generated by
+  scripts/gen_expwindow.py) and checked with decide +kernel.
+
+  Constraints respected: no sorry, no admit, no axiom, no @[implemented_by],
+  no native_decide; kernel decide only. lake build passes with the semantic
+  audit ("axiom audit passed: 1084 theorems, axioms confined to [propext,
+  Classical.choice, Quot.sound]").
+
+  Cost: ExpWindowData.lean elaborates in about 175 s, ExpWindow.lean checks
+  in about 100 s.
+
+  Scruples (also in SCRUPLES-round7.md):
+
+  - The tail bound is a Lebesgue-measure statement at one parameter at a
+    time, not a probabilistic statement integrated over a parameter window.
+  - The exponential bound does not go through the return time at all; the
+    two halves of the round are independent.
+  - The rates obtained (2^(1/5) at 3/2, 2^(1/8) on the window) are below the
+    measured growth (2/lam)^m; no sharpness is claimed.
+  - The window is covered exactly: both endpoints of [1000/667, 8/5] are
+    included, and the search found no certificate with T <= 8 beyond 8/5, so
+    the window stops there rather than at phi.
+  - The doubling interval J ([1/4,3/4] at 3/2, [1/5,4/5] on the window) is
+    wider than the game's window (g, r) and should not be read as one.
+
+--------------------------------------------------------------------------
+ROUND 8 -- the 3/2 reformulations, periodic yield, cylinder counts,
+           window sharpness (T22-T26)
+--------------------------------------------------------------------------
+
+  Census first: CENSUS-round8.md, including the commissioned audit of what
+  the inherited tree already contained (Littlewood.lean, Sqrt2.lean,
+  PlasticConfig.lean, Compactness.lean, Density.lean, Transversality*,
+  Golden.lean, SurvivorSet.exists_long_cell). All of it is genuine and was
+  reused rather than re-derived. No inherited definition was changed and no
+  inherited statement was re-proved; the only edit to an inherited file is
+  seven added imports in RequestProject/All.lean.
+
+  [x] T22a (prop:ternary). RequestProject/Ternary.lean. D(x) = floor(3x) is
+      the ternary cell index; a move is a forbidden digit c in {0,1,2}
+      (Ternary.code); a knot dies exactly when D(x) = c
+      (survives_iff_digit_ne) and otherwise moves to (3x - [D x > c])/2
+      (act_eq_ternary, step_ternary). Exactly one digit is fatal at each
+      point -- never none, never two (exists_unique_fatal). The dyadic
+      invariant (Dyadic, dyadic_act, dyadic_posAfter) is what keeps reachable
+      positions off the cell boundaries, and is the "1/2 is adjoined when
+      c = 1" of the paper.
+
+  [x] T22b (prop:base32). RequestProject/Mahler.lean. prop:itinerary is
+      proved for general lam (itinerary_tsum); at lam = 3/2, x = 1/2 it is
+      sum_{j>=1} eps_j (2/3)^j = 1 (base32_tsum). The digit identity
+      D(x_n) = eps_{n+1} + [2 x_{n+1} >= 1] is digit_eq_eps_add, with the
+      paper's strict bracket in digit_eq_eps_add_strict (see SCRUPLES).
+
+  [x] T22c (prop:mahler). RequestProject/Mahler.lean. mahler_recursion gives
+      the five identities in the (p, y) coordinates; mahler_of_survives is
+      the identification with the game. Nothing is claimed about Mahler's
+      problem itself -- what is certified is that the identification is
+      exact.
+
+  [x] T22d (prop:translation), optional. RequestProject/Translation.lean.
+      unbounded_iff_mahler: N_{3/2} unbounded iff MahlerCriterion, the
+      knot-free statement about controls c in {0,1,2}^N and k trajectories
+      started at w = 1. The dictionary is translate_core, the bookkeeping is
+      card_birthSet. Controls are 0-indexed (see SCRUPLES).
+
+  [x] T23 (prop:kindyield). RequestProject/PeriodicYield.lean. A kind word
+      v = u ++ [M] (1/2 survives every power of v) yields condition (i) of
+      the certified thm:compactness (infinitelyManyKnots_of_kindWord) and
+      hence N_lam = infinity (N_unbounded_of_kindWord). The census found T23
+      partly present: Littlewood.N_unbounded_of_kind already handles an
+      infinite kind sequence; what is new is the finite-word form and the
+      compactness-(i) conclusion. The docstring preserves the distinction
+      from no_return_to_half: that result excludes the orbit of 1/2
+      *returning* to 1/2, not the knot merely *staying alive*, which is what
+      KindWord asks. KindWord is certified for no lam.
+
+  [x] T24a. RequestProject/KindTree.lean. At lam = 3/2 the survival tree of
+      1/2 has exactly 2^n nodes at depth n (card_kindWords_three_halves),
+      by induction on n from exists_unique_fatal.
+
+  [x] T24b. RequestProject/KindTree.lean. At lam = phi the counts satisfy
+      N_{n+3} = 4 N_n (card_kindWords_phi_add_three), from the certified
+      five-state orbit of Golden.lean via the five per-state recursions
+      card_p0_succ ... card_p4_succ.
+
+  [ ] T24c (optional). NOT ATTEMPTED and NOT CLAIMED. Mathlib's dimH does
+      not appear in the tree. The cylinder count alone does not give the
+      Hausdorff or box dimension: the upper box bound needs a diameter
+      estimate for the cylinders and the lower bound a separation/mass
+      argument, neither of which is proved. See SCRUPLES-round8.md section 5.
+
+  [x] T25. RequestProject/WindowSharp.lean. Two explicit {-1,0,1} members
+      with finite support and two rational points of (667/1000, 67/100]:
+      witness_at_3339 (degree 22, x = 3339/5000: 0 < g <= 1/1000 and
+      -1/1000 < g' < 0) and witness_at_3343 (degree 26, x = 3343/5000:
+      g <= 1/100000 and g' > 0). Exports:
+      transversality_fails_beyond_window, window_not_extendable,
+      deriv_witness_at_3339. The search (scripts/window_sharp_search.py) is
+      untrusted; the kernel re-checks every inequality over exact rationals.
+      No tail estimate is needed: the coefficient sequences vanish beyond the
+      given lists, so gval and gder are exactly the finite sums.
+
+  [x] T26 (optional). RequestProject/DensityQuant.lean. Under (D_lam)
+      (KindDenseQuant: every interval of length eps contains a kind-word
+      endpoint at word length <= C log(1/eps)) the conclusion of the
+      topological criterion holds (N_unbounded_of_kindDenseQuant) with the
+      explicit bound d_lam(k) <= B^k - 1, B = max 2 (1 + C(log lam + 1))
+      (d_le_pow). The per-step estimate is qword_length_step, which is the
+      paper's |v_{k+1}| <= (1 + C log lam)|v_k| + O(log|v_k|) with the
+      O-term made explicit as C log(|v_k|+1). (D_lam) is certified for no
+      lam.
+
+  Not commissioned, not attempted: exhaustiveness for prop:twostep; the
+  exact values d_{3/2}(7) = 52 and d_{3/2}(8) >= 57; the silver-ratio d(k)
+  formula.
+
+  Constraints respected: no sorry, no admit, no axiom, no @[implemented_by],
+  no native_decide; kernel decide only. lake build passes with the semantic
+  audit ("axiom audit passed: 1198 theorems, axioms confined to [propext,
+  Classical.choice, Quot.sound]"), up from 1084 at the end of round 7.
+  Per-target #print axioms output is in AXIOM-AUDIT-round8.md.
+
+  Scruples (in full in SCRUPLES-round8.md):
+
+  - D takes the left-closed ternary cells, resolving the paper's overlap at
+    1/3 and 2/3; the dyadic invariant shows reachable points are never there.
+  - digit_eq_eps_add uses the non-strict bracket [2x >= 1]; the paper's
+    strict form needs x != 1/2, which dyadic_posAfter supplies along the
+    game. digit_eq_eps_add_strict records it.
+  - T22d indexes controls from 0, the paper from 1; same object.
+  - T24c is not attempted or claimed anywhere.
+  - T24b is the recursion N_{n+3} = 4 N_n only; no closed form, no growth
+    rate.
+  - T25 says the window cannot be extended to [1/2, 67/100] at delta =
+    1/1000; it does not locate the exact supremum of admissible endpoints.
+  - KindWord, KindDense and KindDenseQuant are hypotheses certified for no
+    lam.
+
+--------------------------------------------------------------------------
+ROUND 10 -- no recurrence at 3/2, a sharper certificate at 3/2, and
+            exponential kind counts ABOVE the golden ratio (T30-T32)
+--------------------------------------------------------------------------
+
+  Census first: CENSUS-round10.md. Round 10 branches from the round-8 tree
+  and runs in parallel with round 9, so the parallel-run clause was observed
+  to the letter: every new Lean declaration is in a NEW file, and the only
+  inherited Lean file edited is RequestProject/All.lean (three added
+  imports). Translation.lean, PeriodicYield.lean and TwoStep.lean were not
+  touched, and no file whose name begins Fourier or Floor was created.
+
+  [x] T30 (prop:norecur). RequestProject/NoRecurrence.lean. At lam = 3/2 a
+      nonempty block of moves never returns a knot to the position it
+      started from (no_recurrence, no_recurrence_knotAt), the positions
+      visited by iterating a block are pairwise distinct
+      (positions_pairwise_ne, knot_positions_injective), and no nonempty
+      block acts as the identity on a knot of a reachable configuration
+      (no_identity_block, no_identity_block_config) -- the corollary the
+      paper cites against a candidate mechanism for prop:twostep. The
+      commission's instruction to REUSE round 8's dyadic invariant rather
+      than re-derive the 3^B - 2^B arithmetic was followed: the proof runs
+      on Ternary.Dyadic (a point reachable in n moves is an odd multiple of
+      2^-(n+1)), the level is determined by the point
+      (dyadic_level_unique), and a block of k > 0 moves raises it by exactly
+      k. See SCRUPLES-round10.md section 1: this is a different proof of the
+      same statement, and the paper's fixed points 0 and 1 never arise.
+
+  [x] T31 (sharper certificate at 3/2). RequestProject/ExpSharperData.lean +
+      RequestProject/ExpSharper.lean. K_{3/2}(m) >= 26^floor(m/14)
+      (twentysix_pow_le_K) via MDoubling on J = [1/6, 5/6]: 747 cells, each
+      with 26 distinct branch words of length 14, checked by the kernel in
+      15 groups (decide +kernel, 790 s). This improves round 7's
+      15^floor(m/12): rate 1.26203 against 1.25316, certified as
+      sharper_rate (15^14 < 26^12) and sharper_rate_real
+      (15^(1/12) < 26^(1/14)).
+      Ceiling actually hit (CENSUS-round10.md section 3): T=15 -> k=34,
+      T=16 -> 49, T=17 -> 66 are all findable but the data literal and the
+      kernel cost grow like lambda^T; the commission's aspiration of rate
+      1.29 needs T ~ 20-22 and was NOT kernel-feasible here. Reported, not
+      papered over.
+
+  [x] T32 (above the golden ratio). RequestProject/ExpVar.lean (machinery),
+      RequestProject/ExpAboveData0.lean ... ExpAboveData11.lean +
+      ExpAboveData.lean (data), ExpAboveChecks.lean (kernel checks),
+      ExpAbove.lean (conclusions).
+
+      *** THE COMMISSIONED WINDOW [17/10, 7/4] IS NOT CERTIFIED. ***
+      What is certified is the narrower rational window
+      [3457/2000, 4331/2500] = [1.7285, 1.7324], which still lies entirely
+      above the golden ratio (golden_lt_window) and still contains
+      sqrt 3 = 1.7320508... (sqrt_three_mem_window). On it,
+      2^floor(m/18) <= K lam m (two_pow_le_K_above), and in particular
+      2^floor(m/18) <= K (sqrt 3) m (two_pow_le_K_sqrt_three); the kind
+      count is unbounded there (K_unbounded_above).
+
+      The certificate: 180 parameter cells carrying 17141 point cells
+      (246225 letters, longest word 18), interval arithmetic in the
+      parameter as well as the point, checked by the kernel in 36 groups
+      (1108 s) plus the chaining check.
+
+      Fixed-length doubling fails above phi (the certified two-cycle
+      {1/(lam+1), lam/(lam+1)} lies outside the branching window, so returns
+      are slow and irregular), so T32 uses a weakened hypothesis:
+      ExpVar.VDoubling asks for two DIVERGING words of lengths at most T,
+      not two words of a common length. The conclusion is the same.
+
+      Infeasibility report (CENSUS-round10.md section 4.2): the core must be
+      inside the branching window (J = [2/5, 3/5] provably stalls -- points
+      of J whose orbit never branches); parameter cells of width ~ 2e-5 are
+      needed; scanning [1.728, 1.736] in 1e-4 slices, the search FAILS at
+      [1.7282,1.7283], [1.7324,1.7325], [1.7325,1.7326], [1.7327,1.7328],
+      [1.7328,1.7329] and the maximal contiguous success range containing
+      sqrt 3 is exactly [1.7283, 1.7324]. A window of the commissioned width
+      would need roughly 13x the data (about 4 h of kernel time) AND would
+      first have to clear those failure parameters, which no subdivision
+      depth tried (to width 1.6e-6) cleared.
+
+  Constraints respected: no sorry, no admit, no axiom, no
+  @[implemented_by], no native_decide; kernel decide only. lake build passes
+  with the semantic audit ("axiom audit passed: 1290 theorems, axioms
+  confined to [propext, Classical.choice, Quot.sound]"), up from 1198 at the
+  end of round 8. Per-target #print axioms output and the measured kernel
+  costs are in AXIOM-AUDIT-round10.md.
+
+  Scruples (in full in SCRUPLES-round10.md):
+
+  - T30 proves prop:norecur from the round-8 dyadic invariant, not from the
+    paper's telescoping 3^B - 2^B identity; same statement, different proof.
+  - T30's headline is stated for any point carrying Dyadic n x, with
+    dyadic_of_knotAt supplying it for an actual knot.
+  - T31 moved the core from [1/4,3/4] to [1/6,5/6]; neither is claimed
+    optimal, and the exponent is a floor.
+  - T32's certified window is narrower than commissioned (above); the rate
+    2^(1/18) is governed by the WORST return time and no sharpness is
+    claimed; the failure parameters are failures of the search, not
+    certified obstructions.
+  - The T32 data is split across twelve files because a single 18213-line
+    file could not be elaborated (>17 min, 8.6 GB).
+  - All searches (scripts/expcert_dfs.py, gen_expsharper.py,
+    expvar_search.py, gen_expabove.py) are untrusted; the kernel re-checks
+    every cell over exact rationals.

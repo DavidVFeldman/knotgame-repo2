@@ -1,0 +1,298 @@
+\documentclass[11pt]{amsart}
+\usepackage{amsmath,amssymb,booktabs}
+\newtheorem{lemma}{Lemma}\newtheorem{proposition}[lemma]{Proposition}
+\newtheorem{conjecture}[lemma]{Conjecture}
+\theoremstyle{remark}\newtheorem{remark}[lemma]{Remark}
+\newcommand{\Z}{\mathbb{Z}}\newcommand{\R}{\mathbb{R}}
+\title[Transversality for the knot family]{Transversality for the knot family:\\ a window, a ceiling, and a conjecture at $2/3$}
+\author{D.\ V.\ Feldman}
+\thanks{Working notes toward the almost-everywhere programme of
+\emph{Knot counts in an interval deletion game}, Question on (D$_\lambda$).
+Status markers: [cited], [proved here], [computed], [open].}
+\begin{document}\maketitle
+
+\section{The family and its difference class}
+
+For a word $u$ of length $m$ with branch bits
+$\varepsilon\in\{0,1\}^m$, the endpoint of the corresponding knot orbit is
+\[
+\Phi_\varepsilon(\lambda)
+=\lambda^m\Bigl(\tfrac12-(\lambda-1)\sum_{j=1}^m\varepsilon_j\lambda^{-j}\Bigr).
+\]
+The parameter-exclusion programme runs on the \emph{differences} of this
+family.
+
+\begin{lemma}[proved here]\label{lem:embed}
+Let $\varepsilon\neq\varepsilon'$ agree before index $k$ and differ there. Then
+\[
+\bigl|\Phi_\varepsilon(\lambda)-\Phi_{\varepsilon'}(\lambda)\bigr|
+=(\lambda-1)\,\lambda^{m-k}\,\bigl|g(1/\lambda)\bigr|,
+\qquad
+g(x)=1+\sum_{i\geq1}c_ix^i,\ \ c_i\in\{-1,0,1\}.
+\end{lemma}
+
+\begin{proof}
+Factor out $\mp(\lambda-1)\lambda^{m-k}$ from
+$-(\lambda-1)\sum_j(\varepsilon_j-\varepsilon'_j)\lambda^{m-j}$.
+\end{proof}
+
+Write $\mathcal B_{01}$ for this coefficient class and $\mathcal B$ for the
+box class with $c_i\in[-1,1]$; so $\mathcal B_{01}\subset\mathcal B$, and
+$\mathcal B$ is the class of the Bernoulli-convolution literature. Recall that
+$\delta$-transversality of a class on $[x_0,x_1]$ means: $|g(x)|<\delta$
+implies $g'(x)<-\delta$, for every $g$ in the class and $x\in[x_0,x_1]$. Its
+standard consequence is that $\{x:|g(x)|\leq\rho\}$ is contained in a single
+interval of length $2\rho/\delta$.
+
+\section{The inherited window, and its ceiling}
+
+\begin{proposition}[cited $+$ computed]\label{prop:window}
+$\delta$-transversality holds for $\mathcal B$ (hence for $\mathcal B_{01}$)
+on $[\tfrac12,0.63]$ with $\delta=7.0\times10^{-3}$, on $[\tfrac12,0.64]$ with
+$\delta=3.2\times10^{-3}$, and on $[\tfrac12,x_0]$ for every $x_0<0.64868$
+with some $\delta(x_0)>0$. In the game's parameter, transversality of the
+difference family holds on every $[\lambda_0,2)$ with $\lambda_0>1.5417$.
+\end{proposition}
+
+Here the cited ingredient is the $(*)$-function lemma of
+Peres--Solomyak: if $h(x)=1-\sum_{i<k}x^i+a_kx^k+\sum_{i>k}x^i$ with
+$a_k\in[-1,1]$ satisfies $h(x_0)>\delta$ and $h'(x_0)<-\delta$, then
+$\delta$-transversality holds for $\mathcal B$ on $[0,x_0]$. The computed
+ingredient: the choice $k=4$, $a_4=0.1$ gives $h(0.63)=0.00703$,
+$h'(0.63)=-0.497$ and remains admissible up to $x_0=0.64868$. (The exact
+form of the cited lemma should be checked against the source before these
+notes are used in anger.)
+
+\begin{proposition}[computed]\label{prop:ceiling}
+The smallest $x$ at which some $g\in\mathcal B$ has a double zero
+($g(x)=g'(x)=0$) is $x^*_{\mathcal B}=0.649138\ldots$, located by linear
+programming over the box (feasibility of $\sum c_ix^i=-1$,
+$\sum ic_ix^{i-1}=0$). Past $x^*_{\mathcal B}$ no transversality for
+$\mathcal B$ is possible; so Proposition~\ref{prop:window} is within $0.0005$
+of optimal for the box class.
+\end{proposition}
+
+The game's named parameters sit at $x=1/\lambda$:
+\[
+\tfrac32\mapsto0.6667,\qquad \sqrt2\mapsto0.7071,\qquad
+\tfrac{1+\sqrt2}2\mapsto0.8284 .
+\]
+All lie beyond the box ceiling. The classical route to the rest of the
+interval (Solomyak's passage to $x^k$) recovers measure statements but not,
+so far as we can see, the pointwise pair-counting needed below; we leave that
+door marked but unopened.
+
+\section{Pair counting on a transversality window}
+
+The following is now also certified in Lean (\texttt{volume\_close\_le},
+\texttt{sum\_volume\_close\_le\_unord}, \texttt{lintegral\_pairCount\_le}),
+instantiated at the window of Proposition~\ref{conj:restricted}, so that
+$I=[\tfrac{1000}{667},2]$ and $\delta=\tfrac1{1000}$ are the certified
+constants rather than hypotheses.
+
+\begin{proposition}[machine-verified]\label{prop:pairs}
+Suppose $\delta$-transversality holds for $\mathcal B_{01}$ on
+$[x_0,x_1]\subset(\tfrac12,1)$, and put $I=[1/x_1,1/x_0]$,
+$\lambda_0=1/x_1$. Then for distinct $\varepsilon,\varepsilon'$ of length $m$
+with first difference at $k$, and every $\rho>0$,
+\[
+\mathrm{Leb}\bigl\{\lambda\in I:\ |\Phi_\varepsilon-\Phi_{\varepsilon'}|\leq\rho\bigr\}
+\leq\frac{8\,\rho\,\lambda_0^{k-m}}{\delta(\lambda_0-1)},
+\]
+and summing over all unordered pairs,
+\[
+\int_I\#\bigl\{(\varepsilon,\varepsilon'):\
+|\Phi_\varepsilon-\Phi_{\varepsilon'}|\leq\rho\bigr\}\,d\lambda
+\ \leq\ \frac{4\lambda_0}{\delta(\lambda_0-1)(2-\lambda_0)}\;
+\rho\,\Bigl(\frac{4}{\lambda_0}\Bigr)^{m}.
+\]
+\end{proposition}
+
+\begin{proof}
+By Lemma~\ref{lem:embed}, $|\Phi_\varepsilon-\Phi_{\varepsilon'}|\leq\rho$
+forces $|g(1/\lambda)|\leq\rho/((\lambda-1)\lambda^{m-k})
+\leq\rho/((\lambda_0-1)\lambda_0^{m-k})=:\rho'$. Transversality confines
+$\{x:|g(x)|\leq\rho'\}$ to one interval of length $2\rho'/\delta$; the change
+of variable $x=1/\lambda$ has Jacobian $\lambda^{-2}\geq x_1^2\geq\tfrac14$ on
+$I$, giving the first bound. For the sum: pairs with first difference at $k$
+number $2^{k-1}4^{m-k}$, and
+$\sum_{k=1}^m2^{k-1}4^{m-k}\lambda_0^{k-m}
+=\tfrac12(4/\lambda_0)^m\sum_k(\lambda_0/2)^k
+\leq\tfrac12(4/\lambda_0)^m\cdot\frac{\lambda_0}{2-\lambda_0}$.
+\end{proof}
+
+This is the estimate a Benedicks--Carleson exclusion consumes: the parameter
+mass on which any two orbit endpoints collide at scale $\rho$ is linear in
+$\rho$ with an explicit constant, uniformly over the exponentially many pairs.
+
+\section{The restricted class past the box ceiling}
+
+Everything above holds only for $\lambda>1.54$, and $\lambda=3/2$ sits at
+$x=2/3$, a distance $0.0175$ past the box ceiling. But the game's class is
+$\mathcal B_{01}$, not $\mathcal B$, and the restriction turns out to matter.
+Two independent beam searches over sign patterns (depth $50$, width $16{,}000$)
+probe the two failure modes of transversality -- double zeros, and small
+values with non-negative slope:
+
+\begin{center}
+\begin{tabular}{lcccccc}
+\toprule
+$x$ & $0.6491$ & $0.655$ & $0.660$ & $0.664$ & $\mathbf{2/3}$ & $0.669$\\
+\midrule
+$\min(|g|+|g'|)$ & $.041$ & $.016$ & $.013$ & $.0079$ & $\mathbf{.0022}$ &
+$3\times10^{-10}$\\
+$\min(|g|+(-g')_+ )$ & $.041$ & $.016$ & $.013$ & $.0079$ & $\mathbf{.0022}$ &
+$6\times10^{-14}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The two probes agree to all printed digits: the binding failure is the
+tangency in both cases. The data locate the restricted ceiling in
+$(0.6667,\,0.6690)$ -- \emph{above} $2/3$ -- with an apparent margin of
+$2.2\times10^{-3}$ at $2/3$ itself. Beam searches upper-bound these minima,
+so the positive entries are evidence, not proof; but the collapse at $0.669$
+is genuine (an explicit pattern realises it), so the ceiling is certainly
+below $0.669$, and the box LP certifies failures cannot begin before
+$0.6491$.
+
+\begin{proposition}[machine-verified]\label{conj:restricted}
+$\mathcal B_{01}$ satisfies $\delta_0$-transversality on
+$[\tfrac12,\,\tfrac{667}{1000}]$ with $\delta_0=\tfrac1{1000}$: for every
+coefficient sequence $c$ with $c_0=1$ and $c_i\in\{-1,0,1\}$, and every $x$ in
+that window, $|g(x)|\leq\tfrac1{1000}$ implies $g'(x)<-\tfrac1{1000}$.
+\end{proposition}
+
+\emph{Status.} Certified in Lean~4 (\texttt{KnotGame.Transversality.}\allowbreak\texttt{transversality}),
+by a $27$-cell certificate closed by kernel reduction, with all arithmetic on
+$\mathbb N$ over the common denominator $2^{13}\cdot5^6\cdot 10^{0}=1024000000$
+and the cell decomposition itself proved to tile the window. The class is the
+full one: coefficients range over all sequences $\mathbb N\to\{-1,0,1\}$, the
+value is a \texttt{tsum}, and the conclusion is restated for the honest
+derivative of that sum on the window. Below, the exploratory computation that
+found the certificate. A rigorous-in-shape branch and bound (centered-form enclosures
+at rational cell midpoints, sign-independent variation bounds, explicit tail
+bounds, adaptive cell bisection) closes the entire window with $25$ cells and
+$18{,}622$ nodes, no leaks. Two negative controls behave correctly: at the
+same $\delta_0$ the search refuses to certify on $[0.669,0.6695]$, where a
+genuine double zero of the class lies, and at $\delta=2\times10^{-3}$ it leaks
+over three hundred thousand states on $[0.666,0.667]$, matching the beam
+margin. The prototype uses floating point with safety pads; the pending step
+is the same computation in rational arithmetic checked by the Lean kernel,
+commissioned as T9. Until that lands, the statement remains a conjecture in
+the formal sense and nothing downstream is claimed unconditionally.
+
+If true, Proposition~\ref{prop:pairs} extends to a parameter window
+\emph{containing} $\lambda=3/2$. Three remarks on a proof. The
+$(*)$-function method cannot give it: that method certifies the box class,
+whose ceiling is $0.6491$. The natural route is a computer-assisted
+branch-and-bound over sign patterns with interval arithmetic: tails beyond
+depth $60$ contribute less than $10^{-4}$ to both $g$ and $g'$ at $x\leq2/3$,
+the beam identifies the extremal corridor, and the claim is a certified
+positive lower bound on two explicit minima -- squarely the kind of statement
+the verification pipeline of the main paper exists for. And at $x=2/3$ the
+restriction is \emph{arithmetic}: no polynomial in $\mathcal B_{01}$ has even
+a single zero there ($|g(2/3)|\geq3^{-\deg g}$, the $\{0,\pm1\}$ lemma of the
+main paper), so the conjecture is a uniform two-dimensional strengthening of
+a fact already proved in degree one.
+
+\section{Branching below the golden ratio}
+
+Item (iii) asks for a lower bound on kind-constrained hits. It splits into a
+\emph{count} half -- are there exponentially many kind words? -- and a
+\emph{spreading} half -- do their endpoints fill space? This section settles
+the structure behind the count half, unconditionally, for every
+$\lambda<\varphi$.
+
+Write $g=1-1/\lambda$, $r=1/\lambda$. A branch survives from $x$ exactly when
+the image stays in $(0,1)$: branch $0$ needs $x<r$, branch $1$ needs $x>g$.
+Outside the \emph{window} $(g,r)$ exactly one branch is available, so the
+dynamics there is forced; inside, both are.
+
+\begin{lemma}[no jumping]\label{lem:nojump}
+For $\lambda<\varphi$ the forced dynamics cannot cross the window: from
+$x\leq g$ the forced image $\lambda x$ exceeds $g$ only by landing in $(g,r)$,
+and from $x\geq r$ the forced image $\lambda x-(\lambda-1)$ drops below $r$
+only by landing in $(g,r)$. Both assertions fail for every
+$\lambda\geq\varphi$, where the two-cycle
+$\{1/(\lambda+1),\,\lambda/(\lambda+1)\}$ avoids the window forever.
+\end{lemma}
+
+\begin{proof}
+A jump from below requires $\lambda g\geq r$, and an undershoot from above
+requires $\lambda r-(\lambda-1)\leq g$; each is equivalent to
+$\lambda^2-\lambda-1\geq0$, that is $\lambda\geq\varphi$. The verification of
+the two-cycle is a two-line computation.
+\end{proof}
+
+\begin{lemma}[good child]\label{lem:goodchild}
+Let $[\lambda_0,\lambda_1]\subset(1,\varphi)$ and
+$\eta=\min(\lambda_0-1,\,(2-\lambda_1)/2)$. From any $x\in(g,r)$, the child
+$\lambda x$ (if $x\leq(g+r)/2$) or $\lambda x-(\lambda-1)$ (if $x>(g+r)/2$)
+lies in $[\eta,1-\eta]$, and its forced orbit re-enters the window within
+$B=\lceil\log(g/\eta)/\log\lambda_0\rceil+1$ steps.
+\end{lemma}
+
+\begin{proof}
+For $x\leq(g+r)/2$ the child lies in $(\lambda-1,\lambda/2]$; for
+$x>(g+r)/2$, in $[(2-\lambda)/2,\,2-\lambda)$, and $2-\lambda<r$ since
+$(\lambda-1)^2>0$. In both cases the distance to $\{0,1\}$ is at least $\eta$.
+A forced orbit from distance $\geq\eta$ multiplies its distance from the
+relevant endpoint by $\lambda$ at each step and, by Lemma~\ref{lem:nojump},
+enters the window rather than crossing it.
+\end{proof}
+
+Consequently the survival tree of any window point branches along a spine with
+gaps at most $B+1$: every kind prefix extends to a genuinely branching future,
+which already gives a continuum of kind sequences for every
+$\lambda\in(1,\varphi)$ -- statements of this flavour go back to
+Erd\H{o}s--Jo\'o--Komornik, whose relation to the present lemma should be
+cited precisely before publication -- together with the unconditional linear
+bound
+$K_m\geq\lfloor m/(B+1)\rfloor$. The exponential bound requires the
+\emph{discarded} child too, and its return time $S$ is finite (no jumping) but
+unbounded: it is large exactly when the discarded child lands within
+$\lambda^{-S}$ of $\{0,1\}$. Measured at $\lambda=3/2$ over $20{,}095$
+branchings: the chosen child always returned within one step, and
+\[
+\mathbb P(S>t)\approx1.3\cdot\lambda^{-t}\qquad(t\leq10),
+\]
+with maximum observed $S=27$. The count therefore obeys the renewal
+inequality $K_m\geq K_{m-1-B}+\sum_tp_tK_{m-1-t}$, whose growth rate exceeds
+$1$ for any return-time law, and lies below the observed $2/\lambda$ because
+the renewal discards all branching off the spine. What is missing for a
+theorem is exactly the tail bound: \textbf{[open]} $\ \mathbb
+P_\lambda(S>t)\leq C\lambda_0^{-t}$ integrated over a parameter window -- a
+sublevel-set estimate for the position of the discarded child as a function of
+$\lambda$, which is a member of the certified difference class up to an affine
+change. The count half of item (iii) thus reduces to a transversality
+sublevel bound of the very type Proposition~\ref{conj:restricted} certifies,
+plus renewal bookkeeping; the spreading half remains open in full.
+
+We note a pleasant coincidence of windows: the branching lemmas need
+$\lambda<\varphi$, and the certified transversality window is
+$\lambda\in[\tfrac{1000}{667},2]$. Their intersection is
+$[\tfrac{1000}{667},\varphi)$ -- and it contains $3/2$.
+
+\section{What remains for the almost-everywhere theorem}
+
+With $I$ a window where transversality holds, the programme reads:
+(i)~transversality -- certified on $[\tfrac12,\tfrac{667}{1000}]$, hence for
+$\lambda\in[\tfrac{1000}{667},2]$, a window containing $3/2$;
+(ii)~pair counting -- Proposition~\ref{prop:pairs}, certified on that window;
+(iii)~\textbf{[open, reduced]} a first-moment lower bound for
+\emph{kind-constrained} hits -- the count half now rests on the lemmas of the
+previous section plus a certified-type tail bound; the spreading half asks for
+constants $c,C$ with
+\begin{multline*}
+\int_I\#\{\varepsilon\ \text{kind at}\ \lambda:\ \Phi_\varepsilon(\lambda)\in
+J_\lambda\}\,d\lambda\ \geq\ c\,|I|\,(2/\lambda_1)^m\,|J|\\
+\text{for }m\geq C\log(1/|J|),
+\end{multline*}
+uniformly over interval families $J_\lambda$ with Lipschitz endpoints; and
+(iv)~the exclusion iteration assembling (ii) and (iii) across the stages of
+the nested-witness construction, which we expect to be standard once (iii) is
+available, but which is not written. Item (iii) is where the survival
+constraint -- the whole difficulty of the game -- re-enters, and it is the
+right target for the session after this one.
+\end{document}

@@ -1,0 +1,151 @@
+\section{Order, gaps, and a scheduling bound}\label{sec:gaps}
+
+So far we have watched knots one at a time. This section watches the
+\emph{spaces between them}, and the payoff is a second proof that Pisot
+parameters have bounded knot counts -- shorter than the automaton argument of
+Section~\ref{sec:pisot}, and effective: it converts a single number, the
+smallest gap in the orbit of $1/2$, directly into a bound on
+$N_\lambda$.
+
+Throughout, fix a run and consider the knots alive at a given moment, listed in
+increasing order of position. Three elementary lemmas control everything.
+
+\begin{lemma}[order]\label{lem:order}
+Every move preserves the spatial order of the knots that survive it.
+\end{lemma}
+
+\begin{proof}
+The maps $f_0$ and $f_1$ are increasing, so moves $L$ and $R$, which apply one
+map to every survivor, preserve order. At a move $M$ the survivors below the
+deleted interval are carried by $f_0$ into $(0,1/2)$ and those above it by
+$f_1$ into $(1/2,1)$; each group keeps its internal order, and the first group
+lands entirely to the left of the second.
+\end{proof}
+
+Thus two knots, once created, keep their left-to-right relationship for as long
+as both live. Say that a pair of knots \emph{straddles} a move $M$ if one lies
+below the deleted interval and the other above it.
+
+\begin{lemma}[gap law]\label{lem:gaplaw}
+Let $x<y$ be knots that both survive a move. If the move is $L$, is $R$, or is
+an $M$ that the pair does not straddle, then the new distance is
+$\lambda(y-x)$. If the pair straddles an $M$, the new distance is
+$\lambda(y-x)-(\lambda-1)$.
+\end{lemma}
+
+\begin{proof}
+In the first case both knots are carried by the same affine map of slope
+$\lambda$. In the second, $x\mapsto\lambda x$ and
+$y\mapsto\lambda y-(\lambda-1)$.
+\end{proof}
+
+So every distance between coexisting knots is stretched by the factor
+$\lambda$ at every single move, with one exception: a pair that straddles an
+$M$ has its distance reduced by $\lambda-1$ relative to that stretch. Since
+all knots lie in $(0,1)$, no distance can ever reach $1$; the stretching must
+therefore be paid down, and straddling is the only currency. The final lemma
+says the currency is scarce.
+
+\begin{lemma}[one service per move]\label{lem:service}
+At any move, among the spatially consecutive pairs of any fixed set of
+surviving knots, at most one pair straddles.
+\end{lemma}
+
+\begin{proof}
+A straddling pair has its two members on opposite sides of the deleted
+interval, so a consecutive pair straddles exactly when the deleted interval
+falls between its two members -- and an interval falls between the members of
+at most one consecutive pair of an ordered list.
+\end{proof}
+
+These three facts assemble into a pigeonhole argument.
+
+\begin{theorem}[scheduling bound]\label{thm:schedule}
+Suppose a run reaches $k$ simultaneous knots, and that throughout the run any
+two coexisting knots are at distance at least $\delta>0$. Put
+$W=\lceil\log_\lambda(1/\delta)\rceil$. Then
+\[
+  k\ \leq\ W+\lceil W/2\rceil+1.
+\]
+\end{theorem}
+
+\begin{proof}
+Fix a run with $k$ knots alive at time $n$, and look at the window consisting
+of the last $W$ moves. Call a knot \emph{old} if its age is at least $W$; old
+knots were alive throughout the window. By Lemma~\ref{lem:order} the old
+knots keep a fixed spatial order, so their consecutive pairs are well defined
+throughout. Consider one such pair. At time $n-W$ its distance was at least
+$\delta$; by Lemma~\ref{lem:gaplaw} that distance is multiplied by $\lambda$
+at each of the $W$ moves of the window unless the pair straddles one of them;
+and $\lambda^W\delta\geq1$ while distances stay below $1$. So each
+consecutive old pair straddles at least one move of the window. By
+Lemma~\ref{lem:service} each move is straddled by at most one such pair.
+Hence (number of old knots) $-\,1\leq W$.
+
+The remaining knots have age less than $W$, and by the argument of
+Proposition~\ref{prop:lowerbound} their birth times are at least two apart, so
+there are at most $\lceil W/2\rceil$ of them. Adding the two counts gives the
+bound.
+\end{proof}
+
+\begin{corollary}[Pisot boundedness, again, and effectively]\label{cor:effective}
+Let $\lambda$ be Pisot, let $O$ be the (finite) orbit of $1/2$, and let
+$\delta_0$ be the smallest distance between two points of $O$. Then
+$N_\lambda\leq W+\lceil W/2\rceil+1$ with
+$W=\lceil\log_\lambda(1/\delta_0)\rceil$.
+\end{corollary}
+
+\begin{proof}
+Every knot is born at $1/2$ and moved by $f_0$ and $f_1$, so all positions lie
+in $O$; coexisting knots are distinct by Lemma~\ref{lem:distinct}; so any two
+are at distance at least $\delta_0$, and Theorem~\ref{thm:schedule} applies.
+\end{proof}
+
+For the golden ratio the orbit is the five-point set of
+Theorem~\ref{thm:phi}, whose smallest gap is
+$\frac{\varphi-1}{2}-\frac{2-\varphi}{2}=\varphi-\tfrac32=(\sqrt5-2)/2\approx
+0.118$; then $W=5$ and $N_\varphi\leq9$. For the plastic number the orbit has
+$153$ points and smallest gap $\approx0.00239$ (a $50$-digit computation over
+the orbit), giving $W=22$ and $N_\rho\leq34$. The true values are $2$ and $7$,
+so the bound is loose by a factor of about five -- but it needs no reachable
+configurations and no automaton, only the orbit and one minimum, and unlike
+Theorem~\ref{thm:pisot} it is uniform: the same three lemmas serve every
+parameter.
+
+Read in the other direction the theorem says that large knot counts
+\emph{force near-collisions}.
+
+\begin{corollary}[near-collisions are necessary]\label{cor:nearcollision}
+If some run reaches $k$ simultaneous knots, then for every integer
+$m<2(k-2)/3$ there is a moment at which two coexisting knots lie within
+$\lambda^{-m}$ of one another.
+\end{corollary}
+
+\begin{proof}
+If every pair of coexisting knots always kept distance at least
+$\lambda^{-m}$, the theorem with $\delta=\lambda^{-m}$, $W=m$ would give
+$k\leq m+\lceil m/2\rceil+1\leq \tfrac32m+2$.
+\end{proof}
+
+At $\lambda=3/2$ this connects the knot count to the arithmetic of
+Section~\ref{sec:threehalves}: positions of knots of age at most $a$ are odd
+multiples of $2^{-(a+1)}$, so a pair within $\lambda^{-m}$ is a
+near-coincidence among the integers $3^a-\sum\varepsilon_j2^j3^{a-j}$, and how
+closely those subset sums can approach one another governs how many knots can
+coexist. The erratic behaviour of such approximations is, we believe, the
+arithmetic face of the erratic growth of $d_{3/2}(k)$.
+
+Finally, the gap law suggests an accounting heuristic for the quadratic growth
+observed at $\lambda=(1+\sqrt2)/2$, which we record without claiming a proof:
+with $k$ knots there are $k-1$ consecutive distances, every one of them
+stretched by $\lambda$ at every move, and Lemma~\ref{lem:service} allows only
+one reduction per move. Each distance must be serviced before it grows to
+length $1$, so the servicing load grows linearly with $k$ while the service
+rate is fixed; sustaining $k$ knots therefore forces the configuration to
+spend an ever-larger share of its moves on maintenance, and the cost of adding
+one more knot grows roughly linearly in $k$ -- which integrates to
+$d(k)\asymp k^2$. Making this rigorous would require a lower bound on how
+small the serviced distances can be made, which is exactly the
+anti-concentration question left open above.
+
+\section{Periodic runs and Littlewood polynomials}\label{sec:kind}

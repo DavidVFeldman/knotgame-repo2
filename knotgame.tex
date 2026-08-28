@@ -1,0 +1,2639 @@
+\documentclass[11pt,reqno]{amsart}
+\usepackage[margin=1.15in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage[hidelinks]{hyperref}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{question}[theorem]{Question}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\T}{\mathbb{T}}
+\newcommand{\fp}[1]{\{#1\}}
+\DeclareMathOperator{\Orb}{Orb}
+
+\begin{document}
+
+\title[On a problem of Eugene Lawler]{On a problem of Eugene Lawler:\\
+knot counts in an interval deletion game}
+
+\author{D. V. Feldman}
+\address{Department of Mathematics and Statistics, University of New Hampshire,
+Durham, New Hampshire 03824}
+\email{dvfinnh@gmail.com}
+
+\date{25 August 2026}
+
+\subjclass[2020]{Primary 37B10; Secondary 11K16, 11R06, 68R05}
+\keywords{Pisot number, plastic number, symbolic dynamics,
+finite automaton, doubling map, Bernoulli convolution, transversality,
+Mahler's problem, formal verification}
+
+\begin{abstract}
+A strip is repeatedly shortened by deleting a subinterval occupying a fixed
+proportion of its length, closing the gap, and rescaling to the original
+length. Deleting from either end simply truncates the strip, but an interior
+deletion joins two pieces and leaves a persistent mark, which we call a knot;
+later deletions may excise earlier knots. Writing $\lambda>1$ for the reciprocal
+of the retained proportion, we ask how many knots can be present at once.
+
+We show that the maximum knot count is non-decreasing in the number of moves
+for every $\lambda$, and that when $\lambda$ is a Pisot number --- an
+algebraic integer greater than $1$ whose other roots all have modulus less
+than $1$ --- the forward orbit of the point at which knots are born is finite,
+so that the game reduces
+to a finite automaton and the maximum is attained and computable. We determine
+that maximum for the golden ratio, where it equals $2$, and for the plastic
+number, where it equals $7$. For $\lambda=\sqrt2$, $\lambda=3/2$ and
+$\lambda=\sqrt3$ no such reduction is available; we report exhaustive
+computations and record what is and is not settled. A second and independent
+threshold occurs at $\lambda=3/2$, where the three deleted intervals tile the
+strip. For $\lambda=\sqrt2$ the identity $\lambda^2=2$ makes pairs of moves act
+as the two branches of the doubling map, reducing the survival of a knot to the
+binary expansion of $b\sqrt2$ for an associated integer $b$. For $\lambda=3/2$ the three deleted intervals are exactly the three ternary
+cells, and a knot survives precisely as long as an associated number, formed by
+repeatedly multiplying by $3/2$ and subtracting an integer, remains inside a
+fixed window. That is the recursion appearing in Mahler's unsolved problem on
+the powers of $3/2$; the difference is that here several such numbers must be
+held inside the window at once, by a single shared sequence of subtractions,
+and it is this sharing rather than the width of the window that carries the
+difficulty. At $\lambda=(1+\sqrt2)/2$, which has a small conjugate root but is not an
+algebraic integer, the orbit of the birth point is infinite -- so the Pisot
+hypothesis is sharp -- and the record lengths grow quadratically as far as they
+are known. Allowing $\lambda$ to vary, we prove that two distinct knot histories, viewed
+as functions of $\lambda$, always separate at a definite rate wherever their
+values nearly agree; this holds on a range of $\lambda$ containing $3/2$, and it bounds on average
+how many pairs of histories can nearly collide. That it could hold there was a
+genuine question: the histories are encoded by power series with coefficients
+$-1$, $0$, $1$, and if the coefficients are instead allowed to be arbitrary
+numbers between $-1$ and $1$ the separation statement becomes false just short
+of $3/2$ --- so the result rests essentially on the coefficients being
+discrete. With a lower bound on the number of
+survivable move sequences, and lemmas describing how those sequences branch
+below the golden ratio, this supplies the first steps --- all machine-verified
+--- of a programme aimed at showing the count unbounded for almost every
+$\lambda$.
+\par
+We also show that the maximum is exactly $1$ when the
+deleted interval occupies at least half the strip, and that a periodic run can never carry a knot back to
+its birth point, so that unboundedness cannot be certified by an orbit that is
+periodic -- though whether some periodic run keeps a knot alive forever, which
+would give unboundedness at once, remains open.
+\end{abstract}
+
+\maketitle
+
+\tableofcontents
+
+
+\section{The game}\label{sec:game}
+
+The problem treated here is recalled as having circulated among theoretical
+computer scientists at Berkeley, attributed to Eugene Lawler. No published
+source has been located, and what follows is a reconstruction. We take the
+original to be the case in which the deleted piece is a third of the strip ---
+so that the three possible deletions exactly tile it, which is what makes the
+game natural to pose --- and it is this case, $\lambda=3/2$, that we regard as
+the problem proper; the one-parameter family in which $\lambda$ may be any
+number greater than $1$ is our own, and serves both to locate what is special
+about $3/2$ and to supply cases that can be settled. A reader interested only
+in the original question may read Sections~\ref{sec:game},
+\ref{sec:normal}, \ref{sec:gaps} and~\ref{sec:threehalves}.
+
+Fix $\lambda>1$ and set
+\[
+  r=\lambda^{-1},\qquad g=1-r .
+\]
+The strip is normalised at every stage to the interval $[0,1]$. A
+\emph{configuration} is a finite subset of the open interval $(0,1)$, whose
+elements are called \emph{knots}. Three \emph{moves} are available, each of
+which deletes a closed subinterval of length $g$, closes the gap, and rescales
+by $\lambda$. Two of them delete from an end and merely truncate; the third
+deletes from the middle and joins two pieces:
+\begin{itemize}
+\item[$R$:] delete $[r,1]$. A knot at $x$ survives if and only if $x<r$, and
+  moves to $\lambda x$.
+\item[$L$:] delete $[0,g]$. A knot at $x$ survives if and only if $x>g$, and
+  moves to $\lambda x-(\lambda-1)$.
+\item[$M$:] delete $[r/2,\,1-r/2]$. A knot at $x$ survives if and only if
+  $x<r/2$ or $x>1-r/2$; in the first case it moves to $\lambda x$, in the second
+  to $\lambda x-(\lambda-1)$. The two exposed ends are joined, and the join is a
+  new knot, which after rescaling lies at $1/2$.
+\end{itemize}
+The moves $L$ and $R$ remove an end of the strip and create no knot; only $M$
+does. The deleted interval is closed: a knot lying on its boundary is destroyed.
+This is the correct convention rather than a choice, since such a knot would
+otherwise be carried to an endpoint of the shortened strip, which is a free end
+and not a join of two pieces.
+
+Throughout, $\fp{t}$ denotes the fractional part of $t$. Write
+$f_0(x)=\lambda x$ and $f_1(x)=\lambda x-(\lambda-1)$ for the two branch
+maps, so that every surviving knot moves by $f_0$ if it lies below the deleted
+interval and by $f_1$ if it lies above.
+
+A \emph{run} is a word in $\{L,M,R\}^{*}$, applied left to right to the empty
+configuration. Let $N_\lambda(n)$ denote the largest number of knots present
+after a run of length $n$, and
+\[
+  d_\lambda(k)=\min\{\,n: N_\lambda(n)\geq k\,\}
+\]
+the least length of a run producing $k$ simultaneous knots. The original
+question is whether $N_\lambda$ is bounded.
+
+In fact distinct knots never come to occupy the same point, so no convention
+about coincidence is needed.
+
+\begin{lemma}\label{lem:distinct}
+Let $x<y$ be knots that both survive a move. Then their images are distinct.
+Moreover no surviving knot is carried to $1/2$ by the move $M$, so the knot that
+$M$ creates differs from every survivor. Consequently the number of knots after
+a move is the number of survivors, together with one more when the move is $M$.
+\end{lemma}
+
+\begin{proof}
+Under $L$ or $R$ both knots are moved by the same injective map, as they are
+under $M$ when both lie below the deleted interval or both above it. In the
+remaining case $x<r/2$ and $y>1-r/2$ hold strictly, so $y-x>1-r=g$ and
+\[
+  f_1(y)-f_0(x)=\lambda(y-x)-(\lambda-1)>\lambda g-(\lambda-1)=0 .
+\]
+Finally $f_0(x)=1/2$ forces $x=r/2$ and $f_1(x)=1/2$ forces $x=1-r/2$, and both
+of these lie in the interval deleted by $M$.
+\end{proof}
+
+Under the opposite convention, in which a knot on the boundary of the deleted
+interval is spared, coincidence does occur: the two boundary points are then
+carried to $1/2$, where the newly created knot already lies. This is why the two
+conventions agree at $\lambda=\varphi$ in Section~\ref{sec:pisot}.
+
+
+
+\begin{figure}[ht]
+\centering
+\includegraphics{game.pdf}
+\caption{The game at $\lambda=3/2$, where the three deleted intervals are
+exactly the three ternary cells $[0,\frac13]$, $[\frac13,\frac23]$,
+$[\frac23,1]$. The run $MRML$ is played from the empty configuration. The first
+$M$ creates a knot at $\frac12$; $R$ carries it to $\frac34$; the second $M$
+spares it, since $\frac34>\frac23$, carrying it to $\frac58$ while creating a
+second knot at $\frac12$; and $L$ carries the pair to $\frac7{16}$ and
+$\frac14$. Two knots in four moves --- one fewer move than the minimum for a
+third, by Proposition~\ref{prop:lowerbound}. Had the move after either birth
+been $M$, the newborn would have died, since $\frac12$ always lies strictly
+inside the interval deleted by $M$.}
+\label{fig:game}
+\end{figure}
+
+\section{Directions of attack}\label{sec:directions}
+
+The question just posed --- is $N_\lambda$ finite? --- is not answered in this
+paper for any $\lambda$ that is not a Pisot number, and in particular not for
+$\lambda=3/2$, which is where the problem began. What follows is therefore not
+a solution but a map of partial ones. Each buys something by relaxing the goal
+in a different direction, and the directions are largely independent: a reader
+may enter at any row of the table below and follow that thread alone.
+
+\medskip
+\begin{longtable}{@{}p{0.26\textwidth}p{0.45\textwidth}p{0.17\textwidth}@{}}
+\toprule
+\textbf{Relaxation} & \textbf{What it buys, and what it costs} &
+\textbf{Where}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Relaxation} & \textbf{What it buys, and what it costs} &
+\textbf{Where}\\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\bottomrule
+\endlastfoot
+Restrict the parameter &
+Complete answers. $N_\lambda=1$ for $\lambda\geq2$; for four Pisot parameters
+the maximum is computed exactly ($2$, $3$, $4$, $7$). The price is that the
+Pisot numbers are countable, and the finiteness of the orbit that makes them
+tractable is exactly what a general $\lambda$ lacks. &
+\S\ref{sec:pisot}, \S\ref{sec:thresholds}\\[2pt]
+Ask for less than a bound &
+Exact least lengths $d_\lambda(k)$, and structural laws relating them, in
+place of the supremum. The price is that no such statement constrains the
+limit. &
+\S\ref{sec:normal}, \S\ref{sec:nonpisot}\\[2pt]
+Accept evidence &
+Exhaustive tables, a quadratic growth law at $(1+\sqrt2)/2$ fitting every
+known value, and measured densities matching the counting-optimal rate. The
+price is that none of it is proof. &
+\S\ref{sec:nonpisot}, App.~\ref{app:explore}\\[2pt]
+Change the conclusion &
+Ask for one run with infinitely many simultaneous knots rather than for
+unbounded finite counts; this is equivalent to a checkable condition on
+finite witnesses, and is the natural form of the backward game. The price is
+that it is formally stronger, and the converse implication is open. &
+\S\ref{sec:density}\\[2pt]
+Assume a hypothesis &
+A knot survives a stretch of play only if the moves are kind to it, and we call
+a run \emph{kind} when the knot born at the outset survives every move of it
+(Section~\ref{sec:kind}). Each finite kind run ends with its knot somewhere in
+the strip. If those ending positions are dense, unboundedness follows; if in
+addition short runs already reach everywhere, so does an exponential bound on
+$d_\lambda(k)$. The price is that the
+hypothesis is unproved at every non-Pisot parameter, though it is measured to
+hold at the best possible rate. &
+\S\ref{sec:density}\\[2pt]
+Reduce to a known problem &
+At $\lambda=3/2$ a single knot survives exactly as long as a number, repeatedly
+multiplied by $3/2$ with an integer subtracted each time, stays inside a fixed
+window --- the recursion of Mahler's unsolved problem on the powers of $3/2$.
+What is new here is that several such numbers must be kept inside the window
+simultaneously, by one and the same sequence of subtractions. At
+$\lambda=\sqrt2$ two moves together act as doubling, and survival becomes a
+condition on binary digits. The price is that the problems we arrive at are
+themselves open: the difficulty is explained and relocated, not removed ---
+though the relocation at $3/2$ is exact, an equivalence checked by machine. &
+\S\ref{sec:threehalves}, \S\ref{sec:sqrt2}\\[2pt]
+Aim at generic parameters &
+Let $\lambda$ vary. The final position of a knot is then a function of
+$\lambda$, and two different histories give two such functions; we show that
+wherever they nearly agree they are pulling apart at a definite rate, so any
+one pair can nearly collide only over a short range of $\lambda$. Summed over
+all pairs this bounds, on average in $\lambda$, how much collision is
+possible --- the estimate an argument about typical $\lambda$ requires. It
+holds on a range containing $3/2$. The pairs of histories are encoded by power
+series with coefficients $-1$, $0$, $1$; had the coefficients been allowed to
+range over all of $[-1,1]$, the statement would be false just short of $3/2$,
+so the discreteness of the coefficients is doing essential work. We also bound the number of survivable move sequences from below,
+exponentially. The price is that the theorem about almost every $\lambda$
+towards which these are steps is not proved here. &
+\S\ref{sec:transversality}\\[2pt]
+Reprove what is known &
+A second proof of Pisot boundedness, from a minimum-separation argument rather
+than an automaton: effective, uniform, and applicable where the automaton is
+infeasible. The price is that its constants are far from sharp ($9$ against
+$2$, $34$ against $7$). &
+\S\ref{sec:gaps}\\[2pt]
+Insist on certainty &
+Machine verification of the great majority of what is asserted, with the
+exceptions itemised. The price is only that it constrains what may be
+claimed. &
+App.~\ref{app:verify}\\
+\end{longtable}
+\medskip
+
+Two threads cut across the table. Section~\ref{sec:conjugate} asks what governs
+the \emph{size} of a bound once one exists, and finds that it is the modulus of
+the conjugates rather than $\lambda$ itself. Section~\ref{sec:kind} closes one
+route --- no periodic run returns a knot to its birth point --- while leaving
+open the neighbouring one that would settle the problem at once, and explains
+why the obvious algebraic attack on it fails.
+
+Throughout, we try to say which of these registers a given statement belongs
+to. A theorem is a theorem; a computation is labelled as one; a conditional
+result carries its hypothesis in its statement; and the appendix records
+exactly which claims have been checked by machine and which have not.
+
+\section{Two normal forms}\label{sec:normal}
+
+\subsection{Suffix decomposition}
+
+A knot is born at $1/2$ and thereafter moves by maps depending only on its own
+position. Consequently the survival of a knot born at time $t$ depends only on
+the letters after $t$.
+
+\begin{lemma}\label{lem:suffix}
+For a run $w=w_1\cdots w_n$,
+\[
+  \#\{\text{knots after } w\}
+   =\#\{\,t : w_t=M \text{ and } 1/2 \text{ survives } w_{t+1}\cdots w_n\,\}.
+\]
+\end{lemma}
+
+\begin{theorem}\label{thm:mono}
+$N_\lambda(n+1)\geq N_\lambda(n)$ for every $n$ and every $\lambda$.
+\end{theorem}
+
+\begin{proof}
+Prepend a letter $c$ to $w$. Every index shifts by one, but every suffix is
+unchanged, so by Lemma~\ref{lem:suffix} each knot of $w$ persists in $cw$; a
+further knot may be gained at the front.
+\end{proof}
+
+Appending, by contrast, can cost a knot. For $\lambda=3/2$ the configuration
+$\{1/4,\,7/16,\,55/64\}$ loses a knot to each of the three moves: the first
+point blocks $L$, the third blocks $R$, and the second, lying in the middle
+third, blocks $M$. Hence a run of minimal length attaining $k$ knots may admit
+no useful extension, and Theorem~\ref{thm:mono} is recovered only by rebuilding
+from the left.
+
+The same mechanism that makes an $M$ immediately after a birth fatal gives a
+universal lower bound on the record lengths.
+
+\begin{proposition}\label{prop:lowerbound}
+For every $\lambda$ and every $k$, $d_\lambda(k)\geq 2k-1$.
+\end{proposition}
+
+\begin{proof}
+Since $r/2<1/2<1-r/2$, the point $1/2$ lies strictly inside the interval
+deleted by $M$, so a knot born at time $t$ is destroyed if the move at $t+1$ is
+$M$. If knots born at times $t_1<\dots<t_k$ are all alive at time $n$, then no
+$t_{i+1}$ equals $t_i+1$, whence $n\geq t_k\geq t_1+2(k-1)\geq 2k-1$.
+\end{proof}
+
+\begin{corollary}\label{cor:recursive}
+$d_\lambda(k+1)\geq d_\lambda(k)+2$.
+\end{corollary}
+
+\begin{proof}
+Suppose $k+1$ knots are alive at time $n$, born at $t_1<\dots<t_{k+1}$. All of
+the first $k$ are already alive at time $t_k$, so $t_k\geq d_\lambda(k)$; and
+$t_{k+1}\geq t_k+2$ as in the proposition.
+\end{proof}
+
+\subsection{The itinerary of a knot}
+
+A knot born at $1/2$ moves by $x_j=\lambda x_{j-1}-\varepsilon_j(\lambda-1)$,
+where $\varepsilon_j\in\{0,1\}$ records the branch taken at its $j$th move. Call
+$(\varepsilon_j)$ its \emph{itinerary}.
+
+\begin{proposition}\label{prop:itinerary}
+For every $n$,
+\[
+  x_n=(\lambda-1)\sum_{k\geq1}\varepsilon_{n+k}\lambda^{-k},
+\]
+and in particular the itinerary of a knot is exactly a $\{0,1\}$-representation
+\[
+  \sum_{j\geq1}\varepsilon_j\lambda^{-j}=\frac1{2(\lambda-1)} .
+\]
+Conversely every $\{0,1\}$-sequence satisfying this is the itinerary of a knot.
+\end{proposition}
+
+\begin{proof}
+Inverting the recursion gives $x_{j-1}=r x_j+\varepsilon_j(1-r)$ with
+$r=\lambda^{-1}$, so $x_n=(1-r)\sum_{k=1}^{N}\varepsilon_{n+k}r^{\,k-1}+r^Nx_{n+N}$,
+and $r^N\to0$ with $x_{n+N}\in[0,1]$. Taking $n=0$ and $x_0=1/2$ and multiplying
+by $r$ gives the second display, since $r/(1-r)=(\lambda-1)^{-1}$. For the
+converse, the displayed tails lie in $[0,1]$ for every sequence, so they define
+an admissible orbit.
+\end{proof}
+
+The number being represented is $1$ at $\lambda=3/2$, $(1+\sqrt2)/2$ at
+$\lambda=\sqrt2$ and $\varphi/2$ at $\lambda=\varphi$.
+
+\subsection{Circle normal form}
+
+Identify the endpoints of $[0,1]$ and call the resulting point the \emph{seam};
+the strip is then a circle carrying a marked point together with its knots. Each
+of the three moves deletes an arc of length $g$, rejoins, rescales by $\lambda$,
+and deposits a point at the join. The deposited point is the new seam when the
+deleted arc contains the old seam, which is the case for $L$ and for $R$, and is
+a knot otherwise, which is the case for $M$. Counting the seam as a marked point
+therefore makes the rule uniform. Let
+\begin{quote}
+$D$: delete the closed arc of length $g$ centred at $0$, rejoin, rescale by
+$\lambda$, place the join at $0$, and mark it,
+\end{quote}
+and let $\rho_\theta$ denote rotation of $\T=\R/\Z$ by $\theta$.
+
+\begin{proposition}\label{prop:circle}
+With the seam held at $0$,
+\[
+  L=D\circ\rho_{-g/2},\qquad R=D\circ\rho_{g/2},\qquad
+  M=\rho_{-1/2}\circ D\circ\rho_{-1/2},
+\]
+and the number of knots is one less than the number of marked points.
+\end{proposition}
+
+Absorbing each post-rotation into the pre-rotation of the following move puts a
+run in the form $D\rho_{\theta_n}D\rho_{\theta_{n-1}}\cdots D\rho_{\theta_1}$
+with $\theta_j$ drawn from the six values $\{0,\pm g/2,1/2,1/2\pm g/2\}$. On the
+Fourier side the rotations are diagonal and $D$ is a single fixed kernel, so the
+choice of move enters only through a phase. At $\lambda=3/2$ the three
+pre-rotations are $g/2+\{0,1/3,2/3\}$, and the phase is a character of $\Z/3$.
+
+\begin{remark}\label{rem:jsr}
+The homogeneous parts of the three move operators are positive and do not
+increase total mass, so no product of them can expand --- their joint spectral
+radius is at most $1$ --- and it
+equals $1$, since $R$ preserves $(0,r)$, $L$ preserves $(g,1)$, and these cover
+$(0,1)$ whenever $g<r$, that is whenever $\lambda<2$. A single knot can
+therefore be maintained indefinitely, and any bound obtained from a linear
+functional of the configuration degenerates to $N_\lambda(n)\leq n$. A useful
+bound must be nonlinear in the configuration.
+\end{remark}
+
+\section{Pisot parameters}\label{sec:pisot}
+
+\emph{Relaxation in force: the parameter is restricted. Within that
+restriction the results here are complete.}
+
+Recall that a \emph{Pisot number} is a real algebraic integer greater than $1$
+all of whose other roots --- its conjugates --- lie strictly inside the unit
+circle. The golden ratio is one, its conjugate being $-0.618$; so is the
+plastic number, the real root of $x^3=x+1$, whose two conjugates are complex
+of modulus $0.869$. The property we use is elementary and entirely
+consequential: because the conjugates shrink under powering while the integer
+lattice is discrete, $\lambda^n$ is very close to a whole number for large $n$,
+and sums built from powers of $\lambda$ cannot spread out. Everything in this
+section follows from that.
+
+Knots born at $1/2$ take values in $\tfrac12\Z[\lambda]$, since $f_0$ and $f_1$
+have coefficients in $\Z[\lambda]$. Let $\Orb(\lambda)$ denote the set of points
+reachable from $1/2$ by successive applications of $f_0$ and $f_1$ along
+surviving branches.
+
+\begin{theorem}\label{thm:pisot}
+If $\lambda$ is a Pisot number, then $\Orb(\lambda)$ is finite.
+\end{theorem}
+
+\begin{proof}
+Let $\lambda$ have degree $d$ and conjugates $\lambda^{(2)},\dots,\lambda^{(d)}$,
+all of modulus less than $1$. Applying a field embedding to $f_0$ and $f_1$
+gives the maps $y\mapsto\lambda^{(i)}y$ and
+$y\mapsto\lambda^{(i)}y-(\lambda^{(i)}-1)$, affine contractions with fixed
+points $0$ and $1$ respectively. Any orbit of the semigroup they generate is
+bounded, uniformly in the branch sequence. The map sending $x$ to the vector of
+its conjugates embeds $\tfrac12\Z[\lambda]$ as a lattice, and every knot
+satisfies $0<x<1$ while its conjugates remain in a fixed bounded set. A bounded
+region contains finitely many lattice points.
+\end{proof}
+
+\begin{corollary}\label{cor:decide}
+For Pisot $\lambda$ the reachable configurations form a finite set,
+$N_\lambda$ is eventually constant, and $\sup_n N_\lambda(n)$ is computable by a
+finite search.
+\end{corollary}
+
+Two further Pisot parameters round out the picture, both computed exactly in
+$\Z[\lambda]$ (Appendix~\ref{app:verify}). For the tribonacci constant, the
+real root of $x^3=x^2+x+1$ ($\lambda\approx1.83929$), the orbit of $1/2$ has
+$7$ points, only $20$ configurations are reachable, and the maximum is exactly
+$3$, attained first at length $7$ ($d(k)=1,3,7$). For the supergolden ratio,
+the real root of $x^3=x^2+1$ ($\lambda\approx1.46557$), the orbit has $43$
+points, $412$ configurations are reachable, and the maximum is exactly $4$
+($d(k)=1,3,5,11$). Both closures are small enough that full kernel
+certification appears feasible, unlike the plastic configuration closure. Note the tribonacci
+maximum $3$ exceeds the golden-ratio maximum $2$ at a larger $\lambda$ --
+non-monotonicity again.
+
+\begin{remark}\label{rem:sharp}
+The hypothesis of Theorem~\ref{thm:pisot} cannot be weakened to the contraction
+of the conjugates alone. The parameter $\lambda=(1+\sqrt2)/2$, with minimal
+polynomial $4x^2-4x-1$, has its conjugate $(1-\sqrt2)/2$ of modulus below $1$
+but is not an algebraic integer: $\lambda^2=\lambda+\tfrac14$, so
+$\Z[\lambda]$ contains $\Z[\tfrac12]$ and is dense, and the lattice step of the
+proof fails. The orbit of $1/2$ is indeed infinite there; the numbers of
+distinct points at successive depths run
+$2,4,8,14,26,46,80,136,226,378,\dots$, growing by a factor of about $1.66$,
+with $165{,}094$ points at depth $22$. Section~\ref{sec:nonpisot} examines this
+parameter further.
+\end{remark}
+
+\subsection{The golden ratio}
+
+\begin{theorem}\label{thm:phi}
+For $\lambda=\varphi=(1+\sqrt5)/2$ one has $\sup_n N_\varphi(n)=2$, attained by
+the run $MRM$.
+\end{theorem}
+
+\begin{proof}
+By Theorem~\ref{thm:pisot} the orbit is finite; computation gives the five
+points
+\[
+  p_1=1-\tfrac{\varphi}{2},\quad
+  p_2=\tfrac{\varphi-1}{2},\quad
+  p_3=\tfrac12,\quad
+  p_4=\tfrac{3-\varphi}{2},\quad
+  p_5=\tfrac{\varphi}{2},
+\]
+with approximate values $0.190983$, $0.309017$, $0.5$, $0.690983$, $0.809017$.
+Here $p_2=r/2$ and $p_4=1-r/2$ are exactly the endpoints of the interval deleted
+by $M$. Each transition below is an instance of $\varphi^2=\varphi+1$; for
+example $\varphi\,p_2=(\varphi^2-\varphi)/2=1/2=p_3$.
+
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+ & $p_1$ & $p_2$ & $p_3$ & $p_4$ & $p_5$\\
+\midrule
+$R$ & $p_2$ & $p_3$ & $p_5$ & --- & ---\\
+$L$ & --- & --- & $p_1$ & $p_3$ & $p_4$\\
+$M$ & $p_2$ & --- & --- & --- & $p_4$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+A dash records destruction. Under $M$ the points $p_2$ and $p_4$ lie on the
+boundary of the deleted interval and $p_3$ lies in its interior; the move also
+adjoins $p_3$. Enumerating the configurations reachable from $\emptyset$ gives
+twelve, namely $\emptyset$, the five singletons, and
+\[
+  \{p_3,p_4\},\ \{p_2,p_3\},\ \{p_1,p_3\},\ \{p_3,p_5\},\ \{p_2,p_5\},\
+  \{p_1,p_4\}.
+\]
+All have at most two elements, and $\{p_3,p_4\}$ is reached by $MRM$.
+\end{proof}
+
+The bound is insensitive to the treatment of the boundary. If a knot on the
+boundary of the deleted interval were spared, then $p_2$ and $p_4$ would both be
+carried by $M$ to $p_3$, where the newly created knot already lies, and the
+twelve configurations would be unchanged.
+
+Boundedness here is not a matter of knots dying. Under the periodic run
+$(RLL)^\infty$ a knot born at $1/2$ returns to $1/2$ after every three moves and
+survives for all time. The bound arises instead because $M$ is at once the only
+creator of knots and a destroyer of them.
+
+\subsection{The plastic number}
+
+Let $\rho$ denote the real root of $x^3=x+1$, so $\rho\approx1.324718$. Its
+conjugates have modulus $\rho^{-1/2}\approx0.8688$, so $\rho$ is Pisot and
+Theorem~\ref{thm:pisot} applies.
+
+\begin{proposition}\label{prop:plastic}
+For $\lambda=\rho$ the orbit $\Orb(\rho)$ has $153$ points, there are $25{,}525$
+reachable configurations, and $\sup_n N_\rho(n)=7$. The least lengths attaining
+$k$ knots for $k\leq6$ are $1,3,5,7,12,17$.
+\end{proposition}
+
+This is a finite verification: the orbit is enumerated to closure, the induced
+automaton on subsets is enumerated to closure, and the maximum is read off.
+
+\section{Two independent thresholds}\label{sec:thresholds}
+
+The three deleted intervals are $[0,g]$, $[\tfrac12-\tfrac g2,\tfrac12+\tfrac
+g2]$ and $[1-g,1]$, all of length $g=1-\lambda^{-1}$. Their union is $[0,1]$ if
+and only if $g\geq1/3$, that is if and only if $\lambda\geq3/2$. Three regimes
+result.
+
+\begin{center}
+\begin{tabular}{lccl}
+\toprule
+$\lambda$ & value & $g$ & geometry\\
+\midrule
+$(1+\sqrt2)/2$ & $1.20711$ & $0.17157$ & safe set $(0.1716,0.4142)$ and its mirror\\
+plastic $\rho$ & $1.32472$ & $0.24512$ & safe set $(0.2451,0.3774)$ and its mirror\\
+$\sqrt2$ & $1.41421$ & $0.29289$ & safe set $(0.2929,0.3536)$ and its mirror\\
+$3/2$ & $1.50000$ & $0.33333$ & the three deleted intervals tile $[0,1]$\\
+$\varphi$ & $1.61803$ & $0.38197$ & overlap of length $0.0729$\\
+$\sqrt3$ & $1.73205$ & $0.42265$ & overlap of length $0.1340$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+For $\lambda<3/2$ the \emph{safe set}
+$(g,\tfrac12-\tfrac g2)\cup(\tfrac12+\tfrac g2,1-g)$ is non-empty, and a knot
+lying in it survives every move. At $\lambda=3/2$ the three deleted intervals
+are the three thirds of $[0,1]$, so that a move preserves every knot if and only
+if one of the thirds contains no knot; by the pigeonhole principle two knots can
+always be preserved, and three is the first count at which a configuration can
+be blocked. For $\lambda>3/2$ the deleted intervals overlap and some points are
+destroyed by two of the three moves.
+
+This threshold is independent of the arithmetic of $\lambda$. The golden ratio
+and the plastic number are both Pisot and both give bounded games, but they lie
+on opposite sides of $3/2$ and their maxima are $2$ and $7$. The Pisot condition is what we can prove to
+force boundedness; whether it is also necessary is open
+(Section~\ref{sec:questions}). What governs the \emph{size} of the bound is
+neither the Pisot condition nor the position relative to $3/2$, but a third
+quantity, examined in Section~\ref{sec:conjugate}.
+
+At the far end of the range the classification is complete. Observe that
+$f_0(x)=\lambda x$ multiplies $x$ by $\lambda$, while
+$1-f_1(x)=1-\lambda x+(\lambda-1)=\lambda(1-x)$ multiplies $1-x$ by $\lambda$.
+Every move therefore multiplies one of $x$ and $1-x$ by $\lambda$, and both must
+remain in $(0,1)$; a knot survives a move only if $\min(x,1-x)<r$.
+
+\begin{proposition}\label{prop:big}
+$N_\lambda(n)=1$ for every $n\geq1$ if and only if $\lambda\geq2$, that is, if
+and only if the deleted interval occupies at least half the strip.
+\end{proposition}
+
+\begin{proof}
+A knot is born at $x=1/2$, where $\min(x,1-x)=1/2$. If $\lambda\geq2$ then
+$r\leq1/2$ and the condition $\min(x,1-x)<r$ fails, so the knot is destroyed by
+whichever move follows its birth and no two knots coexist. If $\lambda<2$ then
+$r>1/2$ and the run $MRM$ produces two knots.
+\end{proof}
+
+The threshold at $\lambda=2$ does not extend downwards into a monotone
+principle. Exhaustive search to depth $16$--$18$ gives the following, where
+entries other than those for $\varphi$ are lower bounds.
+
+\begin{center}
+\begin{tabular}{lcccccccc}
+\toprule
+$\lambda$ & $5/4$ & $8/5$ & $\varphi$ & $5/3$ & $7/4$ & $9/5$ & $19/10$ & $2$\\
+$g$ & $.200$ & $.375$ & $.382$ & $.400$ & $.429$ & $.444$ & $.474$ & $.500$\\
+\midrule
+knots & $7$ & $4$ & $2$ & $4$ & $3$ & $4$ & $4$ & $1$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Both neighbours of $\varphi$ listed here reach four knots, while $\varphi$
+reaches two and stops. Outside the regime $g\geq1/2$, where the count collapses
+for reasons independent of arithmetic, the classification is not determined by
+$g$.
+
+\section{Parameters that are not Pisot}\label{sec:nonpisot}
+
+\emph{Relaxation in force: finitely many knots at a time, and computation in
+place of proof. Nothing in this section bounds $N_\lambda$.}
+
+\begin{lemma}\label{lem:overlap}
+Neither $1/\sqrt2$ nor $2/3$ is a root of a non-zero polynomial with
+coefficients in $\{0,\pm1\}$. By contrast $1/\varphi$ is a root of $x^2+x-1$ and
+$1/\rho$ is a root of $x^3+x^2-1$.
+\end{lemma}
+
+\begin{proof}
+Suppose $\sum_k a_k 2^{-k/2}=0$ with $a_k\in\{0,\pm1\}$, finitely many non-zero.
+Separating even and odd indices gives $A+B/\sqrt2=0$ with $A,B$ rational, whence
+$A=B=0$. Each of $A$ and $B$ is a finite $\{0,\pm1\}$-combination of distinct
+powers of $\tfrac12$; if the least index with non-zero coefficient is $j$, that
+term has modulus $2^{-j}$ while the remaining terms sum to less than $2^{-j}$,
+so all coefficients vanish.
+
+Suppose $\sum_k a_k(2/3)^k=0$ with $a_k\in\{0,\pm1\}$ and $a_k=0$ for $k>n$.
+Multiplying by $3^n$ gives $\sum_k a_k2^k3^{n-k}=0$. Reduction modulo $2$ leaves
+$a_0 3^n$, so $a_0$ is even and hence zero; dividing by $2$ and repeating gives
+$a_k=0$ for all $k$.
+\end{proof}
+
+\begin{remark}\label{rem:overlap}
+Lemma~\ref{lem:overlap} is the exact-overlap criterion for the iterated function
+system $\{rx,\ rx+(1-r)\}$, which is the backward form of the game: a run of
+length $n$ read from the right transforms the set of starting points surviving
+the current suffix by these two contractions. Two compositions of equal length
+coincide precisely when $r$ satisfies such a relation. Running this system with the two
+contractions chosen by independent fair coin tosses gives a random point of
+$(0,1)$, and the distribution of that point --- the \emph{Bernoulli
+convolution} with parameter $r$ --- is the invariant measure of the system.
+Whether it is spread smoothly or concentrated on a small set is the question
+studied for eighty years under that name, and it turns on the same
+coincidences: its Fourier transform fails to tend to zero exactly when
+$\lambda$ is Pisot, by Erd\H{o}s
+\cite{Erdos1939} and Salem \cite{Salem1944}; and the corresponding statement in real
+space is the separation lemma of Garsia \cite{Garsia1962}. Under stronger
+hypotheses than we invoke here, results of Hochman \cite{Hochman2014} show that
+a dimension drop for such self-similar measures forces super-exponentially
+close pairs of compositions -- so that, in the algebraic setting, exact
+overlaps are the source of the drop. We do not use these results; we record
+only that the game lives in the same arithmetic-overlap framework, and that
+Lemma~\ref{lem:overlap} is exactly the exact-overlap condition for it. The finiteness of $\Orb(\lambda)$ in
+Theorem~\ref{thm:pisot} is the extreme case of this collapse. For $\sqrt2$ and
+$3/2$ Lemma~\ref{lem:overlap} shows that no collapse occurs, in agreement with
+the exponential growth of the number of reachable configurations, measured at
+about $1.41^n$ and $1.335^n$ respectively.
+\end{remark}
+
+\begin{figure}[ht]
+\centering
+\includegraphics{reachable.pdf}
+\caption{The positions a knot born at $1/2$ can occupy after twenty moves, using
+only $L$ and $R$; the count is shown at the right. By Lemma~\ref{lem:overlap}
+distinct surviving words give distinct positions at $3/2$ and $\sqrt2$, so
+these counts are exactly the numbers of surviving words, out of $2^{20}$; they
+grow at the rate $2/\lambda$. At the golden ratio the orbit is the five-point
+set of Theorem~\ref{thm:phi} and the reachable set cycles with period three
+through $\{1/2\}$, $\{p_1,p_5\}$, $\{p_2,p_4\}$: exponentially many surviving
+words, at most two places to be.}
+\label{fig:reachable}
+\end{figure}
+
+The following table records exhaustive computation. An entry $\geq m$ means that
+the search was complete to depth $m-1$ without attaining the count.
+
+\begin{center}
+\begin{tabular}{lccccccccccccc}
+\toprule
+$k$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13\\
+\midrule
+$d_{(1+\sqrt2)/2}(k)$ & 1 & 3 & 5 & 7 & 9 & 11 & 13 & 17 & 21 & 26 & 31 & 33--37 & 35--49\\
+$d_{\sqrt2}(k)$ & 1 & 3 & 5 & 9 & 13 & 17 & 27 & 31 & $\geq39$ & & & &\\
+$d_{3/2}(k)$ & 1 & 3 & 5 & 9 & 19 & 23 & 52 & $\geq57$ & & & & &\\[-1pt]
+\multicolumn{14}{l}{\footnotesize (the configurations attaining these are drawn in Figure~\ref{fig:records32})}\\
+$d_{\sqrt3}(k)$ & 1 & 3 & 10 & 29 & $\geq31$ & & & & & & & &\\
+$d_{\rho}(k)$ & 1 & 3 & 5 & 7 & 12 & 17 & finite & --- & & & & &\\
+$d_{\varphi}(k)$ & 1 & 3 & --- & & & & & & & & & &\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+For $\lambda=3/2$ the entry $43$--$52$ records that no run of length at most
+$42$ attains seven knots and that an explicit run of length $52$ does. For
+$\lambda=\rho$ the seventh knot is attained, by
+Proposition~\ref{prop:plastic}, but not within the depth searched exhaustively.
+
+Two features of this table deserve comment. The maximum for the plastic number
+is $7$, yet its least lengths for $k\leq6$ are smaller throughout than those for
+$\sqrt2$: early growth carries no information about boundedness. And
+$d_{3/2}$ is constant at $4$ from $n=9$ to $n=18$ and at $6$ from $n=23$ to at
+least $n=43$, so a plateau is not evidence of a ceiling.
+
+\begin{proposition}\label{prop:periodic}
+Over all runs of period at most $6$, iterated for $240$ moves, the largest
+number of simultaneous knots is $3$ for $\lambda=3/2$, $4$ for $\lambda=\sqrt2$
+and $2$ for $\lambda=\varphi$.
+\end{proposition}
+
+Under a run of period $p$ the number of knots present at time $n$ equals, up to
+edge effects, the sum over the $p$ phases of the lifetime of a knot born at that
+phase, divided by $p$. It is therefore bounded if and only if no knot survives
+for ever, that is if and only if $1/2$ lies outside the survivor set of the
+periodic itinerary for each phase. This is a Diophantine condition on $\lambda$
+rather than a formal one; at $\lambda=3/2$ it is of the type considered by
+Mahler \cite{Mahler1968}, as Section~\ref{sec:threehalves} makes precise. Proposition~\ref{prop:periodic} shows only that no
+short period succeeds.
+
+\subsection{\texorpdfstring{The parameter $(1+\sqrt2)/2$}{The parameter (1+sqrt2)/2}}
+\label{sub:silver}
+
+Half the silver ratio deserves separate attention, both as the witness of
+Remark~\ref{rem:sharp} and because it carries the strongest evidence of
+unboundedness at any parameter examined. It shares its arithmetic shape with
+$3/2$: each is $\theta/2$ for a Pisot number $\theta$, namely $3$ and
+$1+\sqrt2$, each has a coefficient ring containing $\Z[\tfrac12]$, and the
+number represented by an itinerary under Proposition~\ref{prop:itinerary},
+$1/(2(\lambda-1))$, is $1$ in the first case and the silver ratio $1+\sqrt2$
+itself in the second.
+
+Its gap $g=3-2\sqrt2\approx0.1716$ leaves the largest safe set of the
+parameters considered, of measure $6\sqrt2-8\approx0.485$. The first eleven
+record lengths in the table are exact, and they satisfy
+\[
+  d(k)=\max\bigl(2k-1,\ \lfloor k^2/4\rfloor+1\bigr)
+  \qquad(1\leq k\leq 11),
+\]
+the first branch, which is Proposition~\ref{prop:lowerbound}, holding with
+equality up to $k=7$ and the second from $k=7$ on. Whether the formula persists
+is open; it predicts $d(12)=37$ and $d(13)=43$, and what is known is
+$d(12)\in[33,37]$ and $d(13)\in[35,49]$: the lower bounds from
+Corollary~\ref{cor:recursive}, the upper bound $37$ from a beam search, and the
+upper bound $49$ from an explicit $49$-move run with thirteen simultaneous
+knots, found by a search that minimises the knots' ages rather than the run
+length and checked three independent ways. If it does persist, then $N_\lambda(n)$ grows like $2\sqrt n$: polynomial
+growth, against the doubling pattern of the $3/2$ column.
+
+The remaining computations of this paper, run at this parameter, give: over all
+periodic runs of period at most $6$, iterated for $240$ moves, seven
+simultaneous knots, attained by $(LM)^\infty$, against three at $3/2$ and four
+at $\sqrt2$; over all periodic sequences of period at most $14$ containing an
+$M$, a longest survival of $1/2$ of $67$ moves, at period $11$, with none of the
+$381{,}952$ surviving period-$14$ prefixes reaching $200$; a kind set of
+dimension approximately $0.834$, against $0.631$, $0.679$ and $0.421$ at $3/2$,
+$\sqrt2$ and $\varphi$ (Proposition~\ref{prop:kinddim}); and no Littlewood polynomial of degree at most $12$
+vanishing at $\lambda$, nor any $\{0,\pm1\}$ polynomial of degree at most $10$
+vanishing at $1/\lambda$, so that the conclusions of Section~\ref{sec:kind}
+apply here unchanged: $1/2$ is never a periodic point, separation is
+exponential, and a single periodic kind sequence would give
+$N_\lambda=\infty$.
+
+\section{Transversality and branching: certified steps toward almost every
+\texorpdfstring{$\lambda$}{lambda}}\label{sec:transversality}
+
+\emph{Relaxation in force: the target is generic rather than specific
+parameters. The theorems here are steps of a programme whose conclusion is not
+reached.}
+
+The technical term for what this section proves is \emph{transversality}, and
+it is worth saying in ordinary words what it asserts before the notation
+begins. Fix two different histories a knot might have --- two sequences of
+survived moves --- and let $\lambda$ vary. Each history determines where the
+knot ends up, so each gives a function of $\lambda$, and the two knots collide
+at those $\lambda$ where the two functions agree. Transversality is the
+statement that this can only happen cleanly: wherever the two values are close,
+the two functions are pulling apart at a definite rate, so the set of $\lambda$
+for which they are within $\rho$ of each other is a single short interval, of
+length proportional to $\rho$. Since there are exponentially many pairs of
+histories and each contributes only a short interval, one can add up the
+contributions and bound, on average over $\lambda$, how much collision occurs
+in total. That average bound is what an argument about almost every $\lambda$
+consumes, and it is Proposition~\ref{prop:paircount} below.
+
+Two facts make this delicate. The first is that transversality is not
+automatic: it genuinely fails for large $\lambda$. The technique available
+since Solomyak's theorem certifies a wider class of series --- coefficients
+anywhere in $[-1,1]$ --- and that wider class really does fail at
+$\lambda\approx1.5405$, just short of $3/2$; only the smaller class our
+problem actually produces, with coefficients $-1$, $0$, $1$, can go further.
+Proposition~\ref{prop:restricted} is the work of showing that it does. The second
+is that the pairs one needs to count are not arbitrary: they must be histories
+in which the knot actually survives, and controlling those is the subject of
+the second half of the section.
+
+The density criterion of Section~\ref{sec:density} reduces unboundedness to a
+property of one orbit, and Question~\ref{q:ae} asks for it almost everywhere.
+This section records how far that programme has been carried, with proofs
+where they are short and machine-verified certificates where they are not.
+Everything stated as a proposition here is certified in Lean
+(Appendix~\ref{app:verify}).
+
+\subsection{The obstruction just short of $3/2$, and the way past it}
+For branch words $\varepsilon\neq\varepsilon'$ of length $m$ first differing at
+index $k$, the endpoint functions of Section~\ref{sec:density} satisfy
+\[
+\bigl|\Phi_\varepsilon(\lambda)-\Phi_{\varepsilon'}(\lambda)\bigr|
+=(\lambda-1)\lambda^{m-k}\bigl|g(1/\lambda)\bigr|,\qquad
+g(x)=1+\textstyle\sum_{i\geq1}c_ix^i,\ c_i\in\{-1,0,1\},
+\]
+so everything reduces to a statement about the class $\mathcal B_{01}$ of such
+power series --- those with constant term $1$ and every other coefficient
+$-1$, $0$ or $1$. The statement wanted is \emph{transversality}: that
+$|g(x)|<\delta$ forces $g'(x)<-\delta$, so that a member of the class which is
+near zero is on its way down through zero and cannot linger.
+
+The way such statements have been proved since Solomyak's theorem
+\cite{Solomyak1995} is to exhibit one explicit worst-case series and check it
+alone. One takes
+$h(x)=1-x-\dots-x^{k-1}+a\,x^k+x^{k+1}+x^{k+2}+\cdots$, the series that falls
+as fast as the coefficients allow and then rises again; if $h$ is still
+positive and still decreasing at $x_0$, then transversality holds throughout
+$[0,x_0]$, because any series of the class which is small at a point is
+dominated there by a translate of $h$. These are the $(*)$-functions of
+Peres and Solomyak \cite{PeresSolomyak1996}.
+
+Two things limit the argument. It certifies not our class but the larger one
+in which the coefficients may be any real numbers in $[-1,1]$, and its reach
+is bounded by how that larger class behaves: choosing $k=4$ and $a=0.1$ gives
+$h(0.63)=0.0070$ and $h'(0.63)=-0.497$, so transversality holds on
+$[0,0.63]$, and no choice pushes past $x\approx0.6487$. Nor could any other
+argument, because at $x^*=0.649138\ldots$ the larger class genuinely fails:
+some member of it has a double zero there, sitting on the axis instead of
+crossing it. We locate $x^*$ by linear programming. Since $x=1/\lambda$, that
+ceiling is $\lambda\approx1.5405$ --- and $\lambda=3/2$ sits at $x=2/3$,
+outside, by about $0.017$.
+
+The way through is that our class is smaller: coefficients $-1$, $0$, $1$ and
+nothing between. That turns out to be exactly enough.
+
+\begin{proposition}[machine-verified]\label{prop:restricted}
+For every $c:\mathbb N\to\{-1,0,1\}$ with $c_0=1$ and every
+$x\in[\tfrac12,\tfrac{667}{1000}]$: if $|g(x)|\leq\tfrac1{1000}$ then
+$g'(x)<-\tfrac1{1000}$.
+\end{proposition}
+
+The certificate is a finite case check. The window is cut into $27$ pieces;
+on each piece one bounds the possible values of $g$ and $g'$ over all
+coefficient choices at once, using that a partial sum plus a bound on
+everything that can follow it already excludes most cases; a case not excluded
+is split further. Twenty-seven pieces suffice, and the whole check is carried
+out in integer arithmetic by the proof kernel, with the pieces themselves
+proved to cover the window; the class is the full infinite one, the
+value a convergent series, and the conclusion holds for the honest derivative.
+The window cannot extend much further, and this is now a theorem rather than a
+search report. At $x=\tfrac{3339}{5000}=0.6678$, only $0.0008$ beyond the
+certified window, an explicit member of the class of degree $22$ takes a value
+in $(0,\tfrac1{1000}]$ while its derivative stays above $-\tfrac1{1000}$: small
+without falling fast, which is exactly what the proposition forbids inside the
+window. At $x=\tfrac{3343}{5000}$ another explicit member, of degree $26$, is
+smaller than $10^{-5}$ and \emph{rising}. Both are kernel checks over exact
+rationals (the programs that found them are not trusted; the kernel re-verifies
+what they propose). So for this class and this $\delta$ the last possible
+endpoint of the window is pinned between $0.667$ and $0.6678$, a band of width
+less than a thousandth --- and $3/2$, at $x=2/3\approx0.6667$, clears the
+demonstrated failures by about a thousandth.
+
+\begin{proposition}[pair counting; machine-verified]\label{prop:paircount}
+Let $I=[\tfrac{1000}{667},2]$, $\lambda_0=\tfrac{1000}{667}$,
+$\delta=\tfrac1{1000}$. For distinct branch words of length $m$ first
+differing at $k$, and every $\rho\geq0$,
+\begin{align*}
+\mathrm{Leb}\bigl\{\lambda\in I:|\Phi_\varepsilon-\Phi_{\varepsilon'}|\leq\rho\bigr\}
+&\leq\frac{8\,\rho\,\lambda_0^{k-m}}{\delta(\lambda_0-1)},\\
+\int_I\#\{\rho\text{-close pairs}\}\,d\lambda
+&\leq\frac{4\lambda_0\,\rho}{\delta(\lambda_0-1)(2-\lambda_0)}
+\Bigl(\frac4{\lambda_0}\Bigr)^{m}.
+\end{align*}
+\end{proposition}
+
+This is the estimate a parameter-exclusion argument consumes: the parameter
+mass on which any two endpoints collide at scale $\rho$ is linear in $\rho$,
+uniformly over the exponentially many pairs, on a window containing $3/2$.
+
+\subsection{Branching below the golden ratio}
+The other half of the programme concerns the kind words themselves. A branch
+survives from $x$ exactly when its image stays in $(0,1)$: branch $0$ needs
+$x<r$, branch $1$ needs $x>g$. On the \emph{window} $(g,r)$ both branches are
+legal; elsewhere exactly one is, and the dynamics is forced.
+
+\begin{lemma}[no jumping]\label{lem:nojump}
+For $\lambda^2<\lambda+1$ the forced dynamics cannot cross the window: from
+$x\leq g$, either $\lambda x\leq g$ or $\lambda x\in(g,r)$; from $x\geq r$,
+either $\lambda x-(\lambda-1)\geq r$ or it lies in $(g,r)$. Each crossing
+inequality is equivalent to $\lambda^2\geq\lambda+1$, and for
+$\lambda\geq\varphi$ the pair $\{1/(\lambda+1),\lambda/(\lambda+1)\}$ is a
+forced two-cycle avoiding the window forever.
+\end{lemma}
+
+\begin{proof}
+A jump from below requires $\lambda g\geq r$ and an undershoot from above
+requires $\lambda r-(\lambda-1)\leq g$; each rearranges to
+$\lambda^2-\lambda-1\geq0$. For the cycle, $\lambda\cdot\frac1{\lambda+1}
+=\frac{\lambda}{\lambda+1}$ and $\lambda\cdot\frac{\lambda}{\lambda+1}
+-(\lambda-1)=\frac1{\lambda+1}$, and $\frac1{\lambda+1}\leq g$,
+$\frac{\lambda}{\lambda+1}\geq r$ are again both equivalent to
+$\lambda^2\geq\lambda+1$.
+\end{proof}
+
+The golden ratio thus appears in this paper for a second time, for what looks
+like a second reason: Section~\ref{sec:pisot} used $\varphi^2=\varphi+1$ to
+close an orbit, and here the same equation is the exact threshold at which the
+forced dynamics can leap the window. We do not know a conceptual reason the
+two thresholds coincide.
+
+\begin{lemma}[good child]\label{lem:goodchild}
+Let $[\lambda_0,\lambda_1]\subset(1,\varphi)$ and
+$\eta=\min(\lambda_0-1,(2-\lambda_1)/2)$. Since $g+r=1$, the midpoint of the
+window is $\tfrac12$. For $x$ in the window, the child $\lambda x$ (if
+$x\leq\tfrac12$) or $\lambda x-(\lambda-1)$ (if $x>\tfrac12$) lies in
+$[\eta,1-\eta]$, and its forced orbit re-enters the window within
+$B=\lceil\log(g/\eta)/\log\lambda_0\rceil+1$ steps.
+\end{lemma}
+
+\begin{proof}
+For $x\leq\tfrac12$ the child lies in $(\lambda-1,\lambda/2]$; for
+$x>\tfrac12$, in $[(2-\lambda)/2,2-\lambda)$, and $2-\lambda<r$ because
+$(\lambda-1)^2>0$. In both cases the distance to $\{0,1\}$ is at least
+$\eta$; a forced orbit multiplies that distance by $\lambda$ at each step and,
+by Lemma~\ref{lem:nojump}, enters the window rather than crossing it.
+\end{proof}
+
+\begin{proposition}[machine-verified]\label{prop:continuum}
+For every $\lambda\in(1,\varphi)$ there is an explicit injection of
+$\{0,1\}^{\mathbb N}$ into the survival itineraries of $1/2$: uncountably many
+kind sequences. Moreover $K_\lambda(m)$, the number of kind words of length
+$m$, satisfies $K_\lambda(m)\geq\lfloor m/(B+1)\rfloor$ on any window as in
+Lemma~\ref{lem:goodchild}.
+\end{proposition}
+
+In our normalisation the first assertion recovers, in certified form, a
+theorem of Erd\H{o}s, Jo\'o and Komornik \cite{ErdosJooKomornik1990} on the
+multiplicity of $q$-expansions for $q<\varphi$; the lemmas above are its
+quantitative skeleton, and the count is what the first-moment programme
+consumes.
+
+The linear bound is far from the truth: the measured growth of $K_\lambda(m)$
+is $(2/\lambda)^m$. It can be replaced by an exponential one, and by an
+argument that avoids the return-time analysis altogether.
+
+\begin{proposition}[machine-verified]\label{prop:expcount}
+For every $\lambda\in[\tfrac{1000}{667},\tfrac85]$ and every $m$,
+\[
+  K_\lambda(m)\ \geq\ 2^{\lfloor m/8\rfloor},
+\]
+and at $\lambda=3/2$, $K_{3/2}(m)\geq15^{\lfloor m/12\rfloor}$, a growth rate
+of $15^{1/12}\approx1.2532$ per move against the measured $4/3$.
+\end{proposition}
+
+The mechanism is a self-reproducing interval. Say that an interval
+$[a,b]$ \emph{doubles in $T$ steps} if from every $x\in[a,b]$ there are two
+distinct branch words of length $T$ carrying $x$ back into $[a,b]$; then the
+number of surviving words from any point of $[a,b]$ at least doubles every $T$
+steps, and iterating gives $2^{\lfloor m/T\rfloor}$. The certificates are
+finite: $24$ parameter cells carrying $1333$ interval cells with words of
+length at most $8$ for the window, and $503$ cells tiling $[\tfrac14,\tfrac34]$
+with $15$ words of length $12$ at $\lambda=3/2$, all checked by kernel
+reduction over exact rationals, with the interval arithmetic carried out in the
+parameter as well as in the point so that one certificate serves a whole
+interval of $\lambda$. Underlying it is a small structural simplification: a
+branch word issued from a point of $(0,1)$ is legal exactly when its final
+image lies again in $(0,1)$, so a certificate need only control images and
+never legality.
+
+Two things this does and does not settle. It settles the counting half of the
+first-moment problem, unconditionally and uniformly on a window containing
+$3/2$: the supply of kind words grows exponentially, which is the half of the
+heuristic of Remark~\ref{rem:candidates} that says one may prepend as many
+moves as one likes. It does not settle the other half. Exponentially many kind
+words do not have to have well-distributed endpoints, and it is distribution,
+not abundance, that Theorem~\ref{thm:density0} requires.
+
+Finally, the two halves meet where they are needed:
+
+\begin{proposition}[common window; machine-verified]\label{prop:commonwindow}
+For every $\lambda\in[\tfrac{1000}{667},\tfrac85]$: the transversality of
+Proposition~\ref{prop:restricted} applies at $1/\lambda$;
+$\lambda^2<\lambda+1$, so Lemmas~\ref{lem:nojump} and~\ref{lem:goodchild}
+apply with $\eta=\tfrac15$, $B=3$; the injection of
+Proposition~\ref{prop:continuum} exists; and
+$K_\lambda(m)\geq\lfloor m/4\rfloor$. The window contains $3/2$.
+\end{proposition}
+
+\section{Order, gaps, and a scheduling bound}\label{sec:gaps}
+
+So far we have watched knots one at a time. This section watches the
+\emph{spaces between them}, and the payoff is a second proof that Pisot
+parameters have bounded knot counts -- shorter than the automaton argument of
+Section~\ref{sec:pisot}, and effective: it converts a single number, the
+smallest gap in the orbit of $1/2$, directly into a bound on
+$N_\lambda$.
+
+Throughout, fix a run and consider the knots alive at a given moment, listed in
+increasing order of position. Three elementary lemmas control everything.
+
+\begin{lemma}[order]\label{lem:order}
+Every move preserves the spatial order of the knots that survive it.
+\end{lemma}
+
+\begin{proof}
+The maps $f_0$ and $f_1$ are increasing, so moves $L$ and $R$, which apply one
+map to every survivor, preserve order. At a move $M$ the survivors below the
+deleted interval are carried by $f_0$ into $(0,1/2)$ and those above it by
+$f_1$ into $(1/2,1)$; each group keeps its internal order, and the first group
+lands entirely to the left of the second.
+\end{proof}
+
+Thus two knots, once created, keep their left-to-right relationship for as long
+as both live. Say that a pair of knots \emph{straddles} a move $M$ if one lies
+below the deleted interval and the other above it.
+
+\begin{lemma}[gap law]\label{lem:gaplaw}
+Let $x<y$ be knots that both survive a move. If the move is $L$, is $R$, or is
+an $M$ that the pair does not straddle, then the new distance is
+$\lambda(y-x)$. If the pair straddles an $M$, the new distance is
+$\lambda(y-x)-(\lambda-1)$.
+\end{lemma}
+
+\begin{proof}
+In the first case both knots are carried by the same affine map of slope
+$\lambda$. In the second, $x\mapsto\lambda x$ and
+$y\mapsto\lambda y-(\lambda-1)$.
+\end{proof}
+
+So every distance between coexisting knots is stretched by the factor
+$\lambda$ at every single move, with one exception: a pair that straddles an
+$M$ has its distance reduced by $\lambda-1$ relative to that stretch. Since
+all knots lie in $(0,1)$, no distance can ever reach $1$; the stretching must
+therefore be paid down, and straddling is the only currency. The final lemma
+says the currency is scarce.
+
+\begin{lemma}[one service per move]\label{lem:service}
+At any move, among the spatially consecutive pairs of any fixed set of
+surviving knots, at most one pair straddles.
+\end{lemma}
+
+\begin{proof}
+A straddling pair has its two members on opposite sides of the deleted
+interval, so a consecutive pair straddles exactly when the deleted interval
+falls between its two members -- and an interval falls between the members of
+at most one consecutive pair of an ordered list.
+\end{proof}
+
+Applied to the extreme pair, the gap law becomes a statement about the whole
+configuration. Write $S$ for the \emph{spread}, the distance from the leftmost
+to the rightmost knot, and $T=1-S$ for the \emph{deficit}.
+
+\begin{corollary}[deficit law]\label{cor:deficit}
+Across a move at which no knot dies and none is born outside the current
+range, $T\mapsto\lambda T$ if the extreme pair straddles, and
+$T\mapsto\lambda T-(\lambda-1)$ otherwise.
+\end{corollary}
+
+\begin{proof}
+By Lemma~\ref{lem:gaplaw}, $S\mapsto\lambda S-(\lambda-1)$ in the straddling
+case and $S\mapsto\lambda S$ otherwise; substitute $S=1-T$.
+\end{proof}
+
+This is verbatim the law of a single knot, with a straddling $M$ in the role of
+$R$ and every other move in the role of $L$; and $T$ must remain in $(0,1)$,
+since $T\leq0$ says the configuration no longer fits in the strip. A
+configuration therefore carries a virtual knot of its own, which has to be kept
+alive by the same letters that keep the real ones alive. The tension is visible
+in the witnesses: a long run of $L$ and $R$ drives $T$ towards $0$, and only a
+straddling $M$ restores it.
+
+These three facts assemble into a pigeonhole argument.
+
+\subsection{Free births}
+The three moves are not always three. Relative to a given configuration, an $M$
+may act on the knots present exactly as an $L$ or an $R$ would --- same
+survivors, same images --- differing only in that it also creates a knot. Call
+such an $M$ \emph{free}: it adds a knot at no cost to the configuration.
+
+\begin{lemma}\label{lem:free}
+If every knot of $C$ lies below $r/2$ then $M$ acts on $C$ exactly as $R$
+does, and if every knot lies above $1-r/2$ then $M$ acts exactly as $L$: in
+either case $C$ is contained in one of the two intervals that $M$ leaves
+alone, and the $M$ is free. For $\lambda<3/2$ the converses hold as well. For
+$\lambda\geq3/2$ they fail: then $r\leq1-r/2$, and a knot sitting in
+$[r,1-r/2]$ is deleted by $M$ and by $R$ alike, so $M$ acts on the
+one-knot configuration $\{r\}$ exactly as $R$ does although $r\geq r/2$.
+\end{lemma}
+
+\begin{proof}
+If $C\subset[0,r/2)$ then no knot is deleted by $M$ or by $R$, and both carry
+each knot by $f_0$. For the converse suppose $\lambda<3/2$, so $1-r/2<r$, and
+let $x\in C$ with $x\geq r/2$. If $x\leq1-r/2$ then $M$ deletes $x$ while $R$,
+which deletes only $[r,1]$, does not, since $x\leq1-r/2<r$. If $x>1-r/2$ then
+$M$ carries $x$ by $f_1$, whereas $R$ either deletes it or carries it by
+$f_0$. Either way $M$ does not act as $R$. The statements for $L$ are the
+reflection $x\mapsto1-x$, and the counterexample for $\lambda\geq3/2$ is
+checked directly.
+\end{proof}
+
+At $\lambda=3/2$ itself the exceptional interval $[r,1-r/2]$ degenerates to the
+single point $2/3$, which is not dyadic and so is never occupied --- reachable
+positions staying off the cell boundaries is itself certified
+(Appendix~\ref{app:verify}); the converse therefore holds for every
+configuration that actually arises there.
+
+This gives a clean notion of weak equivalence: two runs are equivalent if,
+along the way, each of their moves acts identically on the knots present, so
+that an $M$ may be matched with an $L$ or an $R$. Under this equivalence the
+positions of the knots depend only on the resulting two-letter word, and the
+three-letter structure survives only where some $M$ is not free. Free births
+are what one would want in quantity --- a knot gained for nothing --- but they
+are also, by Lemma~\ref{lem:free}, births into a configuration huddled in one
+of the two end intervals, and such a configuration has small spread and cannot
+straddle. So a free $M$ never services a gap, and by Corollary~\ref{cor:deficit} it
+moves the deficit as every non-straddling move does --- down toward the fatal
+exit at $0$; only the $M$'s that are not free can replenish it. The
+economy of the game is visible in the records: in the runs attaining $5$, $6$
+and $7$ knots at $\lambda=3/2$, of $48$ moves $M$ only $13$ are free, and the
+proportion falls as $k$ grows.
+
+\subsection{The backward picture}
+Order preservation has a consequence for the bookkeeping that is worth
+isolating, because it removes an apparent exponential.
+
+Read a run backwards. The inverse branches $y\mapsto ry$ and
+$y\mapsto ry+(1-r)$ are contractions defined on all of $(0,1)$: backwards
+nothing is ever destroyed. A move $L$ applies the second branch to every knot
+and $R$ the first; a move $M$ applies the \emph{first} branch to knots below
+$1/2$ and the \emph{second} to knots above, since its image is
+$[0,r/2)\cup(1-r/2,1]$. So backwards each knot experiences a two-letter
+itinerary, and the itineraries of different knots differ only at the moves
+$M$. Knots are not destroyed but \emph{annihilated}: a knot reaches exactly
+$1/2$ at the move that gave birth to it, and disappears there.
+
+At first sight the moves $M$ impose a compounding constraint --- the letter
+that annihilates one knot must serve as $L$ or as $R$ for each older knot,
+according to the side that knot happens to occupy, and a knot outliving several
+births must fall correctly each time, which looks like $2^{j}$ conditions after
+$j$ births. It is not so. By Lemma~\ref{lem:order} the spatial order of the
+knots never changes; the knot being annihilated sits at $1/2$; so the knots
+below it in the fixed order take one branch and those above it the other. No
+choice is made and no condition is imposed. The combinatorial content of a
+$k$-knot configuration is therefore a single permutation --- the annihilation
+order read against the spatial order --- rather than a tree of side-patterns.
+
+\begin{theorem}[scheduling bound]\label{thm:schedule}
+Suppose a run reaches $k$ simultaneous knots, and that throughout the run any
+two coexisting knots are at distance at least $\delta>0$. Put
+$W=\lceil\log_\lambda(1/\delta)\rceil$. Then
+\[
+  k\ \leq\ W+\lceil W/2\rceil+1.
+\]
+\end{theorem}
+
+\begin{proof}
+Fix a run with $k$ knots alive at time $n$, and look at the window consisting
+of the last $W$ moves. Call a knot \emph{old} if its age is at least $W$; old
+knots were alive throughout the window. By Lemma~\ref{lem:order} the old
+knots keep a fixed spatial order, so their consecutive pairs are well defined
+throughout. Consider one such pair. At time $n-W$ its distance was at least
+$\delta$; by Lemma~\ref{lem:gaplaw} that distance is multiplied by $\lambda$
+at each of the $W$ moves of the window unless the pair straddles one of them;
+and $\lambda^W\delta\geq1$ while distances stay below $1$. So each
+consecutive old pair straddles at least one move of the window. By
+Lemma~\ref{lem:service} each move is straddled by at most one such pair.
+Hence (number of old knots) $-\,1\leq W$.
+
+The remaining knots have age less than $W$, and by the argument of
+Proposition~\ref{prop:lowerbound} their birth times are at least two apart, so
+there are at most $\lceil W/2\rceil$ of them. Adding the two counts gives the
+bound.
+\end{proof}
+
+\begin{corollary}[Pisot boundedness, again, and effectively]\label{cor:effective}
+Let $\lambda$ be Pisot, let $O$ be the (finite) orbit of $1/2$, and let
+$\delta_0$ be the smallest distance between two points of $O$. Then
+$N_\lambda\leq W+\lceil W/2\rceil+1$ with
+$W=\lceil\log_\lambda(1/\delta_0)\rceil$.
+\end{corollary}
+
+\begin{proof}
+Every knot is born at $1/2$ and moved by $f_0$ and $f_1$, so all positions lie
+in $O$; coexisting knots are distinct by Lemma~\ref{lem:distinct}; so any two
+are at distance at least $\delta_0$, and Theorem~\ref{thm:schedule} applies.
+\end{proof}
+
+For the golden ratio the orbit is the five-point set of
+Theorem~\ref{thm:phi}, whose smallest gap is
+$\frac{\varphi-1}{2}-\frac{2-\varphi}{2}=\varphi-\tfrac32=(\sqrt5-2)/2\approx
+0.118$; then $W=5$ and $N_\varphi\leq9$. For the plastic number the orbit has
+$153$ points and smallest gap at least $239/100000$ (certified; the value is
+$\approx0.00239$), giving $W=22$ and $N_\rho\leq34$. Both bounds are now
+formally verified (Appendix~\ref{app:verify}). The true values are $2$ and $7$,
+so the bound is loose by a factor of about five -- but it needs no reachable
+configurations and no automaton, only the orbit and one minimum, and unlike
+Theorem~\ref{thm:pisot} it is uniform: the same three lemmas serve every
+parameter.
+
+Read in the other direction the theorem says that large knot counts
+\emph{force near-collisions}.
+
+\begin{corollary}[near-collisions are necessary]\label{cor:nearcollision}
+If some run reaches $k$ simultaneous knots, then for every integer
+$m<2(k-2)/3$ there is a moment at which two coexisting knots lie within
+$\lambda^{-m}$ of one another.
+\end{corollary}
+
+\begin{proof}
+If every pair of coexisting knots always kept distance at least
+$\lambda^{-m}$, the theorem with $\delta=\lambda^{-m}$, $W=m$ would give
+$k\leq m+\lceil m/2\rceil+1\leq \tfrac32m+2$.
+\end{proof}
+
+At $\lambda=3/2$ this connects the knot count to the arithmetic of
+Section~\ref{sec:threehalves}: positions of knots of age at most $a$ are odd
+multiples of $2^{-(a+1)}$, so a pair within $\lambda^{-m}$ is a
+near-coincidence among the integers $3^a-\sum\varepsilon_j2^j3^{a-j}$, and how
+closely those subset sums can approach one another governs how many knots can
+coexist. The erratic behaviour of such approximations is, we believe, the
+arithmetic face of the erratic growth of $d_{3/2}(k)$.
+
+Finally, the gap law suggests an accounting heuristic for the quadratic growth
+observed at $\lambda=(1+\sqrt2)/2$, which we record without claiming a proof:
+with $k$ knots there are $k-1$ consecutive distances, every one of them
+stretched by $\lambda$ at every move, and Lemma~\ref{lem:service} allows only
+one reduction per move. Each distance must be serviced before it grows to
+length $1$, so the servicing load grows linearly with $k$ while the service
+rate is fixed; sustaining $k$ knots therefore forces the configuration to
+spend an ever-larger share of its moves on maintenance, and the cost of adding
+one more knot grows roughly linearly in $k$ -- which integrates to
+$d(k)\asymp k^2$. Making this rigorous would require a lower bound on how
+small the serviced distances can be made, which is exactly the
+anti-concentration question left open above.
+
+\section{Periodic runs and Littlewood polynomials}\label{sec:kind}
+
+A \emph{Littlewood polynomial} is one all of whose coefficients are $+1$ or
+$-1$. They enter for a concrete reason: asking whether a knot returns exactly
+to its birth point after a fixed number of moves amounts to asking whether a
+particular polynomial with coefficients $\pm1$ vanishes at $\lambda$, and
+whether such polynomials can vanish at a given number is a much-studied and
+difficult question. This section shows the answer here is no, for a reason that
+needs none of that theory, and explains why the route the theory would have
+supplied is closed. At $\lambda=3/2$ a stronger statement holds --- no knot
+ever revisits \emph{any} previous position (Proposition~\ref{prop:norecur}).
+
+Call an infinite sequence $v\in\{L,M,R\}^{\mathbb N}$ \emph{kind} for $\lambda$
+if the orbit of $1/2$ under $v$ meets no deleted interval. A knot is immortal
+exactly when the sequence of moves following its birth is kind, and if a run has
+infinitely many births whose subsequent sequences are kind, and the resulting
+knots occupy distinct points, then $N_\lambda$ is unbounded. Periodic runs are
+the case that can be treated algebraically, and we fix the indexing as follows:
+the run has period $p$, one of its phases carries $M$, and a knot born at that
+phase experiences $v=v_1\cdots v_p$ repeated, so that $v_p=M$.
+
+\begin{proposition}\label{prop:littlewood}
+The orbit of $1/2$ along a branch itinerary $(\varepsilon_1,\dots,\varepsilon_q)
+\in\{0,1\}^q$ satisfies $x_q=1/2$ if and only if
+\[
+  \sum_{i=0}^{q-1}\bigl(1-2\varepsilon'_i\bigr)\lambda^{\,i}=0,
+  \qquad \varepsilon'_i=\varepsilon_{q-i},
+\]
+that is, if and only if $\lambda$ is a root of the Littlewood polynomial of
+degree $q-1$ whose signs record the itinerary.
+\end{proposition}
+
+\begin{proof}
+The composite map along the itinerary is $x\mapsto\lambda^q
+x-(\lambda-1)\sum_{j}\varepsilon_j\lambda^{\,q-j}$. Setting the image of $1/2$
+equal to $1/2$ gives $(\lambda^q-1)/2=(\lambda-1)\sum_j\varepsilon_j
+\lambda^{\,q-j}$; dividing by $\lambda-1$ and rearranging gives the display,
+whose coefficients lie in $\{\pm1\}$.
+\end{proof}
+
+For $q=3$ and $\varepsilon=(0,1,1)$ the display reads $1+\lambda+\lambda^2=
+2(1+\lambda)$, that is $\lambda^2-\lambda-1=0$, and the orbit of $1/2$ at
+$\lambda=\varphi$ is $1/2$, $\varphi/2$, $(3-\varphi)/2$.
+
+Recall from Lemma~\ref{lem:distinct} that under $M$ no surviving knot is carried
+to $1/2$: the two preimages of $1/2$ are $r/2$ and $1-r/2$, the endpoints of the
+interval $M$ deletes. This alone empties the construction.
+
+\begin{corollary}\label{cor:noperiodic}
+Under a periodic run of period $p$ the orbit of a knot born at an $M$ never
+returns to $1/2$ at a time divisible by $p$. Equivalently, $1/2$ is not a
+periodic point of the associated period map, and
+Proposition~\ref{prop:littlewood} has no realisable instances of this kind.
+\end{corollary}
+
+\begin{remark}
+The corollary rules out one route to unboundedness and not the natural one. It
+says that a knot cannot \emph{return to its birth point} under a periodic run;
+it says nothing about a knot merely staying alive. Indeed
+Proposition~\ref{prop:kindyield} shows that a periodic kind word with an $M$ in
+its period would give $N_\lambda=\infty$ immediately, and no such word is
+excluded by anything proved here -- which is why the searches reported below,
+over all periods up to $14$ at $\lambda=(1+\sqrt2)/2$, were worth running. What
+the corollary does exclude is the algebraic shortcut: one cannot exhibit such a
+word by solving for a $\lambda$ at which $1/2$ is periodic, because there is
+none.
+\end{remark}
+
+\begin{proof}
+Suppose the orbit returns to $1/2$ at a time $q$ with $p\mid q$. The move at
+time $q$ is then the move at phase $p$, namely $M$, and by
+Lemma~\ref{lem:distinct} no surviving knot is carried to $1/2$ by $M$.
+\end{proof}
+
+\begin{remark}\label{rem:onlymultiples}
+The restriction to times divisible by $p$ cannot be removed. The orbit may
+return to $1/2$ at other times, since $R$ carries $r/2$ to $1/2$ and $L$ carries
+$1-r/2$ to $1/2$, and both of those points survive the move in question. At
+$\lambda=\varphi$ the run of period four with $v=RLLM$ carries $1/2$ to
+$\varphi/2$, then to $(3-\varphi)/2$, then back to $1/2$ at time three, where
+the following $M$ destroys it. Only returns at times divisible by $p$ bear on
+periodicity of the period map, and those are what the corollary excludes.
+\end{remark}
+
+What survives of the construction is the following, in which the orbit is
+allowed to be eventually periodic on a cycle avoiding $1/2$.
+
+Coding a run in base three by $L,M,R\mapsto0,1,2$ realises the kind sequences
+as a subset $K_\lambda$ of $[0,1]$, and the threshold of
+Section~\ref{sec:thresholds} governs its size.
+
+\begin{proposition}[counts machine-verified]\label{prop:kinddim}
+$K_{3/2}$ has exactly $2^n$ cylinders of length $3^{-n}$ at every level $n$;
+hence it has Lebesgue measure zero and Hausdorff and box dimension exactly
+$\log2/\log3$. It is not self-similar. For $\lambda<3/2$ the dimension is
+larger and for $\lambda>3/2$ smaller; at $\varphi$ the set is \emph{sofic} ---
+its sequences are exactly the paths through a finite directed graph, here the
+five-state one of Theorem~\ref{thm:phi} --- with
+$N_{n+3}=4N_n$ cylinders and dimension exactly $2\log2/(3\log3)$.
+\end{proposition}
+
+\begin{proof}
+At $\lambda=3/2$ the three deleted intervals tile, so a point lies in exactly
+one of them: exactly one letter is fatal at each node of the survival tree of
+$1/2$, never none and never two, and the cylinder count doubles at each level.
+Measure $(2/3)^n\to0$; and a set covered at level $n$ by $2^n$ intervals of
+length $3^{-n}$, each containing a further such set, has both dimensions
+$\log2/\log3$. Self-similarity fails because which of the three subintervals is
+deleted depends on the current position, which varies from node to node. For
+$\lambda<3/2$ the deleted intervals leave gaps, so some nodes have three
+children; for $\lambda>3/2$ they overlap, so some have one. At $\varphi$ the
+survival tree is generated by the five-state automaton of
+Theorem~\ref{thm:phi}, in which two of the states have two children and three
+have one; the counts satisfy $N_{n+3}=4N_n$, giving growth $4^{1/3}$ per level.
+\end{proof}
+
+\begin{figure}[ht]
+\centering
+\includegraphics{kindsets.pdf}
+\caption{The kind sequences, coded in base three by $L,M,R\mapsto0,1,2$, drawn
+to level six with the cylinder counts at the right. The middle third is absent
+from every picture: a run beginning with $M$ kills the newborn at once. At
+$3/2$ exactly one letter is fatal at each node, so exactly one third is deleted
+at each step --- the Cantor count $2^n$, though the third that goes varies from
+node to node, so the set is not self-similar. At $\sqrt2$ the deleted intervals
+leave gaps, so some nodes keep all three children and the count breaks away
+from $2^n$ at level six. At $\varphi$ they overlap, some nodes keep only one,
+and the count stalls every third level.}
+\label{fig:kindsets}
+\end{figure}
+
+The measured dimensions are $0.834$ at $(1+\sqrt2)/2$, $0.679$ at $\sqrt2$ and
+$0.421\approx2\log2/(3\log3)$ at $\varphi$, bracketing the exact
+$\log2/\log3=0.6309$ at $3/2$ as the proposition requires.
+
+\begin{proposition}[machine-verified]\label{prop:kindyield}
+If $v$ is kind, with $v_p=M$, then $N_\lambda=\infty$.
+\end{proposition}
+
+\begin{proof}
+The knots born at the successive occurrences of that phase are all immortal, and
+by Lemma~\ref{lem:distinct} each is distinct from all its predecessors at the
+moment of its birth and remains so. Hence the number of knots present grows
+without bound.
+\end{proof}
+
+No hypothesis on the orbit is needed. Coincidence of two immortal knots would
+require the orbit of $1/2$ to repeat a value, and Lemma~\ref{lem:distinct}
+forbids two knots from ever meeting.
+
+\begin{remark}
+Neither $\sqrt2$ nor $3/2$ is a root of a Littlewood polynomial, so at those two
+parameters $1/2$ is not a periodic point for any itinerary whatever, not merely
+for those ending in $M$. For $\sqrt2$: separating a Littlewood polynomial
+evaluated at $\sqrt2$ into rational and irrational parts gives $A+B\sqrt2$ with
+$A$ a $\{\pm1\}$-combination of distinct powers of $2$, whose leading term
+exceeds the sum of the others, so $A\neq0$. For $3/2$: clearing denominators
+gives $\sum_k a_k2^k3^{\,d-k}=0$, in which only the term $k=d$ is odd.
+\end{remark}
+
+A search over all itineraries with $q\leq10$, conducted in exact arithmetic in
+$\Q(\lambda)$, confirms Corollary~\ref{cor:noperiodic}. The numbers of
+itineraries whose orbit is realisable, that is for which every step satisfies
+the appropriate strict inequality, are $0,2,2,10,10,44,56,180,250$ for
+$q=2,\dots,10$; none of them admits an assignment of moves periodic in any
+$p\mid q$ with $M$ at phase $p$.
+
+Two further computations bear on the remaining possibility, that of a kind
+periodic run whose orbit is not eventually periodic. For the sequence
+$v=RM$ the set of $\lambda\in(1,2)$ for which $1/2$ survives $n$ moves is
+contained in $(1,1.2)$ for $n\geq25$, and its measure decays roughly as
+$n^{-0.83}$, so short periods serve only parameters near $1$. At
+$\lambda=\sqrt2$ and $\lambda=3/2$, over all periodic sequences of period at
+most $9$ containing an $M$, the point $1/2$ survives at most $22$ and $17$ moves
+respectively.
+
+
+
+\section{A density criterion for unboundedness}\label{sec:density}
+
+\emph{Relaxation in force: a hypothesis is assumed, and the conclusion sought
+is strengthened. The hypothesis is proved for no non-Pisot parameter.}
+
+This section isolates a single hypothesis about the orbit of $1/2$ -- a
+quantitative density statement -- and shows that it implies
+$N_\lambda=\infty$. The hypothesis is measured to hold, at the best possible
+rate, at every non-Pisot parameter we can test; and it fails, provably, at
+every Pisot parameter. We believe it is the mechanism of the dichotomy.
+
+Two preparatory lemmas. Recall from Theorem~\ref{thm:mono} that prepending a
+letter never destroys a knot; the first lemma sharpens this: prepending does
+not even move one.
+
+\begin{lemma}\label{lem:permanent}
+Let $v$ be a word and $c$ a letter. The knots of $cv$ are exactly the knots of
+$v$, with the same positions and ages, together with one new knot of age
+$|v|$, present exactly when $c=M$ and $1/2$ survives $v$.
+\end{lemma}
+
+\begin{proof}
+A knot alive at the end of a word is determined by the suffix following its
+birth (Lemma~\ref{lem:suffix}): it exists iff its birth letter is $M$ and
+$1/2$ survives that suffix, and its position is the image of $1/2$ under that
+suffix. Prepending $c$ leaves every proper suffix of $cv$ that lies inside $v$
+unchanged, and adds one new birth position at the front.
+\end{proof}
+
+So a run extended into the past accumulates knots and never disturbs the ones
+it has; the only question is whether it can keep gaining. Write $S(v)$ for the
+set of starting points in $(0,1)$ that survive the word $v$.
+
+\begin{lemma}\label{lem:survivorset}
+$S(v)$ is a union of at most $1+\#\{M\text{'s in }v\}$ open intervals, of
+total length exactly $r^{|v|}$; in particular it contains an open interval of
+length at least $r^{|v|}/(|v|+1)$.
+\end{lemma}
+
+\begin{proof}
+Induct from the right: $S(\varnothing)=(0,1)$, and $S(cv')$ is the image of
+$S(v')$ under the inverse branch of the move $c$, which is affine of slope $r$
+for $c=L,R$ and piecewise affine of slope $r$ with two order-preserving
+branches for $c=M$. Each step multiplies total length by $r$ and increases the
+number of intervals by at most one, at an $M$; and the intervals are open,
+survival being defined by strict inequalities.
+\end{proof}
+
+By Lemma~\ref{lem:permanent}, the extended word $Muv$ has one more knot than
+$v$ exactly when $1/2$ survives $uv$ -- that is, when the image of $1/2$ under
+$u$ lands in $S(v)$ while surviving $u$. Gaining is thus a question about how
+densely the kind orbit of $1/2$ fills the interval. This motivates:
+
+\begin{quote}
+\textbf{Hypothesis (D$_\lambda$).} There is a constant $C$ such that every
+interval $J\subseteq(0,1)$ of length $\varepsilon$ contains the endpoint of a
+kind word of length at most $C\log(1/\varepsilon)$.
+\end{quote}
+
+\begin{theorem}\label{thm:density}
+If \textup{(D$_\lambda$)} holds then $N_\lambda=\infty$. Moreover the witnesses
+form a single nested family: each is obtained from the last by prepending, so
+every knot, once created, appears with the same age in all later witnesses,
+and $d_\lambda(k)$ grows at most exponentially in $k$.
+\end{theorem}
+
+\begin{proof}
+Given a word $v_k$ carrying $k$ knots, Lemma~\ref{lem:survivorset} provides a
+component of $S(v_k)$ of length at least $r^{|v_k|}/(|v_k|+1)$, and
+(D$_\lambda$) a kind word $u$ of length at most
+$C\bigl(|v_k|\log\lambda+\log(|v_k|+1)\bigr)$ whose endpoint lies in it. Then
+$1/2$ survives $uv_k$, and $v_{k+1}=Muv_k$ carries $k+1$ knots by
+Lemma~\ref{lem:permanent}. Iterating from $v_1=M$ gives
+$|v_{k+1}|\leq(1+C\log\lambda)|v_k|+O(\log|v_k|)$, and
+$N_\lambda(|v_k|)\geq k$ for every $k$.
+\end{proof}
+
+Before stating the criterion we record the form the question takes when the
+run is read backwards, which is where the construction above actually lives.
+Reading a run from its last move, each knot moves by one of the two inverse
+branches $y\mapsto ry$ and $y\mapsto ry+(1-r)$ (Section~\ref{sec:gaps}); these
+are defined on all of $(0,1)$, so backwards nothing is ever destroyed. What
+happens instead is that a knot arrives at exactly $1/2$ at the move that gave
+birth to it, and is \emph{annihilated} there. The backward game is thus a
+pursuit of a single target by a family of points driven by one control.
+
+\begin{lemma}\label{lem:oneperstep}
+At each backward step at most one point is annihilated.
+\end{lemma}
+
+\begin{proof}
+The two inverse branches have disjoint images, $[0,r)$ and $[1-r,1]$ at a move
+$L$ or $R$ and $[0,r/2)$ and $(1-r/2,1]$ at a move $M$, and each is injective;
+so every composite of inverse branches is injective, and the point carried to
+$1/2$ after $a$ steps, if there is one, is unique.
+\end{proof}
+
+Consequently the set of points ever annihilated during a backward play is at
+most countable, whatever the run --- so \emph{countably infinite} is the
+largest it can be, and asking for infinitely many annihilations is asking for
+the most that can be asked. That question is the dual of the one this paper
+began with, and it is not the same question: unboundedness says the finite
+counts $N_\lambda(n)$ grow without bound, while this asks for one play in which
+infinitely many points are eventually annihilated. The second implies the
+first; whether the first implies the second is exactly the gap discussed below.
+Note also that a positive answer does not make any configuration infinite in
+the forward game, nor does it exhaust the annihilated set in the backward one:
+by Lemma~\ref{lem:oneperstep} only finitely many points are gone at any finite
+stage.
+
+Lemma~\ref{lem:permanent} has a second consequence, which converts the
+existence of an \emph{infinite} configuration into a statement about finite
+witnesses. Given a word $w$ carrying $k$ knots, let its \emph{age vector} be
+the increasing list $a_1<\dots<a_k$ of the ages of those knots.
+
+\begin{theorem}[compactness criterion]\label{thm:compactness}
+The following are equivalent.
+\begin{enumerate}
+\item Some left-infinite run carries infinitely many simultaneous knots.
+\item In the backward reading of some run, infinitely many points are
+  annihilated --- equivalently, by Lemma~\ref{lem:oneperstep}, the set of
+  annihilated points is countably infinite.
+\item There are words $w_k$ carrying $k$ knots whose age vectors are
+  pointwise bounded: for each $i$, $\sup_k a_i^{(k)}<\infty$.
+\end{enumerate}
+Any of them implies $N_\lambda=\infty$.
+\end{theorem}
+
+\begin{proof}
+Statements (i) and (ii) are the same statement read in the two directions: a
+knot of age $a$ alive at the end is a point annihilated at backward step $a$,
+and conversely.
+
+If $\omega$ is such a run, its truncations after $n$ moves carry arbitrarily
+many knots, and the $i$th smallest age is the same in all of them once it
+appears, by Lemma~\ref{lem:permanent}; so (i) implies (iii).
+
+Conversely, read each $w_k$ backwards, as an element of
+$\{L,M,R\}^{\mathbb N}$ padded arbitrarily. That space is compact in the
+product topology, so some subsequence converges; convergence means agreement on
+longer and longer \emph{suffixes} of the original words. By
+Lemma~\ref{lem:suffix} the presence of a knot of age $a$ depends only on the
+last $a+1$ letters. Fix $i$ and let $A_i=\sup_ka_i^{(k)}<\infty$. Along the
+subsequence the values $a_i^{(k)}\leq A_i$ are integers, so after passing to a
+further subsequence they are constant, $=\alpha_i$; and the last $\alpha_i+1$
+letters are eventually constant too. Hence the limit word has a knot of age
+$\alpha_i$ for every $i$, and the $\alpha_i$ are distinct. A diagonal
+subsequence serves all $i$ at once.
+\end{proof}
+
+The criterion is exact for the stronger statement, an infinite configuration,
+which implies $N_\lambda=\infty$; whether $N_\lambda=\infty$ implies it back is
+not known. Its hypothesis is checkable: at $\lambda=(1+\sqrt2)/2$ a search
+minimising the age vector rather than the length yields
+\[
+\begin{array}{r@{\;}l}
+k=7:&\ 0,2,4,6,8,10,12\\
+k=8:&\ 0,2,4,6,8,10,12,18\\
+&\ \vdots\\
+k=13:&\ 0,2,4,6,8,10,12,18,24,26,31,39,48\\
+k=14:&\ 0,2,4,6,8,10,12,18,24,26,31,39,48,62
+\end{array}
+\]
+each vector extending the previous one, so that $a_i$ is not merely bounded but
+constant in $k$ as far as computed. By Lemma~\ref{lem:permanent} the nesting is
+automatic once the witnesses are built by prepending; what is not automatic,
+and not known, is that the process continues. The $k=13$ entry is the source of
+the bound $d_{(1+\sqrt2)/2}(13)\leq49$ in Section~\ref{sec:nonpisot}.
+
+In fact, for the bare conclusion $N_\lambda=\infty$ the rate in
+(D$_\lambda$) can be dispensed with entirely.
+
+\begin{theorem}[density criterion, topological form]\label{thm:density0}
+If the endpoints of kind words are dense in $(0,1)$, then some run carries
+infinitely many simultaneous knots; in particular $N_\lambda=\infty$.
+\end{theorem}
+
+\begin{proof}
+Given a word $v$ carrying $k$ knots, Lemma~\ref{lem:survivorset} provides an
+open interval $J\subseteq S(v)$. Density provides a kind word $u$ with
+$\Phi_u(1/2)\in J$; then $1/2$ survives $uv$, and $Muv$ carries $k+1$ knots
+with every previous knot's position and age unchanged
+(Lemma~\ref{lem:permanent}). Iterating from $v_1=M$ gives words $v_k$ with
+$k$ knots whose age vectors are pointwise eventually constant, and
+Theorem~\ref{thm:compactness} supplies the single run.
+\end{proof}
+
+\begin{remark}[the candidate count]\label{rem:candidates}
+The theorem makes precise a counting heuristic for the backward game which is
+worth recording, because it locates exactly what density is doing. Suppose a
+backward play over the word $w$ already annihilates $m$ knots, and one wants
+one more. A \emph{candidate} is an intended itinerary through $w$: at each $M$
+of $w$, a declaration of which branch the new point will take. The entry
+points that realise a given itinerary and survive form an open interval ---
+empty for most declarations, which are bogus in the sense that any point
+following them would land on the wrong side of some $M$ --- and the nonempty
+cells partition $S(w)$, so their lengths sum to exactly $r^{|w|}$. For the
+$19$-move run attaining five knots at $\lambda=3/2$ there are $2^{11}=2048$
+candidates, of which six are genuine, tiling a set of length exactly
+$(2/3)^{19}$. The decisive asymmetry is that this target is \emph{fixed},
+while the supply of entry points reachable from $1/2$ grows without bound with
+the number $p$ of further moves one is prepared to prepend --- at the measured
+rate $(2/\lambda)^p$ --- and $p$ is free. Density is the statement that an
+unbounded supply eventually meets any fixed open target; Hypothesis
+(D$_\lambda$) additionally bounds how soon, which is what the exponential
+bound on $d_\lambda(k)$ in Theorem~\ref{thm:density} costs.
+\end{remark}
+
+Both criteria are certified: the topological form as stated, and the
+quantitative form with the explicit bound $d_\lambda(k)\leq B^k-1$ for
+$B=\max\bigl(2,\,1+C(\log\lambda+1)\bigr)$, each carrying its unproved
+hypothesis visibly in its statement (Appendix~\ref{app:verify}).
+
+Both hypotheses fail at every Pisot $\lambda$, since the kind orbit
+of $1/2$ is then a finite set and misses every sufficiently short interval in
+its gaps -- as Theorem~\ref{thm:pisot} demands it must, given the theorem
+above. Whether it holds at any specific non-Pisot parameter is open, and at
+$\lambda=3/2$ it sits in distinguished company: the endpoint of a kind word of
+length $a$ is an odd multiple of $2^{-(a+1)}$ determined by the subset sums of
+Section~\ref{sec:threehalves}, and density statements for such orbits are
+adjacent to the distribution of $(3/2)^n$ modulo one and to Mahler's
+$Z$-numbers \cite{Mahler1968}. For the \emph{unconstrained} words the
+endpoints equidistribute exactly: the map
+$(\varepsilon_j)_{j<\ell}\mapsto\sum_{j<\ell}\varepsilon_j2^j3^{a-j}\bmod
+2^\ell$ is a bijection, each term being $2^j$ times an odd number. The entire
+difficulty is the survival constraint.
+
+What can be measured supports the hypothesis at the optimal rate. At
+$\lambda=3/2$, in exact arithmetic, let $m^*(L)$ be the least depth by which
+the kind orbit has visited every dyadic interval of length $2^{-L}$; counting
+alone forbids this before $L\log2/\log(4/3)\approx2.41\,L$, and the measured
+values $m^*(4),\dots,m^*(9)=6,11,13,16,19,22$ approach that bound from below
+with ratios $1.50,2.20,2.17,2.29,2.38,2.44$: the orbit spreads essentially as
+fast as its cardinality permits. A floating-point survey across eighteen
+parameters in $(1,2)$ shows the same counting-rate coverage at every non-Pisot
+point tested, with failure occurring exactly at the four Pisot points on the
+grid, by orbit closure (Appendix~\ref{app:verify}).
+
+Finally, the metric precedents. For almost every base $\beta>1$ the sequence
+$(\beta^n)$ equidistributes modulo one (Koksma \cite{Koksma1935}); for almost
+every $\lambda\in(1,2)$ the Bernoulli convolution with ratio $1/\lambda$ --
+which is precisely the law of the backward orbit here -- is absolutely
+continuous (Solomyak \cite{Solomyak1995}). Both are statements that most
+intervals receive their share; (D$_\lambda$) asks for all intervals, and the
+construction of Theorem~\ref{thm:density} in fact needs less: not every
+interval, only the particular ones it asks about, chosen one at a time as the
+construction proceeds. For an almost-everywhere theorem we expect the right tool to be
+\emph{parameter exclusion}: build one construction that works for a whole
+interval of $\lambda$ at once, and at each stage discard the small set of
+$\lambda$ for which that stage fails, arranging the discarded sets to have
+summable measure so that most $\lambda$ survive every stage. This is the
+strategy Benedicks and Carleson introduced for a different family, and the
+estimate it needs here --- that each stage fails only on a short range of
+$\lambda$ --- is what Section~\ref{sec:transversality} supplies. We pose the
+question below.
+
+\section{The conjugate modulus}\label{sec:conjugate}
+
+Among Pisot parameters the game is bounded, but the bounds differ widely: $2$
+at the golden ratio and $7$ at the plastic number. This section identifies the
+quantity responsible. It is not $\lambda$, and it is not the threshold of
+Section~\ref{sec:thresholds}; it is the modulus of the conjugates.
+
+Recall from Remark~\ref{rem:overlap} that the backward form of the game is the
+iterated function system $\{rx,\ rx+(1-r)\}$, whose invariant measure is the
+Bernoulli convolution $\nu_r$. As a convolution of two-point masses its Fourier
+transform is an explicit product of cosines,
+\[
+  |\widehat{\nu_r}(\xi)|=\prod_{j\geq0}\bigl|\cos\bigl(\pi(1-r)r^j\xi\bigr)\bigr| ,
+\]
+which at $r=\tfrac12$ telescopes to $|\sin\pi\xi/\pi\xi|$, the transform of
+Lebesgue measure -- as it must, since there the two branches tile. Evaluating
+along the frequencies $\xi_N=\lambda^N/(1-r)$ turns every argument into
+$\pi\lambda^{N-j}$, so
+\[
+  |\widehat{\nu_r}(\xi_N)|=\prod_{m\leq N}\bigl|\cos(\pi\lambda^m)\bigr|
+  \ \xrightarrow[N\to\infty]{}\ \prod_{m\in\Z}\bigl|\cos(\pi\lambda^m)\bigr| .
+\]
+For Pisot $\lambda$ this limit is positive: the factors with $m\to-\infty$
+tend to $1$ because $\lambda^m\to0$, and those with $m\to+\infty$ tend to $\pm1$
+because $\|\lambda^m\|\to0$. That positivity is Erd\H{o}s's theorem
+\cite{Erdos1939}; what the product adds is a \emph{number}, and the number
+turns out to be informative. Write $\|\lambda^m\|$ for the distance to the
+nearest integer and $c(\lambda)$ for the maximum modulus of the conjugates of
+$\lambda$, so that $\|\lambda^m\|$ decays like $c(\lambda)^m$.
+
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+$\lambda$ & $c(\lambda)$ & $|\Orb(\lambda)|$ & $\delta_0$ &
+$\prod_{m\in\Z}|\cos(\pi\lambda^m)|$ & $\max N_\lambda$\\
+\midrule
+golden $1.61803$ & $0.61803$ & $5$ & $0.118$ & $6.6135\times10^{-3}$ & $2$\\
+tribonacci $1.83929$ & $0.73735$ & $7$ & $0.0674$ & $1.2475\times10^{-3}$ & $3$\\
+supergolden $1.46557$ & $0.82603$ & $43$ & $0.0109$ & $6.6208\times10^{-6}$ & $4$\\
+plastic $1.32472$ & $0.86884$ & $153$ & $0.00239$ & $3.3942\times10^{-7}$ & $7$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Every column is monotone in $c(\lambda)$, and none is monotone in $\lambda$:
+the tribonacci constant is the largest of the four parameters and has the
+second smallest maximum. The mechanism is the same on both sides of the table.
+A conjugate that contracts slowly means that $\|\lambda^m\|$ decays slowly, so
+that many cosine factors sit well away from $\pm1$ before the product
+stabilises -- hence a low Fourier floor; and it means that the orbit of $1/2$
+takes longer to close, so it has more points packed into $(0,1)$ -- hence a
+small minimum gap $\delta_0$. The Fourier floor and the minimum gap are two
+measurements of one quantity, in frequency and in space.
+
+Only the third link is a theorem. Theorem~\ref{thm:schedule} converts
+$\delta_0$ into a genuine bound on $N_\lambda$, and it is what produces the
+values $9$ and $34$ of Corollary~\ref{cor:effective}. The correlation of the
+last column with the rest of the table is an observation on four parameters,
+not a proof, and we do not know a bound on $N_\lambda$ in terms of
+$c(\lambda)$ directly. What the table does establish is that the size of the
+bound is a question about conjugates rather than about $\lambda$ itself.
+
+\begin{figure}[ht]
+\centering
+\includegraphics{densities.pdf}
+\caption{The limit distribution of the backward set --- the Bernoulli
+convolution $\nu_r$ --- computed by iterating the transfer operator, at
+resolution $300$. Below each panel is the mean absolute difference between
+adjacent bins, relative to the mean, at resolutions $3000$ and $12000$. Only
+the behaviour under refinement is diagnostic: at $\varphi$ it does not move,
+the signature of a singular measure; at the plastic number it falls and then
+stops, so that a profile which looks smooth to the eye is singular as well; at
+half the silver ratio it continues to fall, as an actual density must.}
+\label{fig:densities}
+\end{figure}
+
+\begin{remark}[the plastic number is isolated]\label{rem:isolated}
+By a theorem of Siegel the plastic number is the smallest Pisot number, so the
+interval $(1,\rho)$ contains none at all; by a theorem of Salem the smallest
+limit point of the Pisot set is $\varphi$, so below $\varphi$ the Pisot numbers
+are isolated, the next one after $\rho$ being the root of $x^4=x^3+1$ at
+$1.3803$. Two consequences. First, if boundedness occurs exactly at Pisot
+parameters, then $N_\lambda=\infty$ for \emph{every} $\lambda$ in $(1,\rho)$,
+an interval containing $(1+\sqrt2)/2$ and $5/4$. Second, the singularity at
+$\rho$ is a solitary phenomenon, and one can watch it dissolve: computing the
+local variation of the transfer-operator profile at $\rho+\varepsilon$ over a
+hundredfold refinement, the value at $\varepsilon=0$ settles at $0.0027$ and
+does not move, while at $\varepsilon=3\times10^{-4}$ it continues to fall, and
+by $\varepsilon=10^{-2}$ it falls by the factor $4$ per fourfold refinement
+characteristic of an absolutely continuous density. At the coarsest resolution
+all of these agree to two digits.
+\end{remark}
+
+\begin{remark}
+These products demand care. Evaluating
+$\prod_{|m|\leq M}|\cos(\pi\lambda^m)|$ in $60$-digit arithmetic gives
+$2.6\times10^{-10}$ at the tribonacci constant, wrong by five orders of
+magnitude, because $\lambda^{200}$ then exceeds the working precision and its
+fractional part is noise; the same computation at $400$ digits is stable in $M$
+and agrees with the transform to five figures. This is the phenomenon of
+Appendix~\ref{app:verify} in another guise: the quantities that decide the
+answer here are exactly the ones floating-point arithmetic destroys.
+\end{remark}
+
+\begin{figure}[ht]
+\centering
+\includegraphics{records32.pdf}
+\caption{Record configurations at $\lambda=3/2$: for each $k$, the knots
+present after $d_{3/2}(k)$ moves, at the first moment $k$ knots coexist. The
+dashed line marks the birth point $1/2$, which is occupied in every record,
+since the last move of a shortest run must be the birth of the $k$th knot.
+The particular configurations drawn nest along the two chains
+$k=2\subset3\subset5\subset7$ and $k=4\subset6$; the general fact behind this
+is Proposition~\ref{prop:twostep}. From $k=4$ onward the smallest distance
+between two knots is $13/512$ at every record, realised by the newborn at
+$1/2$ together with a knot at $243/512$ or at $269/512$; it does not shrink as
+$k$ grows to $7$, consistent with Corollary~\ref{cor:nearcollision}, which at
+$k=7$ demands only a gap below $(3/2)^{-3}$.}
+\label{fig:records32}
+\end{figure}
+
+\begin{proposition}[observed]\label{prop:twostep}
+At $\lambda=3/2$, for $1\leq k\leq5$, every configuration attaining $k+2$
+knots in $d_{3/2}(k+2)$ moves contains, as a set of points, some
+configuration attaining $k$ knots in $d_{3/2}(k)$ moves. The corresponding
+statement one step apart is false: of the four configurations attaining five
+knots at depth $19$, only two contain a four-knot record.
+\end{proposition}
+
+This is a computation, not a theorem: the record configurations were
+enumerated exhaustively at each depth --- there are $2,2,2,4,2$ of them for
+$k=2,\dots,6$, and $4$ at $k=7$ --- and every one of the $2,2,4,2,4$
+configurations at levels $3,4,5,6,7$ contains a record two levels below. The
+obvious mechanism does not explain it. Prepending preserves knots and their
+positions exactly (Lemma~\ref{lem:permanent}), so containment would follow if
+the shorter record word were a suffix of the longer; it is not, already at
+$k=5$ and $k=7$, where the point sets nest but the words are unrelated. We do
+not know why two steps is the right distance, nor whether the pattern persists.
+
+\begin{question}
+Is Proposition~\ref{prop:twostep} a theorem, and is the step of two essential?
+\end{question}
+
+\section{\texorpdfstring{The case $\lambda=3/2$}{The case lambda = 3/2}}\label{sec:threehalves}
+
+\emph{Relaxation in force: reduction to a known open problem. What follows
+explains the difficulty and does not remove it.}
+
+At $\lambda=3/2$ the three deleted intervals are the three ternary cells of
+$[0,1]$, so the rules can be stated in base three. Knot positions are dyadic, by
+the computation in Section~\ref{sec:nonpisot}, hence never equal to $1/3$ or
+$2/3$, and the leading ternary digit
+\[
+  D(x)=\lfloor 3x\rfloor\in\{0,1,2\}
+\]
+is defined at every knot.
+
+\begin{proposition}[machine-verified]\label{prop:ternary}
+Identify the moves $L,M,R$ with the digits $c=0,1,2$. Then a move consists of
+choosing a forbidden digit $c$; every knot with $D(x)=c$ is destroyed; every
+surviving knot moves to $\bigl(3x-[\,D(x)>c\,]\bigr)/2$; and when $c=1$ the
+point $1/2$ is adjoined.
+\end{proposition}
+
+\begin{proof}
+The interval deleted by $L$ is $[0,1/3]$, by $M$ is $[1/3,2/3]$ and by $R$ is
+$[2/3,1]$, which are the cells of $D=0,1,2$. A survivor lies below the deleted
+cell exactly when $D(x)<c$, and is then moved by $f_0(x)=3x/2$; otherwise it
+lies above and is moved by $f_1(x)=(3x-1)/2$.
+\end{proof}
+
+Three consequences are immediate at this parameter. Since $D(1/2)=1$, a newly
+created knot lies in the very cell that the creating move forbids, which is
+Lemma~\ref{lem:distinct} here. A configuration admits no move preserving all of
+its knots exactly when it meets all three cells, so two knots can always be
+preserved and three is the first count at which obstruction arises. And writing
+$e=D-[\,D>c\,]$ for the surviving digit's rank among the two survivors,
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+ & $c=0$ & $c=1$ & $c=2$\\
+\midrule
+$D=0$ & --- & $0$ & $0$\\
+$D=1$ & $0$ & --- & $1$\\
+$D=2$ & $1$ & $1$ & ---\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+so a knot in an outer cell moves by a branch determined by its own digit alone.
+Only a knot in the middle cell is sensitive to which of the two sparing moves is
+played, and newly created knots are exactly the ones in the middle cell.
+
+\subsection{Three coordinates}
+
+\begin{proposition}[machine-verified]\label{prop:base32}
+At $\lambda=3/2$ Proposition~\ref{prop:itinerary} reads
+$\sum_{j\geq1}\varepsilon_j(2/3)^{j}=1$: the itinerary of a knot is a
+$\{0,1\}$-representation of $1$ in base $3/2$. Moreover
+$D(x_n)=\varepsilon_{n+1}+[\,2x_{n+1}>1\,]$.
+\end{proposition}
+
+\begin{proof}
+The first claim is Proposition~\ref{prop:itinerary} with
+$1/(2(\lambda-1))=1$. For the second, $3x_n=\varepsilon_{n+1}+2x_{n+1}$ and
+$2x_{n+1}<2$.
+\end{proof}
+
+Clearing denominators in the truncation gives the integer form. Writing
+\[
+  m_n=3^n-\sum_{j=1}^{n}\varepsilon_j2^{j}3^{\,n-j},
+\]
+one has $x_n=m_n/2^{\,n+1}$ with $m_n$ odd and $0<m_n<2^{\,n+1}$, and
+$D(x_n)$ equals $0$, $1$ or $2$ according as $3m_n$ lies below $2^{\,n+1}$,
+between $2^{\,n+1}$ and $2^{\,n+2}$, or above $2^{\,n+2}$. So the rule is
+integer arithmetic on powers of three read in base two: triple, compare against
+the two current powers of two, and subtract one of them.
+
+\begin{proposition}[machine-verified]\label{prop:mahler}
+Set $w=2x\in(0,2)$ and write $w=p+y$ with $p=\lfloor w\rfloor\in\{0,1\}$ and
+$y\in[0,1)$. Then
+\[
+  D=\lfloor \tfrac32 w\rfloor,\qquad
+  w'=\tfrac32w-\varepsilon,\qquad
+  y'=\bigl\{\tfrac32y+\tfrac p2\bigr\},\qquad
+  D=p+\bigl[\,y\geq\tfrac{2-p}{3}\,\bigr],\qquad p'=D-\varepsilon .
+\]
+\end{proposition}
+
+The recursion for $y$ is that of Mahler \cite{Mahler1968}: if
+$\xi(3/2)^n=A_n+y_n$ then $y_{n+1}=\{\tfrac32y_n+\tfrac12[A_n\text{ odd}]\}$,
+and the coordinate $p$ plays the role of the parity of $A_n$. The systems differ
+in two respects. Mahler constrains a single orbit to $y<1/2$ for all $n$,
+whereas here the window is all of $(0,2)$ and no single knot is constrained at
+all; and here the carry $p$ is not determined by a real number but chosen,
+subject to the digit condition, by a control sequence shared among all the
+knots. The difficulty has moved from the width of the window to the sharing of
+the control.
+
+We record a consequence of the dyadic structure which strengthens the
+no-return theorem of Section~\ref{sec:kind} from one point to all of them.
+
+\begin{proposition}\label{prop:norecur}
+At $\lambda=3/2$ no knot ever occupies the same position twice.
+\end{proposition}
+
+\begin{proof}
+Every position is a dyadic rational, the game acting on numerators over the
+denominator $2^{n+1}$. If a knot's position $x$ recurred after $B$ further
+moves, then $x$ would be a fixed point of the affine map those $B$ moves apply
+to it: $x\mapsto\lambda^Bx-c$ with
+$c=(\lambda-1)\sum_{j\in S}\lambda^{B-j}$ for the set $S$ of steps at which
+the knot took the upper branch. Solving, and clearing powers of $2$,
+\[
+  x\;=\;\frac{\sum_{j\in S}3^{B-j}2^{j-1}}{3^B-2^B}.
+\]
+The denominator is odd, so $x$ is dyadic only if it divides the numerator. But
+the numerator lies between $0$ and $\sum_{j=1}^B3^{B-j}2^{j-1}=3^B-2^B$, with
+the extremes attained only at $S=\varnothing$ and $S=\{1,\dots,B\}$; so the
+only dyadic fixed points are $0$ and $1$, and no knot is ever there.
+\end{proof}
+
+This rules out a second candidate mechanism for
+Proposition~\ref{prop:twostep}: the two-step containments cannot arise from a
+block of moves acting as the identity on the old knots, since an identity
+block would make each of their positions a fixed point of its composite. The
+positions in the larger record are the same \emph{numbers}, but every knot
+carrying them has arrived by a path that never pauses.
+
+\subsection{A knot-free equivalent}
+
+\begin{proposition}[machine-verified]\label{prop:translation}
+$N_{3/2}$ is unbounded if and only if for every $k$ there are an $N$, a sequence
+$c\in\{0,1,2\}^N$ and indices $t_1<\dots<t_k$ with $c_{t_i}=1$, such that each
+of the $k$ trajectories
+\[
+  w_{t_i}=1,\qquad
+  w_{s+1}=\tfrac32w_s-\bigl[\,\lfloor\tfrac32w_s\rfloor>c_{s+1}\,\bigr]
+\]
+satisfies $\lfloor\tfrac32w_s\rfloor\neq c_{s+1}$ for all $t_i\leq s<N$.
+\end{proposition}
+
+This is the strongest sense in which the reduction is exact: not an analogy
+and not one direction of an implication, but an equivalence, and the
+equivalence itself has been checked by machine
+(\texttt{unbounded\_iff\_mahler}). Whoever settles the displayed question about
+the recursion, in either direction, settles Lawler's problem.
+
+\begin{proof}
+Proposition~\ref{prop:ternary} and Proposition~\ref{prop:mahler} identify the
+game with this recursion, and Lemma~\ref{lem:suffix} identifies the knot count
+with the number of births whose trajectories run to completion.
+\end{proof}
+
+\begin{proposition}\label{prop:immortal32}
+If some $c\in\{0,1,2\}^{\mathbb N}$ has infinitely many indices $t$ with $c_t=1$
+whose trajectories never meet the control, then $N_{3/2}=\infty$.
+\end{proposition}
+
+\begin{proof}
+Those knots are immortal, and distinct by Lemma~\ref{lem:distinct}.
+\end{proof}
+
+\begin{remark}\label{rem:converse}
+Whether the converse holds is open. Unboundedness supplies a finite witness for
+each $k$, and prepending never destroys a knot, so the witnesses assemble into a
+tree, finitely branching, on which the knot count is monotone away from the root
+and unbounded overall. That does not force a single branch along which the count
+is unbounded, and Section~\ref{sec:sqrt2} exhibits configurations from which no
+extension gains anything. Unboundedness through knots of ever longer but finite
+lifetime is not excluded.
+\end{remark}
+
+\section{\texorpdfstring{The case $\lambda=\sqrt2$}{The case lambda = sqrt 2}}\label{sec:sqrt2}
+
+For $\lambda=\sqrt2$ the positions lie in $\tfrac12\Z[\sqrt2]$ and the
+denominators do not grow: writing $x=(a+b\sqrt2)/2$ with $a,b\in\Z$, one has
+$f_0(a,b)=(2b,a)$ and $f_1(a,b)=(2b+2,a-2)$, and a new knot is $(1,0)$.
+
+\begin{proposition}\label{prop:blocks}
+Composing $f_\varepsilon$ followed by $f_\delta$ gives
+\[
+  x\ \longmapsto\ 2x+(\delta-2\varepsilon)+(\varepsilon-\delta)\sqrt2 .
+\]
+In particular the block $RR$ preserves exactly the knots with $x<1/2$ and acts
+on them as $x\mapsto2x$, while the block $LL$ preserves exactly the knots with
+$x>1/2$ and acts on them as $x\mapsto2x-1$.
+\end{proposition}
+
+\begin{proof}
+The displayed formula is $\lambda^2=2$ together with
+$\lambda(\lambda-1)=2-\sqrt2$. For $RR$, survival of the first move requires
+$x<r$ and of the second $\lambda x<r$, that is $x<1/2$, which is the stronger
+condition. The case of $LL$ is the mirror image under $x\mapsto1-x$.
+\end{proof}
+
+Thus on even time scales the game contains the binary shift, and a block of type
+$RR$ or $LL$ destroys only the single point $1/2$, in place of an interval of
+length $g\approx0.293$.
+
+\begin{proposition}\label{prop:closed}
+Let $0<x<1$ and let $n\geq1$. Under blocks of type $RR$ and $LL$ the coordinate
+$b$ doubles, and the position after $n$ such blocks equals
+$\fp{2^{\,n-1}b\sqrt2}$, where $b$ is the coordinate at the start.
+\end{proposition}
+
+A knot in this regime is therefore described by a single integer, and the
+sequence of blocks it requires is read off the binary expansion of
+$\fp{b\sqrt2}$, a digit $0$ calling for $RR$ and a digit $1$ for $LL$.
+
+\begin{definition}
+For a configuration $S$ let $T(S)$ be the number of blocks of type $RR$ or $LL$
+that $S$ survives entire, equivalently the length of the common binary prefix of
+the positions of its knots.
+\end{definition}
+
+Since $\sqrt2$ has continued fraction $[1;2,2,2,\dots]$, its convergent
+denominators are the Pell numbers and $\|q\sqrt2\|\asymp q^{-1}$. Taking
+$b_i=iq$ for a Pell denominator $q$ places the values $\fp{b_i\sqrt2}$ within
+$O(k/q)$ of one another, so that $k$ knots at those positions share about
+$\log_2(q/k)$ blocks. Arbitrarily many knots can therefore share arbitrarily
+long block words, and there is no positional obstruction to unbounded growth.
+
+The obstruction lies in reaching such positions. A newly created knot has
+$b=0$; its first move carries it to $b=\pm1$, and each subsequent block sends
+$b\mapsto2b+2D$ with $D=\varepsilon-\delta\in\{0,\pm1\}$ determined by the side
+of the deleted interval on which the knot falls. Steering a knot to a prescribed
+$b$ costs about $\log_2|b|$ blocks, during which the same moves act on every
+other knot. The following table, from exhaustive search to depth $30$, records
+the largest $T$ attainable by a configuration of $k$ knots.
+
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+$k$ & 3 & 4 & 5 & 6 & 7\\
+\midrule
+$\max T$ & 7 & 3 & 2 & 2 & 2\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Each additional knot roughly halves the shared prefix, which is the behaviour to
+be expected of positions obeying the exponential separation guaranteed by
+Lemma~\ref{lem:overlap}. Moreover $T$ affords no freedom of manoeuvre: within a
+block of type $RR$ or $LL$ the choice between them is forced by the shared
+digit. The property that prevents the collapse seen at $\varphi$ is thus also
+the property that prevents clustered configurations from forming.
+
+The record configurations found at $\lambda=\sqrt2$ have coordinates $b$, up to
+sign, given by the first $5$, $7$ and $8$ terms of
+\[
+  0,\ 2,\ 6,\ 22,\ 54,\ 750,\ 13110,\ 26134
+\]
+for $5$, $7$ and $8$ knots respectively, and $0,2,6,22,54,408$ for $6$ knots.
+The configurations attaining $5$, $7$ and $8$ knots are nested as sets of
+points, each obtained from the previous by adjoining knots of much larger
+$|b|$, and the configuration attaining $6$ knots is the reflection of the first
+of these together with one further knot. From the configuration of eight knots,
+however, no run of length at most $16$ produces a ninth or returns a superset,
+and no prefix of length at most $20$ prepended to the corresponding run of
+length $31$ produces a ninth.
+
+\subsection{The binary square}
+
+Because $\lambda^2=2$, the representation of Proposition~\ref{prop:itinerary}
+splits by parity into two ordinary binary expansions:
+$\lambda^{-2i}=2^{-i}$ and $\lambda^{-(2i-1)}=\sqrt2\,2^{-i}$. Set
+\[
+  \alpha_n=\sum_{i\geq1}\varepsilon_{n+2i}2^{-i}
+  \;=\;0.\varepsilon_{n+2}\varepsilon_{n+4}\cdots,
+  \qquad
+  \beta_n=\sum_{i\geq1}\varepsilon_{n+2i-1}2^{-i}
+  \;=\;0.\varepsilon_{n+1}\varepsilon_{n+3}\cdots,
+\]
+both in $[0,1]$.
+
+\begin{proposition}\label{prop:square}
+For every $n$,
+\[
+  x_n=(\sqrt2-1)\bigl(\alpha_n+\sqrt2\,\beta_n\bigr),
+  \qquad
+  (\alpha_{n+1},\beta_{n+1})=\bigl(\{2\beta_n\},\,\alpha_n\bigr),
+  \qquad
+  \varepsilon_{n+1}=\lfloor 2\beta_n\rfloor .
+\]
+\end{proposition}
+
+\begin{proof}
+The first is Proposition~\ref{prop:itinerary} with the parity split, since
+$(\lambda-1)(\alpha_n+\sqrt2\beta_n)$ is the displayed tail. The second and
+third are immediate from the definitions, the shift of the odd-indexed digits
+being $\{2\beta_n\}$ and their leading digit $\lfloor2\beta_n\rfloor$.
+\end{proof}
+
+So the state of a knot is a point of the unit square, one move shifts and swaps
+the coordinates, and two moves apply the binary shift to each: this is
+Proposition~\ref{prop:blocks} in another form, the pairing of moves being the
+splitting by parity. The position is the linear form
+$x=(\sqrt2-1)(\alpha+\sqrt2\beta)$.
+
+Unlike the three cells at $\lambda=3/2$, the deleted intervals here do not tile,
+and $(0,1)$ falls into five regions, in order: destroyed by $L$; safe; destroyed
+by $M$; safe; destroyed by $R$. For a knot in a given region with a given
+required branch $\varepsilon$, the moves that both spare it and induce that
+branch are as follows.
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+region & $\varepsilon=0$ & $\varepsilon=1$\\
+\midrule
+$(0,g)$ & $\{M,R\}$ & ---\\
+$(g,r/2)$ & $\{M,R\}$ & $\{L\}$\\
+$(r/2,1-r/2)$ & $\{R\}$ & $\{L\}$\\
+$(1-r/2,r)$ & $\{R\}$ & $\{L,M\}$\\
+$(r,1)$ & --- & $\{L,M\}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Every live knot therefore demands one of the four sets $\{L\}$, $\{R\}$,
+$\{L,M\}$, $\{M,R\}$; all of them survive exactly when the demanded sets have a
+common element, and a knot is created exactly when that element is $M$. Since
+$\{L\}\cap\{M,R\}=\emptyset$ and $\{R\}\cap\{L,M\}=\emptyset$, the whole
+blocking structure at this parameter is contained in that four-element list.
+
+\begin{proposition}\label{prop:squaresurv}
+Write $s_n=\alpha_n+\sqrt2\beta_n\in[0,1+\sqrt2]$. A knot admits some move
+sparing it and inducing its required branch unless either $s_n<1/\sqrt2$ and
+$\beta_n\geq1/2$, or $s_n>(2+\sqrt2)/2$ and $\beta_n<1/2$. A single knot's
+itinerary is realisable by some run precisely when neither occurs at any time.
+\end{proposition}
+
+\begin{proof}
+The two exceptional cases are the entries marked --- in the table, since
+$x<g$ is equivalent to $s<1/\sqrt2$ and $x>r$ to $s>(2+\sqrt2)/2$, and
+$\varepsilon=\lfloor2\beta\rfloor$.
+\end{proof}
+
+The contrast with Section~\ref{sec:threehalves} is now structural rather than
+descriptive. At $\lambda=3/2$ the game is a one-dimensional map of multiplier
+$3/2$ on an interval; at $\lambda=\sqrt2$ it is a two-dimensional binary shift
+on a square with linear killing regions. This is the same distinction as the one
+recorded in Section~\ref{sec:nonpisot}: $\Z[\sqrt2]$ is a lattice of rank two,
+while $\Z[3/2]=\Z[1/2]$ is not a lattice at all.
+
+\section{Questions}\label{sec:questions}
+
+\begin{question}\label{q:kind}
+Is there a $\lambda\in(1,2)$ and a periodic sequence $v$ with $v_p=M$ that is
+kind? By Proposition~\ref{prop:kindyield} a single instance gives
+$N_\lambda=\infty$. This is the sharpest form in which the unboundedness
+question is currently posed: it asks for one finite word.
+\end{question}
+
+\begin{question}
+Is $N_{\sqrt2}$ bounded? Is $N_{3/2}$? By the remark following
+Corollary~\ref{cor:noperiodic}, at these two parameters $1/2$ is not a periodic
+point for any itinerary, so a kind periodic sequence would settle
+Question~\ref{q:kind} affirmatively at a parameter of interest.
+\end{question}
+
+\begin{question}
+Is the Pisot condition necessary as well as sufficient for boundedness? Is
+there a non-Pisot $\lambda$, or a $\lambda$ that is not an algebraic integer,
+for which $N_\lambda$ is bounded?
+\end{question}
+
+\begin{question}
+For $\lambda=\sqrt2$, does $\max\{T(S):|S|=k\}$ remain at least $1$ for every
+$k$? A negative answer would say that beyond some count the knots cannot agree
+on which side of $1/2$ they lie, and would be evidence for boundedness.
+\end{question}
+
+\begin{question}
+What happens for Salem $\lambda$, whose conjugates lie on the unit circle? The
+orbit of $1/2$ should then be infinite but confined, a regime intermediate
+between those of Sections~\ref{sec:pisot} and \ref{sec:nonpisot}.
+\end{question}
+
+\begin{question}
+Is $N_\lambda$ bounded for all $\lambda$ in some interval $(\lambda^*,2)$? The
+newborn knot is carried to within $(2-\lambda)/2$ of an endpoint, after which
+$\min(x,1-x)$ is multiplied by $\lambda$ at each move, so about
+$\log(1/(2-\lambda))/\log\lambda$ moves are needed to return to the middle of
+the strip. This suggests $N_\lambda\asymp\log\bigl(1/(2-\lambda)\bigr)$ as
+$\lambda\uparrow2$. Such a result would be the first boundedness statement not
+obtained from Theorem~\ref{thm:pisot}, and would have to be metric rather
+than arithmetic.
+\end{question}
+
+\begin{question}\label{q:mahlerform}
+Is there a periodic $c\in\{0,1,2\}^{\mathbb N}$ containing a $1$, and an index
+$t$ with $c_t=1$, such that the orbit of $w=1$ under
+$w\mapsto\tfrac32w-[\,\lfloor\tfrac32w\rfloor>c_s\,]$ started at time $t$
+satisfies $\lfloor\tfrac32w_s\rfloor\neq c_{s+1}$ for every $s\geq t$? An
+affirmative answer gives $N_{3/2}=\infty$, by
+Proposition~\ref{prop:immortal32}. This is Question~\ref{q:kind} at
+$\lambda=3/2$, stated without reference to the game.
+\end{question}
+
+\begin{question}
+At $\lambda=(1+\sqrt2)/2$ the record lengths satisfy
+$d(k)=\max(2k-1,\lfloor k^2/4\rfloor+1)$ at every $k$ where they are known
+exactly. Does the formula persist? More broadly, is any superlinear lower bound
+on $d_\lambda(k)$ provable at any parameter? Such a bound would have to
+quantify the obstruction to creating knots as the count grows, and none is
+known.
+\end{question}
+
+\begin{question}\label{q:ae}
+Prove that the kind endpoints are dense in $(0,1)$ for a single non-Pisot
+$\lambda$ --- by Theorem~\ref{thm:density0} this alone gives
+$N_\lambda=\infty$ --- or prove Hypothesis \textup{(D$_\lambda$)} of
+Section~\ref{sec:density} for almost every $\lambda\in(1,2)$. By
+Theorem~\ref{thm:density} either would give unbounded knot counts, and the
+almost-everywhere version would establish that $\{\lambda:N_\lambda<\infty\}$
+has measure zero, as the conjecture that this set is exactly the Pisot numbers
+predicts. Section~\ref{sec:transversality} supplies the certified first steps of a
+parameter-exclusion approach on a window containing $3/2$, including an
+unconditional exponential lower bound on the number of kind words; what
+remains is the half that abundance does not touch --- that the endpoints of
+those words spread out rather than pile up --- and the exclusion iteration
+assembling the estimates.
+\end{question}
+
+\begin{question}
+The least lengths for $\lambda=3/2$ begin $1,3,5,9,19,23,52$, with
+$d_{3/2}(8)\geq57$. The growth is irregular: the run of increments
+$2,2,4,10,4,29$ fits neither a clean exponential (an earlier draft of this
+paper suggested $2^k$, which $d(7)=52<128$ refutes) nor the quadratic law that
+fits all known values at $(1+\sqrt2)/2$. Determine the order of growth of
+$d_{3/2}(k)$.
+\end{question}
+
+\appendix
+
+\section{Verification}\label{app:verify}
+
+Every computation reported above was carried out in exact arithmetic. Positions
+lie in $\tfrac12\Z[\lambda]$ and were represented by integer coordinate vectors;
+comparisons against the endpoints of the deleted intervals reduce to the sign of
+an element of $\Z[\lambda]$, evaluated exactly for quadratic $\lambda$ and, for
+the plastic number, by an exact test for vanishing together with a
+high-precision evaluation of the sign, which suffices because the relevant set
+of points is finite.
+
+Two independent implementations were compared for each of the three quadratic
+parameters: one in the coordinates just described, and one simulating the strip
+literally as a moving subinterval of the line with absolute knot positions and
+no rescaling. The two agree on all $88{,}572$ runs of length at most $10$ for
+$\lambda=3/2$, all $29{,}523$ runs of length at most $9$ for $\lambda=\sqrt2$,
+and all $9{,}840$ runs of length at most $8$ for $\lambda=\varphi$. The circle
+normal form of Proposition~\ref{prop:circle} was checked against the interval
+formulation on all $265{,}719$ runs of length at most $11$ for $\lambda=3/2$,
+with the seam remaining at $0$ throughout.
+
+Lemma~\ref{lem:distinct}, Lemma~\ref{lem:suffix}, Theorem~\ref{thm:mono},
+Proposition~\ref{prop:big}, Theorem~\ref{thm:pisot}, Theorem~\ref{thm:phi} with
+the table of Appendix~\ref{app:phi}, Proposition~\ref{prop:littlewood},
+Corollary~\ref{cor:noperiodic}, Proposition~\ref{prop:kindyield},
+Proposition~\ref{prop:blocks} and Proposition~\ref{prop:closed} have been
+formally verified in Lean~4 against Mathlib, with a semantic audit confirming
+that every public theorem depends only on \texttt{propext},
+\texttt{Classical.choice} and \texttt{Quot.sound}. For the plastic number only
+the hypotheses of Proposition~\ref{prop:plastic} are certified, namely that
+$\rho$ is Pisot and that its orbit is therefore finite; the three numerical
+assertions are not, the kernel-checked closure computation at that size being
+infeasible without compiled evaluation. Everything listed below as out of scope
+remains a computation only.
+
+A second round of verification covers Section~\ref{sec:gaps}.
+Lemmas~\ref{lem:order}, \ref{lem:gaplaw} and~\ref{lem:service} are certified as
+stated; Proposition~\ref{prop:lowerbound} is certified in the form the
+scheduling argument consumes (no birth is followed immediately by $M$, and a
+word of length $n$ carries at most $(n+1)/2$ surviving births);
+Theorem~\ref{thm:schedule} is certified with the logarithm-free hypothesis
+$1\leq\lambda^W\delta$ in place of $W=\lceil\log_\lambda(1/\delta)\rceil$ and
+with $\lceil W/2\rceil$ as natural division; Corollary~\ref{cor:effective} is
+certified at the golden ratio, $N_\varphi\leq9$, with no numerics, via the
+exact identity $\varphi^5(\varphi-\tfrac32)=\varphi^2/2$; and, resolving part
+of the plastic gap above, $N_\rho\leq34$ is certified: the $153$-point orbit,
+its closure under both maps, the membership of $1/2$, and the gap bound
+$\delta_0\geq239/100000$ are all checked by kernel reduction over integer
+coordinate triples, with $\rho$ bracketed between rationals scaled to integer
+inequalities. The configuration closure and the exact maximum $7$ remain
+computations only. The formal proof of Theorem~\ref{thm:schedule} differs from
+the one printed here and is simpler: an induction on the window word that, at
+each straddling move, deletes the largest knot below the deleted interval --
+no ages, no injection.
+
+The third round also certifies the transversality material of
+Section~\ref{sec:transversality}: Proposition~\ref{prop:restricted} by a
+$27$-cell certificate closed by kernel reduction, with all arithmetic over the
+common denominator $1024000000$ and the cell decomposition proved to tile the
+window, and Proposition~\ref{prop:paircount} with Mathlib's Lebesgue measure,
+instantiated at the certified window. Later rounds certify Lemma~\ref{lem:survivorset} (with the cells as an
+explicit list carrying a disjointness invariant), Lemma~\ref{lem:permanent},
+Lemma~\ref{lem:oneperstep}, Theorem~\ref{thm:compactness} -- where the
+compactness step is carried out with a non-principal ultrafilter rather than a
+diagonal subsequence, and $N_\lambda=\infty$ is rendered as unboundedness of
+$N_\lambda(n)$ -- Theorem~\ref{thm:density0} with its hypothesis explicit in
+every statement, Corollary~\ref{cor:deficit}, Lemma~\ref{lem:free},
+Remark~\ref{rem:candidates}'s cell identity, and
+Proposition~\ref{prop:expcount}. The counterexample recorded in
+Lemma~\ref{lem:free} for $\lambda\geq3/2$ was found in the course of that
+verification, and corrects an earlier version of this paper which asserted the
+converse without restriction. For Proposition~\ref{prop:twostep} the runs and
+the containments of Figure~\ref{fig:records32} are certified for the words
+exhibited; the exhaustiveness claim, which needed millions of retained states
+at $k=7$, is not, and remains a computation. Also certified, beyond what earlier drafts of this appendix credited: the
+Littlewood identity and Corollary~\ref{cor:noperiodic}; the block
+reformulation of Section~\ref{sec:sqrt2} in the form
+$x\mapsto\{2^n(a+b\sqrt2)/2\}$ along blocks of two moves; and, at the plastic
+number, the full configuration closure of $25{,}525$ states with
+$N_\rho\leq7$ and the values $d_\rho(4)=7$, $d_\rho(7)=28$ --- the computation
+reported infeasible after round 1, later carried through. A further round certifies the whole of Section~\ref{sec:threehalves}:
+Propositions~\ref{prop:ternary}, \ref{prop:base32} and~\ref{prop:mahler}, the
+equivalence of Proposition~\ref{prop:translation} in both directions, and the
+fact that reachable positions at $3/2$ avoid the ternary cell boundaries. It
+also certifies Proposition~\ref{prop:kindyield}, the cylinder counts of
+Proposition~\ref{prop:kinddim} (the dimension statements are deliberately
+\emph{not} formalised, and the development says so, since the count alone does
+not yield them), the quantitative density criterion with the explicit bound
+recorded in Section~\ref{sec:density}, and the sharpness witnesses of
+Section~\ref{sec:transversality}, found by untrusted search programs and
+re-verified by the kernel. One census finding: the itinerary identity of
+Proposition~\ref{prop:itinerary} had never been formalised, and is now proved
+for every $\lambda>1$. The audit after this round reports $1198$ theorems,
+axioms confined to the same three.
+
+The audit at the end of the preceding rounds reported $1084$ theorems.
+
+A fourth round certifies
+Lemmas~\ref{lem:nojump} and~\ref{lem:goodchild} (with each crossing inequality
+proved equivalent to $\lambda^2\geq\lambda+1$),
+Proposition~\ref{prop:continuum} -- the injection valid for all
+$\lambda\in(1,\varphi)$, since only finiteness of the forced return time is
+required -- and Proposition~\ref{prop:commonwindow}; after it the audit
+reports $636$ theorems, axioms confined to the same three. One plan recorded in earlier commissions --- a probabilistic bound on the
+return time of the discarded child, feeding a renewal inequality --- was
+deliberately fenced off from formalisation because it was never proved on
+paper, and it remains absent; the exponential count of
+Proposition~\ref{prop:expcount} was obtained instead by the covering argument
+described with it, which needs neither ingredient.
+
+A third round likewise certifies the two cubic parameters of
+Section~\ref{sec:pisot}: at the tribonacci constant, the seven-point orbit and
+its closure, the $20$ reachable configurations, the maximum $3$ and the values
+$d=1,3,7$; at the supergolden ratio, the $43$-point orbit, the maximum $4$ and
+$d=1,3,5,11$, where what is certified of the $412$-entry configuration list is
+what the argument consumes -- closure under the three moves and the bound
+$4$ -- rather than its irredundancy. The audit standard is unchanged
+throughout: $524$ theorems after the third round, axioms confined to the same
+three, no \texttt{sorry}, \texttt{admit} or \texttt{native\_decide}.
+
+Proposition~\ref{prop:itinerary} was checked at $\lambda=3/2$, $\sqrt2$ and
+$\varphi$ against trajectories of length $200$, and
+Propositions~\ref{prop:square} and \ref{prop:squaresurv} on $100$ steps of an
+exact trajectory at $\lambda=\sqrt2$, in each case to within the truncation
+bound and without a discrepancy.
+
+The exact values $d(10)=26$ and $d(11)=31$ at $\lambda=(1+\sqrt2)/2$ were
+established by a targeted form of the exhaustive search, asking whether $k$
+knots are attainable by depth $H$ and pruning with three reductions, each of
+which preserves the answer: identification of mirror-image configurations under
+$x\mapsto1-x$, which exchanges $L$ and $R$; subset domination as above; and the
+birth-spacing bound underlying Proposition~\ref{prop:lowerbound}, by which a
+configuration of $j$ knots at depth $n$ reaches $k$ knots by depth $H$ only if
+$j\geq k-\lceil(H-n)/2\rceil$. On the known case, nine knots by depth $20$, the
+pruned search retains ten configurations at depth $18$ where the unpruned
+search retains $1{,}192{,}182$ at depth $20$, and returns the same answer. The
+searches for ten knots by depth $25$ and eleven by depth $30$ then run to
+completion, and beam searches supply witnesses at depths $26$ and $31$. The
+corresponding search for twelve knots by depth $36$ exhausts memory near depth
+$22$, where its threshold is still weak.
+
+The value $d_{3/2}(7)=52$ was fixed by the same targeted method run at
+$\lambda=3/2$: complete searches exclude seven knots at every depth from $43$
+to $51$, and a witness of length $52$ exists. For the horizon-$43$ search the
+retained layers peak at $106{,}569$ configurations, against layers in the
+millions for the unthresholded search. Complete searches likewise exclude
+eight knots at depths $54$, $55$ and $56$, which with
+Corollary~\ref{cor:recursive} gives $d_{3/2}(8)\geq57$; at horizon $57$ and
+beyond the retained layers exceed three million states near depth $46$ and the
+method fails.
+
+
+The lemmas of Section~\ref{sec:gaps} were tested exactly, in
+$\Z[\sqrt2]$, on a $63$-move run at $\lambda=(1+\sqrt2)/2$ carrying fourteen
+simultaneous knots: the gap law held for all $1{,}091$ surviving pairs
+($907$ same-side, $184$ straddling) with no violations, and the order of the
+knots was preserved at every step. The identity for the deficit
+$1-(\mathrm{spread})$ that follows from the gap law held at $58$ of the $60$
+steps at which two or more knots survived, the two exceptions being exactly
+the steps at which a knot died, where no identity is asserted.
+
+The tribonacci and supergolden computations of Section~\ref{sec:pisot} were
+run in $\Z[\lambda]$ with doubled integer numerators $(A,B,C)$ for
+$x=(A+B\lambda+C\lambda^2)/2$; signs of nonzero elements were decided by
+$60$-digit evaluation guarded by the threshold $10^{-30}$, with exact zeros
+detected as vanishing coefficient triples, and the guard never tripped. The
+coverage depths $m^*(L)$ of Section~\ref{sec:density} at $\lambda=3/2$ were
+computed in exact integer arithmetic. The eighteen-parameter survey of that
+section is the one floating-point computation cited in this paper: positions
+were deduplicated at $10^{-11}$, which inflated the plastic orbit to $155$
+points against the exact $153$; its conclusions are stated only qualitatively.
+
+The reformulations of Section~\ref{sec:threehalves} were checked against the
+original rules in exact arithmetic: Proposition~\ref{prop:ternary} on all
+$797{,}160$ runs of length at most $12$, and Propositions~\ref{prop:base32} and
+\ref{prop:mahler} on $300$ trajectories of length $60$ and on $18{,}000$
+individual steps respectively, in each case without a discrepancy.
+
+The exhaustive depths quoted are those independently re-established with
+subset-domination pruning: depth $42$ for $\lambda=3/2$ and depth $38$ for
+$\lambda=\sqrt2$, at which the largest counts are six and eight respectively.
+
+Searches described as exhaustive enumerate all reachable configurations at each
+depth, with configurations that are subsets of others discarded where noted;
+such discarding is justified because survival is a condition on individual
+points, so that $A\supseteq B$ implies the same containment after any move.
+Searches described as beam searches retain a bounded number of configurations at
+each depth and yield lower bounds on $N_\lambda$ only.
+
+The search of Section~\ref{sec:kind} illustrates why exact arithmetic is not a
+formality here. Carried out instead by evaluating the orbit to fifty decimal
+places, it reports several hundred realisable itineraries admitting a periodic
+run with an $M$. Every one of them is spurious. The quantity being tested at the
+final step is $x_{q-1}-r/2$ or $x_{q-1}-(1-r/2)$, which by
+Lemma~\ref{lem:distinct} is exactly zero, so a floating evaluation returns whichever
+sign the rounding supplies. The same effect makes a direct simulation of the
+periodic runs at algebraic $\lambda$ overcount badly: at $\varphi$ it reports
+twenty-seven knots and at the plastic number twenty, where
+Theorem~\ref{thm:phi} and Proposition~\ref{prop:plastic} give two and seven. The
+coincidences responsible for the small exact answers are precisely what
+floating arithmetic destroys.
+
+\section{Exploratory computations}\label{app:explore}
+
+The computations of this appendix guided the investigation without entering
+any proof. They are floating-point unless stated otherwise, and are recorded
+so that the reader can see which quantities were suggestive and which were
+merely consistent.
+
+\subsection{A first moment}
+Suppose the three moves are chosen independently and uniformly. A move deletes
+a closed interval of length $g$ wherever it is placed, so a knot at a position
+independent of the move survives with probability $r$, whichever move is
+played. Births occur at rate $1/3$, so the expected number of knots present
+after many moves is
+\[
+  \sum_{a\geq0}\tfrac13r^a=\frac{1}{3(1-r)}=\frac{\lambda}{3(\lambda-1)} ,
+\]
+which is $1$ at $\lambda=3/2$ and $1.94$ at $\lambda=(1+\sqrt2)/2$. This
+baseline is a useful sanity check on simulations, and it makes plain how far
+the maxima exceed the typical behaviour: the game is entirely about the tail
+of a distribution whose mean is a small constant. It also shows that no
+counting argument of this kind can distinguish Pisot from non-Pisot
+parameters, since the mean does not see the arithmetic at all.
+
+\subsection{Backward counts}
+Reading a word backwards and applying the two inverse branches to $1/2$
+produces, at every non-Pisot parameter examined, $2^n$ distinct points after
+$n$ steps: backwards there are no coincidences. At $\varphi$ the count is
+$F(n+3)-1$ for the Fibonacci numbers $F$, growing like $\varphi^n$ rather than
+$2^n$ --- the same collapse recorded in Figure~\ref{fig:reachable} for the
+forward direction, in its backward form.
+
+\subsection{The transform along a survey}
+Writing $|\widehat{\nu_r}(\xi)|$ for the cosine product of
+Section~\ref{sec:conjugate} and taking the maximum of its logarithm over
+$\xi\in[140,210]$ --- an upper envelope, computed on a fine grid so that
+narrow peaks are not missed --- gives
+\[
+\varphi:-1.37,\quad 3/2:-2.44,\quad \rho:-2.91,\quad
+\sqrt2:-4.71,\quad (1+\sqrt2)/2:-7.34 .
+\]
+The ordering is instructive and slightly treacherous. Half the silver ratio
+decays fastest, consistent with its being the most heavily overlapped of the
+five; but $3/2$, which is not Pisot, sits \emph{above} the plastic number,
+which is. At moderate frequencies a slowly decaying transform can exceed a
+Pisot floor, so the value of $|\widehat{\nu_r}|$ is not by itself diagnostic;
+only its behaviour as $\xi\to\infty$ is. The same caution applies in real
+space, where the plastic density looks smooth at coarse resolution
+(Figure~\ref{fig:densities}).
+
+\subsection{Beam searches}
+Upper bounds on $d_\lambda(k)$ marked as such in Section~\ref{sec:nonpisot}
+come from beam searches: breadth-first exploration retaining a fixed number of
+configurations per level, ranked by knot count and then by spread. These
+establish upper bounds only, since every configuration retained is genuinely
+reachable; the lower bounds quoted alongside them come from exhaustive search
+or from Corollary~\ref{cor:recursive}. Beam widths between $10^4$ and
+$5.5\times10^4$ were used, and the searches that stall do so through memory
+rather than time.
+
+\section{The golden ratio automaton}\label{app:phi}
+
+The twelve reachable configurations of Theorem~\ref{thm:phi} and their
+transitions are as follows, with $\emptyset\mapsto\{p_3\}$ under $M$ and
+$\emptyset\mapsto\emptyset$ under $L$ and $R$.
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+ & $L$ & $M$ & $R$\\
+\midrule
+$\{p_1\}$ & $\emptyset$ & $\{p_2,p_3\}$ & $\{p_2\}$\\
+$\{p_2\}$ & $\emptyset$ & $\{p_3\}$ & $\{p_3\}$\\
+$\{p_3\}$ & $\{p_1\}$ & $\{p_3\}$ & $\{p_5\}$\\
+$\{p_4\}$ & $\{p_3\}$ & $\{p_3\}$ & $\emptyset$\\
+$\{p_5\}$ & $\{p_4\}$ & $\{p_3,p_4\}$ & $\emptyset$\\
+$\{p_1,p_3\}$ & $\{p_1\}$ & $\{p_2,p_3\}$ & $\{p_2,p_5\}$\\
+$\{p_1,p_4\}$ & $\{p_3\}$ & $\{p_2,p_3\}$ & $\{p_2\}$\\
+$\{p_2,p_3\}$ & $\{p_1\}$ & $\{p_3\}$ & $\{p_3,p_5\}$\\
+$\{p_2,p_5\}$ & $\{p_4\}$ & $\{p_3,p_4\}$ & $\{p_3\}$\\
+$\{p_3,p_4\}$ & $\{p_1,p_3\}$ & $\{p_3\}$ & $\{p_5\}$\\
+$\{p_3,p_5\}$ & $\{p_1,p_4\}$ & $\{p_3,p_4\}$ & $\{p_5\}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{thebibliography}{9}
+
+\bibitem{Bertin1992}
+M.-J. Bertin, A. Decomps-Guilloux, M. Grandet-Hugot, M. Pathiaux-Delefosse and
+J.-P. Schreiber,
+\emph{Pisot and Salem Numbers},
+Birkh\"auser, Basel, 1992.
+
+\bibitem{Erdos1939}
+P. Erd\H{o}s,
+\emph{On a family of symmetric Bernoulli convolutions},
+Amer. J. Math. \textbf{61} (1939), 974--976.
+
+\bibitem{ErdosJooKomornik1990}
+P.~Erd\H{o}s, I.~Jo\'o and V.~Komornik,
+\newblock Characterization of the unique expansions
+$1=\sum q^{-n_i}$ and related problems,
+\newblock \emph{Bull.\ Soc.\ Math.\ France} \textbf{118} (1990), 377--390.
+
+\bibitem{Garsia1962}
+A. M. Garsia,
+\emph{Arithmetic properties of Bernoulli convolutions},
+Trans. Amer. Math. Soc. \textbf{102} (1962), 409--432.
+
+\bibitem{Hochman2014}
+M. Hochman,
+\emph{On self-similar sets with overlaps and inverse theorems for entropy},
+Ann. of Math. (2) \textbf{180} (2014), 773--822.
+
+\bibitem{Koksma1935}
+J.~F. Koksma,
+\newblock Ein mengentheoretischer Satz \"uber die Gleichverteilung modulo Eins,
+\newblock \emph{Compositio Math.} \textbf{2} (1935), 250--258.
+
+\bibitem{Mahler1968}
+K. Mahler,
+\emph{An unsolved problem on the powers of $3/2$},
+J. Austral. Math. Soc. \textbf{8} (1968), 313--321.
+
+\bibitem{Solomyak1995}
+B.~Solomyak,
+\newblock On the random series $\sum\pm\lambda^n$ (an Erd\H{o}s problem),
+\newblock \emph{Ann.\ of Math.\ (2)} \textbf{142} (1995), 611--625.
+
+\bibitem{PeresSolomyak1996}
+Y.~Peres and B.~Solomyak,
+\newblock Absolute continuity of Bernoulli convolutions, a simple proof,
+\newblock \emph{Math.\ Res.\ Lett.} \textbf{3} (1996), 231--239.
+
+\bibitem{Salem1944}
+R. Salem,
+\emph{A remarkable class of algebraic integers. Proof of a conjecture of
+Vijayaraghavan},
+Duke Math. J. \textbf{11} (1944), 103--108.
+
+\end{thebibliography}
+
+\end{document}

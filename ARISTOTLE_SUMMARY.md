@@ -1,0 +1,95 @@
+# Summary of changes for run 710c80b2-341d-4b2c-bd11-fc3ba0ecf782
+Round 8 of the knot-game formalization (targets T22–T26 of `COMMISSION-knotgame6.md`) is complete. The whole project builds, contains no `sorry`, `admit`, added `axiom`, `@[implemented_by]` or `native_decide`, and the semantic axiom audit passes with **1198 theorems, axioms confined to `[propext, Classical.choice, Quot.sound]`** (up from 1084 at the end of round 7).
+
+**New Lean files, all imported into `RequestProject/All.lean`:**
+
+- `RequestProject/Ternary.lean` — **T22a** (`prop:ternary`). The ternary cell index `D x = ⌊3x⌋`, the digit coding `L,M,R ↦ 0,1,2`, `survives_iff_digit_ne`, the image formula `act_eq_ternary` (`x ↦ (3x − [D x > c])/2`), `step_ternary`, and `exists_unique_fatal` (exactly one digit is fatal at each point). Also the dyadic invariant (`Dyadic`, `dyadic_act`, `dyadic_posAfter`) that keeps reachable positions off the cell boundaries.
+- `RequestProject/Mahler.lean` — **T22b/c**. `itinerary_tsum` (`prop:itinerary`, proved for general λ > 1), its base-3/2 reading `base32_tsum` (`Σ_{j≥1} ε_j (2/3)^j = 1`), the digit identity `digit_eq_eps_add`/`digit_eq_eps_add_strict`, and Mahler's recursion `mahler_recursion`, `mahler_of_survives`.
+- `RequestProject/Translation.lean` — **T22d** (`prop:translation`). `unbounded_iff_mahler`: `N_{3/2}` is unbounded iff the knot-free control criterion `MahlerCriterion` holds.
+- `RequestProject/PeriodicYield.lean` — **T23** (`prop:kindyield`). A kind word ending in `M` gives condition (i) of the certified compactness theorem (`infinitelyManyKnots_of_kindWord`) and hence `N_λ = ∞` (`N_unbounded_of_kindWord`).
+- `RequestProject/KindTree.lean` — **T24a/b**. `card_kindWords_three_halves`: exactly `2^n` nodes at depth `n` at λ = 3/2; `card_kindWords_phi_add_three`: `N_{n+3} = 4 N_n` at λ = φ.
+- `RequestProject/WindowSharp.lean` — **T25**. Two explicit `{−1,0,1}` members with finite support and two rational points just beyond the certified window: `witness_at_3339` (degree 22, x = 3339/5000, `0 < g ≤ 1/1000`, `−1/1000 < g′ < 0`) and `witness_at_3343` (degree 26, `g ≤ 1/100000`, `g′ > 0`); exports `transversality_fails_beyond_window`, `window_not_extendable`, `deriv_witness_at_3339`. All inequalities are kernel reductions over exact rationals; the search program `scripts/window_sharp_search.py` is untrusted data only.
+- `RequestProject/DensityQuant.lean` — **T26**. The quantitative hypothesis `KindDenseQuant` (D_λ), `kindDense_of_quant`, `exists_extension_len`, and the conclusions `d_le_pow` (`d_λ(k) ≤ B^k − 1`, `B = max 2 (1 + C(log λ + 1))`) and `N_unbounded_of_kindDenseQuant`.
+
+**T24c (Hausdorff/box dimension) is not attempted and not claimed** anywhere — the cylinder count alone does not give it; this is stated explicitly in the file docstring, the census, the scruples and the checklist.
+
+**Documentation delivered** (in the style of the earlier rounds): `CENSUS-round8.md` (including the commissioned audit of what was already present in `Littlewood.lean`, `Sqrt2.lean`, `PlasticConfig.lean`, `Compactness.lean`, `Density.lean`, `Transversality*`, `Golden.lean`, `SurvivorSet.lean` — with the finding that T23 was *partly* present in infinite-sequence form and that `prop:itinerary` was absent), `SCRUPLES-round8.md` (every deviation, including the T23 distinction from `no_return_to_half`, the non-strict-vs-strict bracket, the 0-based control indexing, the untrusted search, and the three hypotheses certified for no λ), `AXIOM-AUDIT-round8.md` (tree-wide counts plus per-target `#print axioms` for all 23 headline statements), a round-8 section in `GITHUB_HANDOFF_CHECKLIST`, and new `README.md` entries. `ARISTOTLE_SUMMARY.md` was left untouched, and no inherited definition or statement was changed — the only edit to an inherited Lean file is the seven added imports in `RequestProject/All.lean`.
+
+# Summary of changes for run 32685799-b789-43bc-bc8b-f06b5d08e805
+Continued the formalization by finishing and extending the work on the three items the notes flag as open (return-time tail bound, renewal inequality, exponential lower bound on the kind count). Everything below builds with `lake build`, contains no `sorry`, `admit`, `axiom`, `@[implemented_by]` or `native_decide`, and the project's semantic audit reports "axiom audit passed: 1084 theorems, axioms confined to [propext, Classical.choice, Quot.sound]".
+
+New this session (all committed and pushed):
+
+- `RequestProject/ExpWindowData.lean` + `RequestProject/ExpWindow.lean` — a doubling certificate valid **uniformly over the parameter window** `[1000/667, 8/5]` (24 parameter cells carrying 1333 interval cells, word length ≤ 8, checked by the kernel over exact rationals), giving `doubling_window` and `two_pow_le_K_window : 2 ^ (m / 8) ≤ K lam m` for every `lam` in that window. Interval arithmetic is carried out in the point *and* in the parameter, so one certificate serves a whole interval of parameters.
+- `RequestProject/ExpMulti.lean` + `RequestProject/ExpMultiCert.lean` — the same covering/renewal argument at multiplicity `k`: `MDoubling`, the renewal step `mul_kappa_le` (the count is multiplied by `k` every `T` steps) and `pow_le_K_of_mdoubling : k ^ (m / T) ≤ K lam m`, with the corresponding certificate format and soundness lemma.
+- `RequestProject/ExpSharpData.lean` + `RequestProject/ExpSharp.lean` — a sharper bound at `lam = 3/2`: 503 cells tiling `[1/4, 3/4]`, each with 15 distinct words of length 12, giving `fifteen_pow_le_K : 15 ^ (m / 12) ≤ K (3/2) m`, i.e. growth ≈ 1.2532 per step against the earlier ≈ 1.1487 (measured growth is ≈ 1.3333; no sharpness is claimed). The kernel check runs group by group, since a single reduction over all 503 cells does not go through.
+- Search/generator programs `scripts/gen_expsharp.py` and the updated `scripts/gen_expwindow.py`; nothing about them is trusted — the kernel re-checks their output.
+- Cleanups: an unused hypothesis removed from `two_pow_le_K_of_doubling` and two unused simp arguments removed, leaving the round's files warning-free.
+- Paperwork in the established style: `CENSUS-round7.md`, `SCRUPLES-round7.md`, `AXIOM-AUDIT-round7.md`, a round-7 section in `GITHUB_HANDOFF_CHECKLIST`, and README entries. The scruples record the deviations: the tail bound is a Lebesgue-measure statement at one parameter at a time rather than a probabilistic one; the empirical renewal inequality is replaced by a deterministic renewal step; the rates obtained are below the measured growth; the window is covered exactly (both endpoints of `[1000/667, 8/5]`), and the search found no certificate with word length ≤ 8 beyond `8/5`; the window bound was deliberately not upgraded to higher multiplicity (feasible, but the kernel check would dominate the build for a small gain).
+
+The Properties table lists the round's user-facing results with their final statuses; `ARISTOTLE_SUMMARY.md` was left untouched as requested.
+
+# Summary of changes for run 039718ad-ac91-4fd2-96e0-e2b24bce01dc
+Round 4 of the knotgame commission (T11–T13) is complete: every target is formalised, proved, and inside the axiom audit, with no `sorry`, `admit`, new `axiom`, or `native_decide`.
+
+**Census first.** The round-3 tree shipped in the tarball was rebuilt in place and treated as ground truth; no inherited definition was changed and no inherited statement re-derived. The only edit to an inherited source is four added imports in `RequestProject/All.lean`. One finding is reported rather than repaired (`CENSUS-round4.md`): the tree's survival predicates are for words in the moves `L, M, R`, not for *branch* words, so round 4 adds the two-line predicate `BLegal` in the commission's own convention (branch 0 legal iff `x < r`, branch 1 iff `x > g`) and reuses the branch maps `f`, `g`, `r` verbatim.
+
+**New Lean sources.**
+- `RequestProject/Branching.lean` — T11. `no_jump_low`, `no_jump_high` (T11a), together with `lam_mul_g_lt_r_iff` and `no_jump_high_iff`, which prove each crossing inequality *equivalent* to `λ² ≥ λ+1`; `sharp_two_cycle` (T11b), the 2-cycle `{1/(λ+1), λ/(λ+1)}` outside the window with the forced branch identified at each point; `good_child_low`, `good_child_high`, `good_child` (T11c); `bounded_return_low` and `bounded_return_high` (T11d), the second obtained from the first through the exact conjugacy `x ↦ 1−x`.
+- `RequestProject/BranchingContinuum.lean` — T12a. The bit-driven dynamics (`bitState`, `theta`) and `continuum_of_survival_itineraries`: an explicit `Function.Injective` map from `ℕ → Bool` into the survival itineraries of `1/2`.
+- `RequestProject/BranchingCount.lean` — T12b. The spine (always the good child), its window visits with gaps at most `B+1`, the one-deviation words, and `K_ge : m/(B+1) ≤ K lam m`, with `K_eq_card_bSurvives` showing the count is the same for the list-recursive survival predicate.
+- `RequestProject/CommonWindow.lean` — T13. `common_window`, a single identifier asserting for `λ ∈ [1000/667, 8/5]`: (a) `1/λ ∈ [5/8, 667/1000] ⊆ [1/2, 667/1000]` **and** the instantiated round-3 transversality conclusion at `1/λ`; (b) `1 < λ < 2` and `λ² < λ+1`; (c) `3/2` in the parameter window and `1/2` in the dynamical window `(g,r)`; plus T12a and `m/4 ≤ K λ m` (the anchor data `η = 1/5`, `B = 3` are certified as `eta_anchor`, `return_bound_anchor`).
+
+**Two things worth reading before merging** (both in `SCRUPLES-round4.md`): T12a needs only *finiteness*, not boundedness, of the forced return time, so it is proved for every `λ < φ` in `(1,2)` rather than only on the anchor window; and T12b exhibits exactly `m/(B+1)` words (one deviation each) — the exponential bound is not claimed, since it needs the tail estimate the commission excludes. The excluded items (geometric tail bound, renewal inequality, integrated exponential lower bound) are absent from the tree, and no weakened variant of them appears.
+
+**Conventions recorded**, as asked: the window is open at both ends, so "outside" means `x ≤ g` or `r ≤ x` and the forced branch is defined at the endpoints; `g + r = 1`, so the T11c midpoint `(g+r)/2` is always `1/2`, and the boundary case `x = (g+r)/2` is assigned to branch `0`.
+
+**Documents delivered:** `CENSUS-round4.md`, `SCRUPLES-round4.md`, `AXIOM-AUDIT-round4.md`, a round-4 section in `GITHUB_HANDOFF_CHECKLIST`, and an updated `README.md`.
+
+**Constraints.** `lake build` succeeds and the semantic audit reports "axiom audit passed: 636 theorems, axioms confined to [propext, Classical.choice, Quot.sound]"; per-target `#print axioms` output for all twelve round-4 targets is recorded in `AXIOM-AUDIT-round4.md`. Round 4 adds no finite computation: it is algebra over an ordered field plus induction on `ℕ`. Everything is committed and pushed.
+
+# Summary of changes for run 2c6b398e-bcb0-41f6-93b4-156dcdfc6a8a
+I picked up the knotgame round-3 commission where it stood and closed the last open item, T10, then wrote the round-3 paperwork the commission requires.
+
+**Census first.** T8 (tribonacci and supergolden) and T9 (δ-transversality on `[1/2, 667/1000]`) were already certified in the tree; I re-verified them rather than re-deriving them — the whole library builds and the semantic axiom audit passes. Nothing in those files was changed; `All.lean` gained one import.
+
+**T10 — the pair-counting proposition (new, in `RequestProject/PairCounting.lean`).** The optional target of the commission, previously unattempted, is now proved in full with Mathlib's Lebesgue measure:
+
+- `Phi` — the endpoint family `Φ_ε(λ) = λ^m(1/2 − (λ−1)Σ ε_j λ^{-j})`, with negative powers cleared.
+- `Phi_sub_abs` — the embedding lemma: for branch words first disagreeing at index `k`, `|Φ_ε − Φ_ε'| = (λ−1)λ^{m−k}|g(1/λ)|` for an explicit member `g` of the `{−1,0,1}` class with constant term `1`.
+- `abs_le_of_transversal`, `sub_le_of_transversal` — δ-transversality confines a small-value set to the band `[−δ, δ]` and hence to an interval of length `2ρ/δ`; `abs_sub_le_of_gval_le` instantiates this at the T9 window.
+- `volume_close_le` — per pair: on `I = [1000/667, 2]` the parameter set where two endpoints are `ρ`-close has measure at most `8ρλ₀^{k−m}/(δ(λ₀−1))`.
+- `fiber_card_le`, `geom_bound` — the count of pairs with a given first disagreement (by an explicit injection) and the geometric summation.
+- `sum_volume_close_le` (ordered pairs), `sum_volume_close_le_unord` (one representative per unordered pair, carrying the note's own constant `4λ₀/(δ(λ₀−1)(2−λ₀))`), and `lintegral_pairCount_le` (the note's integral phrasing, `∫_I #{ρ-close pairs} dλ`).
+
+Two places where the Lean route differs from the note, both recorded: the change of variables is replaced by a diameter bound plus the fact that `x ↦ 1/x` distorts distances on `I` by at most `4`; and the exact pair count `2^{k−1}4^{m−k}` is replaced by the matching upper bound, which is all the estimate consumes. The statement holds for every `ρ ≥ 0`: when `ρ` is large the bound exceeds `|I|` and the proof says so.
+
+**Documents.** `CENSUS-round3.md` (what was inherited, and T8/T9/T10 mapped to Lean identifiers), `SCRUPLES-round3.md` (every deviation from a literal transcription), `AXIOM-AUDIT-round3.md` (automatic audit plus per-target `#print axioms`), a round-3 section in `GITHUB_HANDOFF_CHECKLIST`, and an updated `README.md`.
+
+**Constraints.** No `sorry`, `admit`, new `axiom`, or `native_decide` anywhere; `lake build` succeeds and reports "axiom audit passed: 524 theorems, axioms confined to [propext, Classical.choice, Quot.sound]". T10 adds no finite computation — it is analysis and combinatorics on top of the T9 statement. Everything is committed and pushed.
+
+One thing left untouched, as the note itself flags: item (iii) of its programme — the kind-constrained first-moment lower bound, where the game's survival constraint re-enters — is not addressed here.
+
+# Summary of changes for run c2ff9d79-6d03-49ac-abd5-a45dbff4fd66
+Round 2 of the knotgame commission is complete: all seven targets T1–T7 are certified, sorry-free, and inside the axiom audit.
+
+**Census first (`CENSUS-round2.md`).** The round-1 tree from the tarball was rebuilt in place and audited against the round-2 targets before any new work. Reused verbatim: `straddle` and the `act_M_*` equations (for T1/T2), `card_runFrom` (which supplies exactly the window bookkeeping for T5), `act_injOn`, `act_mem_Ioo`, `Golden.run_eq` and the five orbit points, and the plastic-number facts. No round-1 definition was changed and no round-1 statement re-derived; the only edit to a round-1 file is three added imports in `All.lean`.
+
+Two findings are reported rather than papered over:
+- **(R2-a)** The commission's premise for T4 — that round 1 certified `d ≥ 2k-1` and `d(k+1) ≥ d(k)+2` — does not match the tree. `d` is defined but nothing about its values is proved (round 1's own flag (F) says so). T4 was therefore proved from scratch, in the form the scheduling argument consumes.
+- **(R2-b)** T7 was offered as an acceptable failure and is not one. Round 1's infeasibility report concerns the 25 525 reachable *configurations* and stands untouched; the scheduling route needs only the 153-point *orbit*, which does close.
+
+**New Lean sources.**
+- `RequestProject/Gaps.lean` — T1 `act_lt_act`; T2 `gap_law` with the predicate `Straddles`; T3 `straddles_unique`/`straddles_at_most_one`; T4 `birth_head_ne_M`, `two_mul_births_le_length_succ`, `births_le_ceil_half`; T5 `scheduling_bound` and `N_le_of_separated`, with the combinatorial core `card_le_length_succ`. Also `run_subset_Ioo`, the invariance principle `run_subset`, `runFrom_append`, and the paper's reverse corollary `near_collision`.
+- `RequestProject/GoldenEffective.lean` — T6: `N φ n ≤ 9`, via the exact identity `φ⁵·(φ−3/2) = φ²/2` (`phi_pow_five_mul_delta0`), with no numerics.
+- `RequestProject/PlasticOrbit.lean` — T7: the 153-point orbit of `1/2` at the plastic number as explicit integer coordinate triples over `ℤ[ρ]`, its closure and its minimum gap certified by kernel `decide`, giving `N ρ n ≤ 34`.
+
+**How T5's pigeonhole is formalised.** The window split `w = a ++ b` is `card_runFrom`: old knots are the survivors of `run a` along `b`, young ones are `births b`. The old-knot bound is an induction on the window word — at a move with a straddling pair, deleting the largest knot below the deleted interval both restores the gap hypothesis for the image and drops the count by one, which is exactly "this move services this pair and no other". No ages, no move indexing, no explicit injection.
+
+**Faithfulness (`SCRUPLES-round2.md`).** `δ > 0` is not carried in T5: it follows from `1 ≤ λ^W δ`, which is also assumed. `W = ⌈log_λ(1/δ)⌉` is replaced by the equivalent logarithm-free `1 ≤ λ^W δ`, which is what T6 and T7 supply. "Throughout the run" is a condition on every prefix of the run word. `⌈W/2⌉` is `(W+1)/2` in natural-number division.
+
+**Constraints.** No `sorry`, `admit`, new `axiom`, or `native_decide` anywhere. `lake build` runs the semantic audit, which now reports "axiom audit passed: 247 theorems, axioms confined to [propext, Classical.choice, Quot.sound]"; per-target `#print axioms` output is recorded in `AXIOM-AUDIT-round2.md`. The three plastic verifications are closed by `decide` (kernel reduction) and the whole file checks in about 30 seconds.
+
+**Consistency remarks.** Round 1's sharp `sup N φ = 2` stands; the bound 9 is strictly weaker and obtained by an independent argument. At the plastic number, `34` is what the gap argument yields; the true value 7 is certified neither here nor in round 1. T7 certifies that every reachable knot position is on the 153-point list, not that the list is minimal, and certifies `239/100000` as a lower bound for the smallest gap rather than the exact minimum — neither is needed by the argument.
+
+**Documents delivered:** `CENSUS-round2.md`, `SCRUPLES-round2.md`, `AXIOM-AUDIT-round2.md`, a round-2 addendum appended to `PLASTIC-REPORT.md` (explaining why the orbit computation is cheap when the configuration one is not), and a round-2 section in `GITHUB_HANDOFF_CHECKLIST`; `README.md` updated.

@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and audit axioms
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan
+        run: |
+          curl -sSfL https://github.com/leanprover/elan/releases/latest/download/elan-x86_64-unknown-linux-gnu.tar.gz \
+            | tar xz
+          ./elan-init -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Fetch Mathlib build cache
+        run: lake exe cache get
+
+      # `lake build` elaborates RequestProject.AxiomAudit, which calls
+      # Lean.collectAxioms on every public theorem of the KnotGame namespace and
+      # throws if any axiom outside {propext, Classical.choice, Quot.sound}
+      # occurs (in particular sorryAx). The audit is semantic: it inspects the
+      # elaborated environment, never the text of the sources.
+      - name: Build (includes the semantic axiom audit)
+        run: lake build
+
+      # A belt-and-braces textual check. The audit above is what actually
+      # guarantees soundness; this only catches a `sorry` in a declaration that
+      # the audit does not reach (e.g. a `def`).
+      - name: Textual check for sorry / admit / axiom / native_decide
+        run: |
+          if grep -rnE '(^|[ \t;(\[])(sorry|admit|native_decide)\b|^axiom ' RequestProject --include='*.lean' ; then
+            echo "::error::forbidden token found"; exit 1
+          fi
