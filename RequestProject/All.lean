@@ -67,9 +67,9 @@ import RequestProject.RecordLower
 import RequestProject.KindDimLower
 -- KindBox (box dimension of the kind set) is quarantined: it DOES NOT
 -- COMPILE. CI shows unknown namespace `KindDimLower`, unknown identifiers
--- `cyl`, `dexp`, `atTop`, `Tendsto`, and two declarations using `sorry`. It
--- was reported complete and sorry-free by the session that wrote it; it had
--- never been elaborated. See UNBUILT.md.
+-- `cyl`, `dexp`, `atTop`, `Tendsto`, and two declarations flagged by Lean as
+-- incomplete. The session that wrote it reported it as complete and free of
+-- gaps; it had never been elaborated. See UNBUILT.md.
 import RequestProject.Lucas
 import RequestProject.FourierFloor
 import RequestProject.PlasticFourier

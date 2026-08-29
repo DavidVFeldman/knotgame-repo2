@@ -94,6 +94,15 @@ jobs:
       # the audit does not reach (e.g. a `def`).
       - name: Textual check for sorry / admit / axiom / native_decide
         run: |
-          if grep -rnE '(^|[ \t;(\[])(sorry|admit|native_decide)\b|^axiom ' RequestProject --include='*.lean' ; then
+          # Strip line comments before searching, so that prose mentioning a
+          # forbidden token (e.g. a comment explaining why a file was removed)
+          # cannot fail the check, while code containing one still does.
+          hits=0
+          for f in $(find RequestProject -name '*.lean'); do
+            if sed -e 's/--.*$//' "$f" | grep -nE '(^|[ \t;(\[])(sorry|admit|native_decide)\b|^axiom ' > /tmp/hits.txt ; then
+              echo "=== $f"; cat /tmp/hits.txt; hits=1
+            fi
+          done
+          if [ "$hits" = 1 ]; then
             echo "::error::forbidden token found"; exit 1
           fi
