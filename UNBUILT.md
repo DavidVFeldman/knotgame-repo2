@@ -1,5 +1,16 @@
 # Files outside the verified closure
 
+## PlasticConfig / PlasticOrbitCount — excluded for hardware, NOT for doubt
+
+The 25,525-state configuration closure at the plastic number, carrying
+`N_rho_le_seven`, `d_rho_four`, `d_rho_seven` and `card_reachable_configs`.
+Its kernel reduction exceeds the memory of a GitHub-hosted runner (it was
+killed there after `PlasticCert` completed). It differs from the case below in
+the decisive respect: these results ARE covered by a completed audit,
+`AXIOM-AUDIT-round5.md`, so the paper's `N_rho = 7` stands on that audit and is
+not downgraded. Retry with `heavy.yml`, which adds 32 GB of swap.
+
+
 `RequestProject/ExpSharpest.lean`, `ExpSharpestData0…8`, `ExpSharpestChecks0…8`
 (the multiplicity-49 certificate at lambda = 3/2, aiming at the rate
 49^(1/16) ~ 1.27537) are present in the tree but are NOT part of the import

@@ -4,7 +4,12 @@ GITHUB HANDOFF CHECKLIST
 Project : formal verification of "Knot counts in an interval deletion game"
 Lean    : 4.28.0 (pinned by lean-toolchain)
 Mathlib : pinned by lake-manifest.json
-Source  : knotgame-commission(1).tar.gz, kept in the repository root
+Source  : the repository itself is the live tree. (Earlier rounds described
+          commission tarballs as kept in the repository root; they are not
+          committed -- large, derivative, reconstructible from the round
+          documents. See MERGE-NOTES.md.)
+Repo    : github.com/DavidVFeldman/knotgame-repo2 -- DO NOT DELETE AND RECREATE
+          IT (section 15.2)
 
 
 1. WHAT IS IN THE TREE
@@ -739,3 +744,106 @@ ROUND 10 -- no recurrence at 3/2, a sharper certificate at 3/2, and
   - All searches (scripts/expcert_dfs.py, gen_expsharper.py,
     expvar_search.py, gen_expabove.py) are untrusted; the kernel re-checks
     every cell over exact rationals.
+
+
+================================================================================
+15. OPERATIONS: PACKAGING, CI, AND WHAT COUNTS AS DONE
+================================================================================
+
+  Everything above documents the tree. This section documents the handoff,
+  which is where the project has actually lost time. Each rule below is here
+  because it was violated, and each violation cost at least one wasted cycle.
+
+15.1 PACKAGING AN ARCHIVE FOR A HUMAN TO COMMIT
+-----------------------------------------------
+
+  [ ] The archive contains NO .git directory. A nested directory with its own
+      .git is treated by git as a separate repository and its contents are NOT
+      staged; the recipient's client shows no changes and nothing can be
+      committed. (This happened: a tarball built with `git init` inside it,
+      then `tar czf` over the whole folder.)
+  [ ] Files are at the archive ROOT, not inside a wrapper directory, so
+      unpacking into an existing clone replaces files in place.
+  [ ] Ship .zip as well as .tar.gz when the recipient may be on Windows.
+  [ ] VERIFY BEFORE SENDING, and say what was verified: list the archive and
+      confirm no .git, confirm the file count, confirm the top-level names.
+      "I built it correctly" is not a check.
+
+15.2 THE REPOSITORY IS A BUILD MACHINE; KEEP IT
+------------------------------------------------
+
+  [ ] Never delete and recreate the repository to work around a client
+      problem. Deleting it destroys the Actions cache, so every run restarts
+      from nothing and no sequence of runs can converge. Push to the existing
+      repository; force-push if history must be rewritten.
+  [ ] Cache: use actions/cache/restore plus actions/cache/save with
+      `if: always()`. The combined actions/cache action saves ONLY on job
+      success, so a failed run discards every module it built.
+
+15.3 BUILDING THIS TREE IN CI
+------------------------------
+
+  [ ] `lake exe cache get` FIRST. Without it the job compiles ~8000 Mathlib
+      modules from source and is killed long before reaching this project's
+      ~119. A run reporting "8125 of 8145" has not started on this project.
+  [ ] This Lake has no `-j` flag. Serialise by building one module per
+      invocation in topological import order (the list is embedded in
+      ci.yml), not by a jobs flag.
+  [ ] Add swap. The heaviest kernel reductions exceed even 16 GB of RAM.
+  [ ] Exit code 143 is SIGTERM: the process was killed, not failed. With
+      serialisation in force it names one module as too large for the
+      machine. It is not a Lean error and not a timeout.
+  [ ] Expect roughly 2 hours for the audited closure from a warm Mathlib
+      cache; individual certificate modules legitimately take 5-20 minutes.
+      Silence is work, not a hang.
+
+15.4 QUARANTINE: TWO KINDS, KEPT DISTINCT
+------------------------------------------
+
+  A module excluded from the import closure is excluded for exactly one of
+  two reasons, and the difference decides what the paper may claim.
+
+  (a) NO COMPLETED AUDIT. The claim is not certified and the paper must not
+      state it as such. Example: ExpSharpest (rate 49^(1/16)). A round's
+      census recorded it done; no AXIOM-AUDIT for that round was ever
+      written; CI then showed the checks exceed the machine. The paper was
+      corrected downward to the audited 26^(1/14).
+
+  (b) AUDITED, BUT TOO LARGE FOR THIS HARDWARE. The claim stands on its
+      audit; the exclusion is a hardware limit and must be recorded as such.
+      Example: PlasticConfig (N_rho = 7), audited in AXIOM-AUDIT-round5.md.
+
+  [ ] Record every quarantine in UNBUILT.md with its kind, its evidence, and
+      the route to resurrection (heavy.yml, or a larger machine).
+
+15.5 WHAT COUNTS AS DONE
+-------------------------
+
+  [ ] A session's report is not an audit. The distinguishing question is
+      always: is there an AXIOM-AUDIT document naming this identifier? If
+      not, the result is drafted, not certified, whatever the census says.
+  [ ] file set = import closure of All.lean. A file nothing imports is
+      invisible to every build and every audit. Square.lean sat in the tree
+      with fifteen errors through two audit cycles for exactly this reason;
+      four more files were later found outside the closure. Check the
+      TRANSITIVE closure; the only permitted exceptions are AxiomAudit.lean
+      (which inspects the environment rather than joining it) and Main.lean.
+  [ ] Never assert that a check was run before running it. This applies to
+      the commissioner as much as to the prover: an early version of
+      MERGE-NOTES.md claimed a duplicate-name scan had found nothing, written
+      before the scan had been run; when run, it reported hundreds of
+      (harmless) matches. The claim was withdrawn.
+
+15.6 DOCUMENTATION GAPS KNOWN AT THE TIME OF WRITING
+-----------------------------------------------------
+
+  [ ] This checklist has NO round 9 section (the Fourier round: Lucas,
+      FourierFloor, FourierGeneral, FourierReflect, PlasticFourier,
+      SupergoldenFourier, TribonacciFourier, FourierEnclosure, RecordGaps,
+      Immortal). It is covered by AXIOM-AUDIT-round9.md and CENSUS-round9.md.
+  [ ] There is NO AXIOM-AUDIT-round11.md, and no census, scruples or audit
+      for the final interrupted session (KindDimLower, KindBox). Those files
+      are in the tree and sorry-free but uncertified by any audit, so by
+      15.5 the paper does not claim them.
+  [ ] ABANDONED.md section 1 is stale: it records the Hausdorff lower bound
+      as abandoned, though KindDimLower.lean proves it.

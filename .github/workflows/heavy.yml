@@ -1,0 +1,60 @@
+name: Heavy modules (manual)
+
+# The two quarantined groups: the 25,525-state plastic closure and the
+# multiplicity-49 certificate. Both exceed the memory of the standard runner.
+# Run this manually (Actions -> Heavy modules -> Run workflow); it restores the
+# main build cache, adds a large swap file, and banks whatever it manages,
+# so repeated runs make cumulative progress.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  heavy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Add swap
+        run: |
+          sudo fallocate -l 32G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
+
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: false
+          use-mathlib-cache: true
+
+      - name: Restore project build
+        uses: actions/cache/restore@v4
+        with:
+          path: .lake
+          key: heavy-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            heavy-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+            lake-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+
+      - name: Build quarantined modules, one at a time
+        run: |
+          set -e
+          for m in PlasticConfig PlasticOrbitCount ExpSharpestData0 ExpSharpestData1 \
+                   ExpSharpestData2 ExpSharpestData3 ExpSharpestData4 ExpSharpestData5 \
+                   ExpSharpestData6 ExpSharpestData7 ExpSharpestData8 ExpSharpestData \
+                   ExpSharpestChecks0 ExpSharpestChecks1 ExpSharpestChecks2 \
+                   ExpSharpestChecks3 ExpSharpestChecks4 ExpSharpestChecks5 \
+                   ExpSharpestChecks6 ExpSharpestChecks7 ExpSharpestChecks8 ExpSharpest; do
+            echo "=== $m"
+            lake build RequestProject.$m
+          done
+
+      - name: Save
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .lake
+          key: heavy-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}

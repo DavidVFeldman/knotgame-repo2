@@ -32,8 +32,6 @@ import RequestProject.RecordDepths
 import RequestProject.PlasticIndex
 import RequestProject.PlasticTbl
 import RequestProject.PlasticCert
-import RequestProject.PlasticConfig
-import RequestProject.PlasticOrbitCount
 import RequestProject.ExpLower
 import RequestProject.ExpWindow
 import RequestProject.ExpSharp
@@ -55,6 +53,13 @@ import RequestProject.CircleForm
 import RequestProject.KindDim
 import RequestProject.Square
 import RequestProject.RecordLower
+-- PlasticConfig (the 25,525-state closure at the plastic number) and its
+-- dependent PlasticOrbitCount are quarantined from this closure: the kernel
+-- reduction exceeds the CI runner's memory. UNLIKE the ExpSharpest case, the
+-- results in them ARE covered by a completed audit (AXIOM-AUDIT-round5.md),
+-- so the paper's claim N_rho = 7 stands on that audit; the exclusion here is
+-- a hardware limit, not a doubt. See heavy.yml and UNBUILT.md.
+--
 -- ExpSharpest (and its Data*/Checks* files) is quarantined from the import
 -- closure: its kernel checks exceed the memory of the CI runner, so it has
 -- never completed a build and has no axiom audit. See ABANDONED.md and the
