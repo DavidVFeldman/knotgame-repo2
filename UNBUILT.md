@@ -1,5 +1,11 @@
 # Files outside the verified closure
 
+All files named below now live in `quarantine/`, NOT in `RequestProject/`.
+That directory is a Lake library built by directory glob, so a file sitting
+in it is compiled by `lake build` whether or not `All.lean` imports it;
+removing the import alone does not exclude it from the build.
+
+
 ## KindBox.lean — DOES NOT COMPILE
 
 The box-dimension file for the kind set at lambda = 3/2. A session reported it
