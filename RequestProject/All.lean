@@ -65,7 +65,11 @@ import RequestProject.RecordLower
 -- never completed a build and has no axiom audit. See ABANDONED.md and the
 -- CI workflow. The audited sharper rate is ExpSharper's 26^(1/14).
 import RequestProject.KindDimLower
-import RequestProject.KindBox
+-- KindBox (box dimension of the kind set) is quarantined: it DOES NOT
+-- COMPILE. CI shows unknown namespace `KindDimLower`, unknown identifiers
+-- `cyl`, `dexp`, `atTop`, `Tendsto`, and two declarations using `sorry`. It
+-- was reported complete and sorry-free by the session that wrote it; it had
+-- never been elaborated. See UNBUILT.md.
 import RequestProject.Lucas
 import RequestProject.FourierFloor
 import RequestProject.PlasticFourier

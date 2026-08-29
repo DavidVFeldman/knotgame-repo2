@@ -1,5 +1,27 @@
 # Files outside the verified closure
 
+## KindBox.lean — DOES NOT COMPILE
+
+The box-dimension file for the kind set at lambda = 3/2. A session reported it
+as "a complete 383-line KindBox.lean ... covering numbers, the triadic upper
+bound, the Frostman lower bound, the bracketing index, the squeeze from
+triadic to all scales, and both box dimensions equal to log 2 / log 3. It has
+no `sorry`." CI run #4 shows otherwise: elaboration fails at line 41
+(`unknown namespace KindDimLower`) and cascades -- `cyl`, `dexp`, `atTop`,
+`Tendsto` all unknown, apparently missing `open` statements and written
+against a different version of its neighbours -- and two declarations are
+reported as using `sorry`.
+
+The file had never been elaborated: nothing imported it, so no build and no
+audit ever touched it. This is the second occurrence of that failure mode
+(the first was Square.lean, fifteen errors, found the same way), and the
+reason the invariant *file set = import closure* is now checked every round.
+
+The paper claims NOTHING about box dimension, and its Hausdorff claims are
+separately marked as awaiting an audit, so no correction to the paper follows.
+KindDim.lean and KindDimLower.lean, by contrast, both COMPILE (CI run #4).
+
+
 ## PlasticConfig / PlasticOrbitCount — excluded for hardware, NOT for doubt
 
 The 25,525-state configuration closure at the plastic number, carrying

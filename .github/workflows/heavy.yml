@@ -19,18 +19,19 @@ jobs:
       # The runner already has an active /swapfile, so write a second one at a
       # different path. Non-fatal: swap is insurance, not a requirement, and a
       # runner that refuses it should still attempt the build.
+      # ADD swap; never `swapoff -a` first -- an earlier version did, and when
+      # the allocation then failed the job ran with LESS headroom than default.
       - name: Add swap
         continue-on-error: true
         run: |
           set -x
-          sudo swapoff -a || true
-          sudo rm -f /mnt/extraswap
+          df -h /mnt /
           sudo fallocate -l 32G /mnt/extraswap || sudo dd if=/dev/zero of=/mnt/extraswap bs=1M count=32768
           sudo chmod 600 /mnt/extraswap
           sudo mkswap /mnt/extraswap
           sudo swapon /mnt/extraswap
+          swapon --show
           free -h
-          df -h /mnt
 
       - uses: leanprover/lean-action@v1
         with:
