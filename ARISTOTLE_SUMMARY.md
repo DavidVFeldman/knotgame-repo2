@@ -1,3 +1,32 @@
+# Summary of changes for run ff95a355-16bc-475b-bc67-7627e0c24151
+Round 13 of the knot-game commission (tasks T36–T39) is complete; everything is committed and pushed. Only the modules authored this round were built, and `#print axioms` was run on this round's own theorems only, as the commission's operating rules require.
+
+## Theorems proved this round (all sorry-free, all reporting `[propext, Classical.choice, Quot.sound]`)
+
+**T36 — box dimension of the kind set at λ = 3/2** (`RequestProject/KindBox.lean`, the repair of the file that had never elaborated):
+- `coverNum_K_le` — `N(K, 3^-n) ≤ 2^n` (the 2^n cylinders cover);
+- `le_coverNum_K` — `2^n ≤ 4·N(K, 3^-n)` (Frostman);
+- `tendsto_boxQuot` — the squeeze from triadic scales to **all** scales: `log N(K,r)/log(1/r) → log 2/log 3` as `r → 0⁺` (this was left unproved in the old file);
+- `upperBoxDim_K`, `lowerBoxDim_K`, `boxDim_K` — both box dimensions equal `log 2 / log 3`.
+
+**T38 — the counting operator** (`RequestProject/CountingOperator.lean`):
+- `T_one` — `T 1 = (2/λ)·1`, with the four preimage lemmas and branch injectivity behind it;
+- `bcount_eq_card`, `integral_bcount` — `∫₀¹ B_λ(m,x) dx = (2/λ)^m` for the two-branch count;
+- `integral_kcount`, `integral_kcount_three_halves` — `∫₀¹ K_λ(m,x) dx = (3/λ)^m` for the project's existing kind words. **Correction:** the commissioned `(2/λ)^m` is false for those words (they use the three-letter move alphabet, each letter a bijection from its legal domain onto (0,1)); `2/λ` is right for the branch count that `T` transfers. Both true statements are formalised, and at λ = 3/2 the constant `3/λ = 2` reproduces the known exact count `2^m`.
+
+**T39 — the trapezoid at λ = √2** (`RequestProject/Trapezoid.lean`, the optional task, attempted):
+- `bval_split`, `evenPart_mem_Icc`, `oddPart_mem_Icc` — the even/odd splitting of the backward series, with exact ranges `[0, 2−√2]` and `[0, √2−1]`;
+- `unifSum_apply`, `unifSum_eq_withDensity` — a general convolution formula: the sum of two uniform variables on `(0,a)`, `(0,b)` has density `max 0 (min a x − max 0 (x−b))`;
+- `convDens_sqrt_two`, `trapezoid_law`, `isProbabilityMeasure_trapDens`, `trapezoid_of_split` — the trapezoidal density (plateau `(2+√2)/2`), and that it is a probability measure.
+
+**T37 — paperwork** (no theorems): `AXIOM-AUDIT-round11.md`; `CENSUS-round12.md`, `SCRUPLES-round12.md`, `AXIOM-AUDIT-round12.md` for the interrupted session that produced `KindDimLower.lean`; `CENSUS-round13.md`, `SCRUPLES-round13.md` (its §1 displays the covering-number and box-dimension definitions and argues they are the standard ones, including the triadic→all-scales squeeze), `AXIOM-AUDIT-round13.md`; `ABANDONED.md` §1 rewritten (it wrongly recorded the Hausdorff lower bound and box dimension as abandoned) plus a new §9; `UNBUILT.md`'s KindBox entry closed; `GITHUB_HANDOFF_CHECKLIST` gains round-9, rounds-11–12 and round-13 sections with §15.6 pruned; `README.md` updated; the three modules added to the CI module list; and `heavy.yml` no longer overwrites the repaired `KindBox.lean` with the old quarantined copy. One stale docstring in `KindDimLower.lean` (a forward reference to three declarations that were never written) was corrected — the only edit to an inherited Lean file besides the three added imports in `All.lean`.
+
+## Theorems still to prove
+
+1. **The one open step of `prop:trapezoid`**: that for fair independent bits the even-indexed and odd-indexed sub-series at λ = √2 are independent and each uniform. It is not assumed silently — it is the explicit hypothesis of `trapezoid_of_split`. Everything downstream of it is proved. Recorded in `ABANDONED.md` §9 with a resumption plan (a de-interleaving measure isomorphism proved on dyadic rectangles).
+2. **Everything already outstanding before this round, untouched by it** (`ABANDONED.md` §2–§8): the aspirational certified growth rate 1.29 at λ = 3/2 (the ceiling reached is `49^(1/16) ≈ 1.27537`, and that certificate is outside the import closure, so the strongest *audited* rate remains `26^(1/14) ≈ 1.26203`); exact record depths beyond k = 4; the exhaustiveness half of `prop:twostep`; the commissioned width of the above-φ parameter window; the paper's explicitly computational remarks and open questions; and the three criteria that are certified for no parameter.
+
+
 # Summary of changes for run 710c80b2-341d-4b2c-bd11-fc3ba0ecf782
 Round 8 of the knot-game formalization (targets T22–T26 of `COMMISSION-knotgame6.md`) is complete. The whole project builds, contains no `sorry`, `admit`, added `axiom`, `@[implemented_by]` or `native_decide`, and the semantic axiom audit passes with **1198 theorems, axioms confined to `[propext, Classical.choice, Quot.sound]`** (up from 1084 at the end of round 7).
 
@@ -93,3 +122,14 @@ Two findings are reported rather than papered over:
 **Consistency remarks.** Round 1's sharp `sup N φ = 2` stands; the bound 9 is strictly weaker and obtained by an independent argument. At the plastic number, `34` is what the gap argument yields; the true value 7 is certified neither here nor in round 1. T7 certifies that every reachable knot position is on the 153-point list, not that the list is minimal, and certifies `239/100000` as a lower bound for the smallest gap rather than the exact minimum — neither is needed by the argument.
 
 **Documents delivered:** `CENSUS-round2.md`, `SCRUPLES-round2.md`, `AXIOM-AUDIT-round2.md`, a round-2 addendum appended to `PLASTIC-REPORT.md` (explaining why the orbit computation is cheap when the configuration one is not), and a round-2 section in `GITHUB_HANDOFF_CHECKLIST`; `README.md` updated.
+# Summary of changes for the round-13 session (T36–T39)
+
+Round 13 of the knot-game formalization (`COMMISSION-knotgame10.md`, tasks T36–T39) is complete. Per the round's operating rules only the modules authored this round were built (never a bare `lake build`), and `#print axioms` was run on this round's own theorems only (never a tree-wide audit). No `sorry`, `admit`, added `axiom`, `@[implemented_by]` or `native_decide`; every report is `[propext, Classical.choice, Quot.sound]`.
+
+New Lean files, all imported by `RequestProject/All.lean` and added to the CI module list:
+
+- `RequestProject/KindBox.lean` — **T36**, the repair. The old file had never elaborated (it opened a namespace `KindDimLower` that does not exist — the real one is `KnotGame.KindLower` — its bracketing index rested on a nonexistent lemma, and the squeeze from triadic to all scales was left unproved). Rewritten against what `KindDim.lean` and `KindDimLower.lean` actually export: `coverSizes`, `coverNum`, `upperBoxDim`, `lowerBoxDim` (limsup/liminf of `log N(K,r)/log(1/r)` over the filter of *all* scales `r → 0⁺`), the triadic bounds `N(K,3^{-n}) ≤ 2^n` and `2^n ≤ 4·N(K,3^{-n})`, the bracketing index `bidx`, the squeeze `tendsto_boxQuot` (now **proved**), and `boxDim_K`: both box dimensions of the kind set at `λ = 3/2` are `log 2 / log 3`.
+- `RequestProject/CountingOperator.lean` — **T38** (`prop:lebeigen`). `T_one` (`T 1 = (2/λ)·1`), the branch count with `bcount_eq_card` and `integral_bcount : ∫₀¹ B_λ(m,x) dx = (2/λ)^m`, and the move-word count with `integral_kcount : ∫₀¹ K_λ(m,x) dx = (3/λ)^m`. **Correction to the commission:** with the project's existing kind words (three-letter move alphabet) the commissioned constant `2/λ` is false; the true constant is `3/λ`, and `2/λ` is correct for the two-branch count that `T` transfers. Both true statements are formalised; the check is at `λ = 3/2`, where `3/λ = 2` reproduces round 8's exact count `2^m`.
+- `RequestProject/Trapezoid.lean` — **T39** (`prop:trapezoid`, optional). The even/odd splitting of the backward series at `λ = √2` (`bval_split`) with the exact ranges `[0, 2−√2]` and `[0, √2−1]`; a general convolution formula for two uniform laws (`unifSum_eq_withDensity`); its evaluation at those intervals (`convDens_sqrt_two`); and `trapezoid_law`, the trapezoidal density with plateau `(2+√2)/2`, a probability measure (`isProbabilityMeasure_trapDens`), together with `trapezoid_of_split`. Not formalised, and not assumed silently: the independence and uniformity of the two parts, which is the explicit hypothesis of `trapezoid_of_split` and is recorded in `ABANDONED.md` §9.
+
+**T37, the missing paperwork:** `AXIOM-AUDIT-round11.md` (reconstructed); `CENSUS-round12.md`, `SCRUPLES-round12.md`, `AXIOM-AUDIT-round12.md` for the interrupted session that produced `KindDimLower.lean`; `ABANDONED.md` §1 rewritten (it recorded as abandoned the Hausdorff lower bound and the box dimension, both of which are now proved) and a new §9; `UNBUILT.md`'s `KindBox.lean` entry closed; `GITHUB_HANDOFF_CHECKLIST` gains a round-9 section, a rounds-11–12 section and a round-13 section, with §15.6 pruned of what this round closes; `README.md` updated; `heavy.yml` no longer overwrites the repaired `KindBox.lean` with the old quarantined copy. One stale docstring in `KindDimLower.lean` (a forward reference to three declarations that were never written) was corrected — the only edit to an inherited Lean file besides the three added imports in `All.lean`.

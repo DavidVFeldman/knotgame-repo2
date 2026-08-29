@@ -58,6 +58,10 @@ jobs:
           c=$(git log --diff-filter=D --format=%H -1 -- 'quarantine/KindBox.lean' || true)
           if [ -n "$c" ]; then
             git checkout "$c^" -- quarantine || true
+            # KindBox.lean was repaired in round 13 and lives in the working
+            # tree; never overwrite it with the old, unbuildable quarantined
+            # copy.
+            rm -f quarantine/KindBox.lean
             cp quarantine/*.lean RequestProject/ || true
           fi
           ls RequestProject/ | grep -E "KindBox|PlasticConfig|ExpSharpest" || \

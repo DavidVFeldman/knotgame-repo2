@@ -65,11 +65,19 @@ import RequestProject.RecordLower
 -- never completed a build and has no axiom audit. See ABANDONED.md and the
 -- CI workflow. The audited sharper rate is ExpSharper's 26^(1/14).
 import RequestProject.KindDimLower
--- KindBox (box dimension of the kind set) is quarantined: it DOES NOT
--- COMPILE. CI shows unknown namespace `KindDimLower`, unknown identifiers
--- `cyl`, `dexp`, `atTop`, `Tendsto`, and two declarations flagged by Lean as
--- incomplete. The session that wrote it reported it as complete and free of
--- gaps; it had never been elaborated. See UNBUILT.md.
+-- KindBox (box dimension of the kind set) was quarantined through round 12 as
+-- unbuildable; round 13 (T36) restated it against what KindDim and
+-- KindDimLower actually export, replaced the bracketing index, and supplied
+-- the missing squeeze from triadic to all scales. It now elaborates and is
+-- back in the import closure.
+import RequestProject.KindBox
+-- CountingOperator (round 13, T38): the two-branch transfer operator T, the
+-- eigenvalue T 1 = (2/lam) 1, and the two mean-count integrals.
+import RequestProject.CountingOperator
+-- Trapezoid (round 13, T39): the even/odd splitting of the backward series at
+-- lambda = sqrt 2, the convolution of the two uniform laws, and the
+-- trapezoidal density.
+import RequestProject.Trapezoid
 import RequestProject.Lucas
 import RequestProject.FourierFloor
 import RequestProject.PlasticFourier

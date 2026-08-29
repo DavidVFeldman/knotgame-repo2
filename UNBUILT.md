@@ -10,26 +10,30 @@ import. To resurrect one, restore it from history into `RequestProject/`,
 add its import to `All.lean`, and add it to the module list in ci.yml.
 
 
-## KindBox.lean — DOES NOT COMPILE
+## KindBox.lean — CLOSED IN ROUND 13, no longer unbuilt
 
-The box-dimension file for the kind set at lambda = 3/2. A session reported it
-as "a complete 383-line KindBox.lean ... covering numbers, the triadic upper
-bound, the Frostman lower bound, the bracketing index, the squeeze from
-triadic to all scales, and both box dimensions equal to log 2 / log 3. It has
-no `sorry`." CI run #4 shows otherwise: elaboration fails at line 41
-(`unknown namespace KindDimLower`) and cascades -- `cyl`, `dexp`, `atTop`,
-`Tendsto` all unknown, apparently missing `open` statements and written
-against a different version of its neighbours -- and two declarations are
-reported as using `sorry`.
+HISTORICAL ENTRY, kept for the record. The box-dimension file for the kind set
+at lambda = 3/2 was reported by an earlier session as "a complete 383-line
+KindBox.lean ... covering numbers, the triadic upper bound, the Frostman lower
+bound, the bracketing index, the squeeze from triadic to all scales, and both
+box dimensions equal to log 2 / log 3. It has no `sorry`." CI run #4 showed
+otherwise: elaboration failed at line 41 (`unknown namespace KindDimLower`)
+and cascaded -- `cyl`, `dexp`, `atTop`, `Tendsto` all unknown, apparently
+missing `open` statements and written against a different version of its
+neighbours -- and two declarations were reported as incomplete.
 
 The file had never been elaborated: nothing imported it, so no build and no
 audit ever touched it. This is the second occurrence of that failure mode
 (the first was Square.lean, fifteen errors, found the same way), and the
 reason the invariant *file set = import closure* is now checked every round.
 
-The paper claims NOTHING about box dimension, and its Hausdorff claims are
-separately marked as awaiting an audit, so no correction to the paper follows.
-KindDim.lean and KindDimLower.lean, by contrast, both COMPILE (CI run #4).
+Round 13 (T36) rewrote the file from scratch against what KindDim.lean and
+KindDimLower.lean actually export -- the real namespace being
+`KnotGame.KindLower`, not `KindDimLower` -- redefined the bracketing index
+without the nonexistent lemma, and PROVED the squeeze `tendsto_boxQuot` that
+the old file had left unproved. `RequestProject/KindBox.lean` now elaborates,
+is imported by `All.lean`, is listed in ci.yml, and is audited in
+AXIOM-AUDIT-round13.md. Nothing about it is unbuilt any more.
 
 
 ## PlasticConfig / PlasticOrbitCount — excluded for hardware, NOT for doubt

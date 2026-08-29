@@ -32,9 +32,12 @@ Lebesgue measure on `[0,1)` by an explicit *coding map* `G`:
   length `2^{-n}`, whence the Frostman estimate
   `kindMeasure A ≤ 4 · 2^{-n}` (`kindMeasure_le`).
 
-The same estimate gives the covering-number bounds `coverK_lower` and
-`coverK_upper`, i.e. the box dimension along the triadic scales
-(`box_dimension_triadic`).
+The same estimate is what feeds the covering-number bounds of
+`RequestProject/KindBox.lean` (round 13), where the box dimension is computed;
+no covering-number statement is proved in *this* file.  (An earlier draft of
+this docstring promised `coverK_lower`, `coverK_upper` and
+`box_dimension_triadic` here; that session was interrupted before they were
+written, and round 13 supplies them under different names in `KindBox.lean`.)
 
 ## Conventions (SCRUPLES)
 

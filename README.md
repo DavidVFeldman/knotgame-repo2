@@ -79,11 +79,25 @@ Start here:
   in `cor:decide`, and every other deviation.
 * [`AXIOM-AUDIT-round11.md`](AXIOM-AUDIT-round11.md) — round 11: the audit
   output, automatic and per-target.
+* [`CENSUS-round12.md`](CENSUS-round12.md), [`SCRUPLES-round12.md`](SCRUPLES-round12.md),
+  [`AXIOM-AUDIT-round12.md`](AXIOM-AUDIT-round12.md) — round 12: the Hausdorff
+  *lower* bound for the kind set, hence `dimH K_{3/2} = log 2 / log 3`
+  (`RequestProject/KindDimLower.lean`).  Round 12 was interrupted before
+  writing its paperwork; these three documents were reconstructed in round 13
+  from the source, and say so in their headers.
+* [`CENSUS-round13.md`](CENSUS-round13.md), [`SCRUPLES-round13.md`](SCRUPLES-round13.md),
+  [`AXIOM-AUDIT-round13.md`](AXIOM-AUDIT-round13.md) — round 13: the box
+  dimension of the kind set (T36), the missing paperwork of rounds 11 and 12
+  (T37), the counting operator (T38) and the trapezoid at `λ = √2` (T39).
+  `SCRUPLES-round13.md` §1 displays the definitions of covering number and box
+  dimension and argues that they are the standard ones.
 * [`ABANDONED.md`](ABANDONED.md) — **everything this development does not
-  deliver**, in one place: the dimension lower bound, the growth rate beyond
-  `49^(1/16)`, the record depths beyond `k = 4`, the exhaustiveness half of
-  `prop:twostep`, the commissioned width of the above-`φ` window, and the
-  paper's computational remarks and open questions.
+  deliver**, in one place: the growth rate beyond `49^(1/16)`, the record
+  depths beyond `k = 4`, the exhaustiveness half of `prop:twostep`, the
+  commissioned width of the above-`φ` window, the independence step of
+  `prop:trapezoid`, and the paper's computational remarks and open questions.
+  (Its §1, the dimension of the kind set, is now **closed**: rounds 12 and 13
+  proved the Hausdorff lower bound and both box dimensions.)
 * [`GITHUB_HANDOFF_CHECKLIST`](GITHUB_HANDOFF_CHECKLIST) — status of every work
   order and every round-2 target, the standing constraints, and how to
   reproduce.
@@ -161,10 +175,14 @@ Start here:
 | `RequestProject/CircleForm.lean` | round 11, `prop:circle`: the circle model (`rot`, `Dop`) and the three normal forms `circle_L`, `circle_R`, `circle_M`, with the count of marked points (`card_marked`) |
 | `RequestProject/Immortal.lean` | round 11, `prop:immortal32`: infinitely many immortal births force `N = ∞` (`ImmortalBirth`, `N_unbounded_of_immortal`), for every `λ > 1` |
 | `RequestProject/Square.lean` | round 11, `prop:square` / `prop:squaresurv`: the binary square at `λ = √2` (`alpha`, `beta`, `square_normal_form`) and the survival table on the five regions (`squaresurv`, `spares_region₁…₅`) |
-| `RequestProject/KindDim.lean` | round 11, `prop:kinddim` (upper half): the kind set at `λ = 3/2` is Lebesgue null (`volume_K`) and has `dimH K ≤ log 2 / log 3` (`dimH_K_le`). The matching lower bound and the box dimension are **not** proved; see `ABANDONED.md` §1 |
+| `RequestProject/KindDim.lean` | round 11, `prop:kinddim` (upper half): the kind set at `λ = 3/2` is Lebesgue null (`volume_K`) and has `dimH K ≤ log 2 / log 3` (`dimH_K_le`) |
 | `RequestProject/RecordLower.lean` | round 11, `prop:lowerbound` / `cor:recursive`: `2k ≤ d λ k + 1` and `d λ k + 2 ≤ d λ (k+1)` under the attainability hypothesis, via the chopping lemma `births_le_births_take_add_one` |
 | `RequestProject/ExpSharpestData*.lean`, `ExpSharpestChecks*.lean` | round 11: generated data — 2 008 cells tiling `[1/6,5/6]`, each with 49 distinct words of length 16 — and their kernel checks in 41 groups |
 | `RequestProject/ExpSharpest.lean` | round 11: the sharpest certified bound at `λ = 3/2`, `49 ^ (m/16) ≤ K (3/2) m` (`fortynine_pow_le_K`), rate `49^(1/16) ≈ 1.27537` (`sharpest_rate`, `sharpest_rate_real`) |
+| `RequestProject/KindDimLower.lean` | round 12, `prop:kinddim` (lower half): the coding map `G` of the binary survival tree, the measure `kindMeasure` it carries (`kindMeasure_K`), the Frostman estimate (`kindMeasure_le`, `kindMeasure_le_of_ediam`), and hence `log 2 / log 3 ≤ dimH K` (`le_dimH_K`) and `dimH K = log 2 / log 3` (`dimH_K_eq`) |
+| `RequestProject/KindBox.lean` | round 13, T36: covering numbers (`coverSizes`, `coverNum`), the box dimensions (`upperBoxDim`, `lowerBoxDim`) over *all* scales `r → 0⁺`, the triadic bounds, the squeeze `tendsto_boxQuot`, and `boxDim_K`: both box dimensions of the kind set at `λ = 3/2` are `log 2 / log 3` |
+| `RequestProject/CountingOperator.lean` | round 13, T38 (`prop:lebeigen`): the transfer operator `T` and its eigenvalue (`T_one`, `T 1 = (2/λ)·1`); the branch count with `∫₀¹ B_λ(m,x) dx = (2/λ)^m` (`integral_bcount`, `bcount_eq_card`); the move-word count with `∫₀¹ K_λ(m,x) dx = (3/λ)^m` (`integral_kcount`) — the constant is `3/λ`, not `2/λ`, for the three-letter alphabet, and at `λ = 3/2` it reproduces the known `2^m` |
+| `RequestProject/Trapezoid.lean` | round 13, T39 (`prop:trapezoid`): the even/odd splitting of the backward series at `λ = √2` (`bval_split`) with ranges `[0, 2−√2]` and `[0, √2−1]`; the convolution of two uniform laws (`unifSum_eq_withDensity`); and the trapezoidal density with plateau `(2+√2)/2` (`trapDens`, `trapezoid_law`, `trapezoid_of_split`) |
 | `RequestProject/AxiomAudit.lean` | semantic audit of the axioms of every public theorem |
 
 ## Building
@@ -202,7 +220,7 @@ Both are untrusted; the kernel re-checks every cell they emit.
 Each round leaves three documents: a census of what was inherited and what is
 new (`CENSUS-round*.md`), a record of every deviation from the paper
 (`SCRUPLES-round*.md`), and the axiom report (`AXIOM-AUDIT-round*.md`).  The
-latest round is round 11 (`CENSUS-round11.md`, `SCRUPLES-round11.md`,
-`AXIOM-AUDIT-round11.md`); `GITHUB_HANDOFF_CHECKLIST` carries the per-round
+latest round is round 13 (`CENSUS-round13.md`, `SCRUPLES-round13.md`,
+`AXIOM-AUDIT-round13.md`); `GITHUB_HANDOFF_CHECKLIST` carries the per-round
 checklists, and `ABANDONED.md` collects, once and for all, what the
 development does not deliver and why.

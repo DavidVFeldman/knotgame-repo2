@@ -643,6 +643,64 @@ ROUND 8 -- the 3/2 reformulations, periodic yield, cylinder counts,
     lam.
 
 --------------------------------------------------------------------------
+ROUND 9 -- immortal births, the record-figure caption, and the Fourier
+           floor at the Pisot parameters (T27-T29)
+--------------------------------------------------------------------------
+
+  Census first: CENSUS-round9.md. Round 9 ran in parallel with round 10 from
+  the round-8 tree, and the parallel-run clause was observed: every new Lean
+  declaration is in a NEW file, and the only inherited Lean file edited is
+  RequestProject/All.lean (ten added imports).
+
+  [x] T27 (prop:immortal32). RequestProject/Immortal.lean. A control sequence
+      with infinitely many immortal births forces N = infinity
+      (N_unbounded_of_immortal), and the same at 3/2
+      (N_unbounded_of_immortal_three_halves). "Immortal" is the horizon-free
+      version of Translation.lean's finite-horizon MahlerAlive; that
+      horizon-free condition is the one genuinely new definition of the task.
+      The engine is the inherited unbounded_iff_mahler; lem:distinct is
+      reused, not re-proved.
+
+  [x] T28 (the caption of fig:records32). RequestProject/RecordGaps.lean.
+      Every caption claim about the seven record configurations, as decidable
+      statements over the exact integer model runZ of RunRational.lean:
+      record1 is added here (TwoStep.lean starts at k = 2), the minimum gap
+      is packaged by the new predicate IsMinGapAt rather than computed as a
+      real number, and no minimality claim is made beyond RecordDepths.lean's
+      d_{3/2}(k) for k <= 4.
+
+  [x] T29a (the Fourier floor at the golden ratio, paper section 11).
+      RequestProject/Lucas.lean (the Lucas sequence -- Mathlib has Nat.fib
+      but no lucas -- the trace identity, and the exact distance bound
+      ||phi^m|| <= phi^{-m}) and RequestProject/FourierFloor.lean (the
+      scaling identity (1-r) r^j xi_N = lam^{N-j} for every lam > 1, the
+      positivity of the two-sided cosine product, and the N -> infinity
+      limit). The Bernoulli convolution itself is NOT constructed: cosProd is
+      DEFINED as the cosine product, and nothing claims it is the Fourier
+      transform of a measure.
+
+  [x] T29b (optional) -- the certified enclosure of the golden floor in
+      [66/10^4, 67/10^4]. RequestProject/FourierEnclosure.lean, with
+      RequestProject/FourierReflect.lean. Twelve factors evaluated by exact
+      rational arithmetic plus the round-8 tail estimate; it is an enclosure,
+      not an evaluation, and no more digits are claimed.
+
+  [x] T29c (optional) -- the analogues at the plastic, supergolden and
+      tribonacci parameters. RequestProject/FourierGeneral.lean (the engine,
+      written once and instantiated three times, with the distance bound
+      stated for the SQUARE of the distance so that the complex conjugates
+      never appear), PlasticFourier.lean, SupergoldenFourier.lean,
+      TribonacciFourier.lean. No numerical enclosure is claimed at any of the
+      three.
+
+  Constraints respected: no sorry, no admit, no axiom, no
+  @[implemented_by], no native_decide. The tree-wide semantic audit passed
+  at the end of the round ("axiom audit passed: 1435 theorems, axioms
+  confined to [propext, Classical.choice, Quot.sound]"), up from 1198 at the
+  end of round 8. Per-target output is in AXIOM-AUDIT-round9.md; the
+  deviations are in SCRUPLES-round9.md.
+
+--------------------------------------------------------------------------
 ROUND 10 -- no recurrence at 3/2, a sharper certificate at 3/2, and
             exponential kind counts ABOVE the golden ratio (T30-T32)
 --------------------------------------------------------------------------
@@ -746,6 +804,86 @@ ROUND 10 -- no recurrence at 3/2, a sharper certificate at 3/2, and
     every cell over exact rationals.
 
 
+--------------------------------------------------------------------------
+ROUNDS 11-12 -- where the paperwork had fallen behind
+--------------------------------------------------------------------------
+
+  Round 11 (CENSUS-round11.md, SCRUPLES-round11.md) delivered Overlap,
+  PisotDecide, CircleForm, Immortal (general lam), Square, KindDim,
+  RecordLower and the ExpSharpest certificate, but never wrote its audit.
+  Round 12 delivered KindDimLower.lean -- the Hausdorff LOWER bound for the
+  kind set, hence dimH K_{3/2} = log 2 / log 3 -- and was interrupted before
+  writing any of its three documents.
+
+  Round 13 supplied the missing paperwork from the sources as they stand:
+  AXIOM-AUDIT-round11.md, CENSUS-round12.md, SCRUPLES-round12.md and
+  AXIOM-AUDIT-round12.md, each marked in its own header as a reconstruction.
+  Note what the round-11 audit records: the ExpSharpest files are OUTSIDE the
+  import closure and outside every audit, so the strongest AUDITED growth
+  rate at lam = 3/2 remains ExpSharper's 26 ^ floor(m/14), and the paper
+  states that figure.
+
+--------------------------------------------------------------------------
+ROUND 13 -- box dimension, the counting operator, the trapezoid, and the
+            paperwork (T36-T39)
+--------------------------------------------------------------------------
+
+  Census first: CENSUS-round13.md. Operating rules of this round: build only
+  named modules (never a bare lake build), audit only this round's own
+  theorems (never tree-wide), attempt nothing listed in UNBUILT.md. Three new
+  files; the only inherited Lean file edited is RequestProject/All.lean
+  (three added imports) plus one stale docstring corrected in
+  KindDimLower.lean. ci.yml's explicit module list gained the three modules.
+
+  [x] T36 (repair KindBox). RequestProject/KindBox.lean. The old file had
+      never elaborated: it opened a namespace KindDimLower that does not
+      exist (the real one is KnotGame.KindLower), its bracketing index rested
+      on a nonexistent lemma, and the squeeze from triadic scales to all
+      scales was left unproved. Rewritten against what KindDim.lean and
+      KindDimLower.lean actually export: coverNum (least number of sets of
+      diameter at most r covering the set), upperBoxDim and lowerBoxDim as
+      limsup/liminf of log N(K,r) / log(1/r) over the filter of ALL scales
+      r -> 0+, the triadic bounds N(K,3^-n) <= 2^n and 2^n <= 4 N(K,3^-n),
+      the squeeze tendsto_boxQuot (now PROVED), and boxDim_K: both box
+      dimensions equal log 2 / log 3. SCRUPLES-round13.md section 1 displays
+      the definitions and argues they are the standard ones.
+
+  [x] T37 (the missing paperwork). AXIOM-AUDIT-round11.md; CENSUS-round12.md,
+      SCRUPLES-round12.md, AXIOM-AUDIT-round12.md; ABANDONED.md section 1
+      rewritten (it recorded as abandoned what rounds 12 and 13 proved);
+      UNBUILT.md's KindBox entry closed; this checklist's round-9,
+      rounds-11-12 and round-13 sections, and section 15.6 pruned.
+
+  [x] T38 (prop:lebeigen). RequestProject/CountingOperator.lean. T_one: the
+      constant function 1 satisfies T 1 = (2/lam) 1. integral_bcount: the
+      mean over x in (0,1) of the number of legal BRANCH words of length m is
+      (2/lam)^m, with bcount_eq_card proving that the integrand really is
+      that cardinality. CORRECTION, recorded in the census and the scruples:
+      the commissioned identity with the project's existing KIND words is
+      FALSE -- those are words in the three-letter move alphabet, each letter
+      a bijection from its legal domain onto (0,1), so the constant is 3/lam,
+      and integral_kcount proves (3/lam)^m. The check is at lam = 3/2, where
+      3/lam = 2 reproduces round 8's exact count 2^m.
+
+  [x] T39 (optional; prop:trapezoid). RequestProject/Trapezoid.lean. The
+      even/odd splitting of the backward series at lam = sqrt 2 (bval_split)
+      with the exact ranges [0, 2-sqrt 2] and [0, sqrt 2 - 1]; a general
+      convolution formula for two uniform laws (unifSum_eq_withDensity); its
+      evaluation at those two intervals (convDens_sqrt_two); and
+      trapezoid_law, the trapezoidal density with plateau (2+sqrt 2)/2, a
+      probability measure. NOT formalised, and NOT assumed silently: that the
+      even and odd parts are independent and uniform. It is the explicit
+      hypothesis of trapezoid_of_split, and ABANDONED.md section 9 records
+      it.
+
+  Constraints respected: no sorry, no admit, no axiom, no @[implemented_by],
+  no native_decide, no decide at all (the three modules are analytic).
+  Per-theorem #print axioms output for all three modules is in
+  AXIOM-AUDIT-round13.md; every report is [propext, Classical.choice,
+  Quot.sound]. No tree-wide build and no tree-wide audit was run, by
+  instruction.
+
+
 ================================================================================
 15. OPERATIONS: PACKAGING, CI, AND WHAT COUNTS AS DONE
 ================================================================================
@@ -837,13 +975,20 @@ ROUND 10 -- no recurrence at 3/2, a sharper certificate at 3/2, and
 15.6 DOCUMENTATION GAPS KNOWN AT THE TIME OF WRITING
 -----------------------------------------------------
 
-  [ ] This checklist has NO round 9 section (the Fourier round: Lucas,
-      FourierFloor, FourierGeneral, FourierReflect, PlasticFourier,
-      SupergoldenFourier, TribonacciFourier, FourierEnclosure, RecordGaps,
-      Immortal). It is covered by AXIOM-AUDIT-round9.md and CENSUS-round9.md.
-  [ ] There is NO AXIOM-AUDIT-round11.md, and no census, scruples or audit
-      for the final interrupted session (KindDimLower, KindBox). Those files
-      are in the tree and sorry-free but uncertified by any audit, so by
-      15.5 the paper does not claim them.
-  [ ] ABANDONED.md section 1 is stale: it records the Hausdorff lower bound
-      as abandoned, though KindDimLower.lean proves it.
+  [x] CLOSED IN ROUND 13. The round-9 section is now above, and so are
+      sections for rounds 11-12 and 13.
+  [x] CLOSED IN ROUND 13. AXIOM-AUDIT-round11.md exists, and CENSUS-round12.md,
+      SCRUPLES-round12.md and AXIOM-AUDIT-round12.md cover the interrupted
+      session that produced KindDimLower.lean. KindBox.lean was repaired in
+      round 13 and is audited in AXIOM-AUDIT-round13.md; by 15.5 all of these
+      results may now be claimed.
+  [x] CLOSED IN ROUND 13. ABANDONED.md section 1 is rewritten: the Hausdorff
+      lower bound (round 12) and both box dimensions (round 13) are proved,
+      and the entry now records that rather than abandoning them.
+  [ ] The ExpSharpest certificate remains outside the import closure and
+      outside every audit; see UNBUILT.md. The strongest audited rate at
+      lam = 3/2 is ExpSharper's 26 ^ floor(m/14).
+  [ ] The one step of prop:trapezoid that round 13 did not formalise -- the
+      independence and uniformity of the even and odd parts of the backward
+      series at sqrt 2 -- is a hypothesis of trapezoid_of_split, recorded in
+      ABANDONED.md section 9.

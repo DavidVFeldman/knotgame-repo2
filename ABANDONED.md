@@ -11,40 +11,45 @@ The positive record is in `CENSUS-round*.md`, the deviations in
 
 ---
 
-## 1. `prop:kinddim` — the dimension of the kind set: the lower bound and the box dimension
+## 1. `prop:kinddim` — the dimension of the kind set  *(CLOSED in rounds 12–13)*
+
+**This entry is no longer an abandonment.**  It is kept, rewritten, because
+earlier rounds pointed at it.
 
 **Wanted.** At `λ = 3/2` the kind set `K_{3/2}` has Hausdorff *and box*
-dimension **exactly** `log 2 / log 3`.
+dimension exactly `log 2 / log 3`.
 
-**Delivered.** `RequestProject/KindDim.lean`:
-`volume_K : volume K = 0` and `dimH_K_le : dimH K ≤ ENNReal.ofReal (log 2 / log 3)`.
-Both are consequences of round 8's cylinder count
-`KindTree.card_kindWords_three_halves` (exactly `2^n` surviving words of length
-`n`) plus a covering argument.
+**Delivered — all of it.**
 
-**Abandoned.** The lower bound `log 2 / log 3 ≤ dimH K`, and the box dimension
-in either direction.
+| Statement | Lean | Round |
+| --- | --- | --- |
+| `volume K = 0` | `KindDim.volume_K` | 11 |
+| `dimH K ≤ log 2 / log 3` | `KindDim.dimH_K_le` | 11 |
+| `log 2 / log 3 ≤ dimH K` | `KindLower.le_dimH_K` | 12 |
+| `dimH K = log 2 / log 3` | `KindLower.dimH_K_eq` | 12 |
+| `upperBoxDim K = log 2 / log 3` | `KindBox.upperBoxDim_K` | 13 |
+| `lowerBoxDim K = log 2 / log 3` | `KindBox.lowerBoxDim_K` | 13 |
 
-**Why.** A cylinder *count* bounds a dimension only from above.  The lower
-bound needs a mass distribution (Frostman) argument: the natural measure that
-gives every level-`n` surviving cylinder mass `2^{-n}`, together with a
-Frostman estimate `μ(B(x,ρ)) ≲ ρ^{log 2/log 3}`, which in turn needs control of
-how many level-`n` cylinders can meet a single interval of length `3^{-n}` —
-i.e. a separation property of the survival tree that the count alone does not
-supply and that round 8 did not establish.  The box dimension needs, in
-addition, that the covering by surviving cylinders is efficient at *every*
-scale, not only at the scales `3^{-n}`.
+The lower bound is the mass distribution principle applied to the push-forward
+`KindLower.kindMeasure` of Lebesgue measure on `[0,1)` along the binary coding
+of the survival tree, which is binary because exactly one of the three moves is
+fatal at each reachable position (round 8's `Ternary.exists_unique_fatal`) —
+precisely the separation property whose absence this entry used to give as the
+reason for abandoning.  The box dimension follows from the same Frostman
+estimate together with the bracketing of an arbitrary scale between two triadic
+ones; both box dimensions are computed over *all* scales `r → 0⁺`, not only the
+triadic ones (`KindBox.tendsto_boxQuot`).  See `CENSUS-round12.md`,
+`SCRUPLES-round12.md`, `CENSUS-round13.md` and `SCRUPLES-round13.md` §1.
 
-**To resume.** Establish that distinct level-`n` surviving cylinders are
-separated (or bound the multiplicity of overlap), build the Bernoulli-type
-measure on `K` as an inverse limit over the tree, and feed it to Mathlib's
-Frostman-style lower bounds for `dimH`.  Nothing in the present tree is an
-obstruction; the work simply was not done.
+**Still not claimed.**  That `kindMeasure` is the `log 2 / log 3`-dimensional
+Hausdorff measure on `K`, or the unique self-similar measure on it; and any
+general theory of the box dimension beyond the definitions this one set needed.
 
-**Standing since:** round 8, where the same item (then called T24c) was
-recorded as "not attempted and not claimed".
+**History.** Recorded as abandoned from round 8 (as T24c) to round 11; closed
+by round 12 (Hausdorff) and round 13 (box).
 
 ---
+
 
 ## 2. The aspirational certified growth rate `1.29` at `λ = 3/2`
 
@@ -195,3 +200,40 @@ no `λ`, and which therefore prove nothing unconditional:
 
 Establishing any of them at `λ = 3/2` would settle the paper's central
 question; that is exactly the open problem of §6 and is not attempted.
+
+---
+
+## 9. `prop:trapezoid` — the independence of the even and odd parts at `λ = √2`
+
+**Wanted.** The backward measure at `λ = √2` is the law of
+`(1−r) Σ_j ε_j r^j` with fair independent bits and `r = 1/√2`; since `r² = 1/2`,
+the even- and odd-indexed sub-series are independent uniform variables on
+`[0, 2−√2]` and `[0, √2−1]`, and the measure is their convolution, the
+trapezoidal density.
+
+**Delivered** (round 13, `RequestProject/Trapezoid.lean`): the algebraic
+splitting `bval_split` with the two exact ranges (`evenPart_mem_Icc`,
+`oddPart_mem_Icc`); the general convolution formula
+`unifSum_eq_withDensity`; its evaluation at the two intervals in question
+(`convDens_sqrt_two`); the trapezoid law `trapezoid_law`, with plateau
+`(2+√2)/2`, and the fact that it is a probability measure
+(`isProbabilityMeasure_trapDens`); and the packaging `trapezoid_of_split`.
+
+**Abandoned.** The single probabilistic step: that for fair independent bits
+the even-indexed and odd-indexed sub-series are independent and each uniform.
+It is not assumed silently — it is the explicit hypothesis `hEO` of
+`trapezoid_of_split`.
+
+**Why.** It needs the law of the bit sequence as a measure — an infinite
+product measure, or equivalently Lebesgue measure on `[0,1)` read through
+binary digits — plus the de-interleaving measure isomorphism
+`[0,1) ≅ [0,1) × [0,1)` that sends a real to its even-digit and odd-digit
+parts.  The isomorphism is elementary but is a development in its own right (a
+π-system argument over dyadic rectangles), and T39 was the optional task of a
+small round.
+
+**To resume.** Build the de-interleaving map, prove it measure preserving by
+checking dyadic rectangles and appealing to uniqueness of measures agreeing on
+a generating π-system, and discharge `hEO`.  Nothing else is missing: the rest
+of `prop:trapezoid` is certified.
+
