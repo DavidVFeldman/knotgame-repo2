@@ -15,6 +15,8 @@ jobs:
     timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # The runner already has an active /swapfile, so write a second one at a
       # different path. Non-fatal: swap is insurance, not a requirement, and a
@@ -47,6 +49,19 @@ jobs:
           restore-keys: |
             heavy-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
             lake-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+
+      # The quarantined modules are not in the working tree; restore them from
+      # the commit that removed them before attempting a build.
+      - name: Restore quarantined modules from history
+        run: |
+          set -e
+          c=$(git log --diff-filter=D --format=%H -1 -- 'quarantine/KindBox.lean' || true)
+          if [ -n "$c" ]; then
+            git checkout "$c^" -- quarantine || true
+            cp quarantine/*.lean RequestProject/ || true
+          fi
+          ls RequestProject/ | grep -E "KindBox|PlasticConfig|ExpSharpest" || \
+            { echo "quarantined modules not found in history; nothing to do"; exit 0; }
 
       - name: Build quarantined modules, one at a time
         run: |

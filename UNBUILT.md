@@ -1,9 +1,13 @@
 # Files outside the verified closure
 
-All files named below now live in `quarantine/`, NOT in `RequestProject/`.
-That directory is a Lake library built by directory glob, so a file sitting
-in it is compiled by `lake build` whether or not `All.lean` imports it;
-removing the import alone does not exclude it from the build.
+The files named below have been REMOVED from this repository. They remain in
+the git history of the branch and in the delivery archives from the rounds
+that produced them. They were removed rather than parked in a sibling
+directory because `RequestProject` is a Lake library built by directory glob:
+a file sitting in it is compiled by `lake build` whether or not `All.lean`
+imports it, so an unbuildable file cannot be quarantined by dropping its
+import. To resurrect one, restore it from history into `RequestProject/`,
+add its import to `All.lean`, and add it to the module list in ci.yml.
 
 
 ## KindBox.lean — DOES NOT COMPILE
