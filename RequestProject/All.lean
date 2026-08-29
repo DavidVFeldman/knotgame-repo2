@@ -55,7 +55,10 @@ import RequestProject.CircleForm
 import RequestProject.KindDim
 import RequestProject.Square
 import RequestProject.RecordLower
-import RequestProject.ExpSharpest
+-- ExpSharpest (and its Data*/Checks* files) is quarantined from the import
+-- closure: its kernel checks exceed the memory of the CI runner, so it has
+-- never completed a build and has no axiom audit. See ABANDONED.md and the
+-- CI workflow. The audited sharper rate is ExpSharper's 26^(1/14).
 import RequestProject.KindDimLower
 import RequestProject.KindBox
 import RequestProject.Lucas
