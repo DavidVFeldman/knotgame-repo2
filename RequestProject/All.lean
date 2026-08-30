@@ -104,6 +104,10 @@ import RequestProject.EquiMean
 -- the unit interval, the law of the binary digit series of a uniform real, and
 -- its invariance for the normalised counting operator.
 import RequestProject.InvariantMeasure
+-- PisotSeparation (round 16, T46): the quantitative form of Pisot finiteness:
+-- an explicit separation constant for the orbit of 1/2 and an explicit bound on
+-- its cardinality.
+import RequestProject.PisotSeparation
 
 /-!
 # Knot counts in an interval deletion game

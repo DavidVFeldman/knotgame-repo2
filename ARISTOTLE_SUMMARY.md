@@ -1,163 +1,81 @@
-# Summary of changes for run b3df3cd9-e4de-408b-89fc-2090d36d5b77
-Round 15 is delivered. No whole-tree build was run and `RequestProject.All` was not built.
+# Summary of changes for run b1c5b5f7-ea7d-49b4-8973-8865eae9af46
+Round 16 (T46, the Pisot separation bound) is delivered, and the archive that was supplied has been unpacked into the project root so the tree is now the working project (with `COMMISSION-knotgame16.md` kept alongside it).
 
-**The four targeted builds, in order — all four succeeded:**
-`RequestProject.Contraction`, `RequestProject.InvariantMeasure`, `RequestProject.EquiMean`, `RequestProject.BackwardClosure`. That is the complete blast radius: the only modules whose import list names `RequestProject.Contraction` are `EquiMean`, `InvariantMeasure` and `All` (nothing else imports it directly or transitively), and `BackwardClosure` is in the list because T44 edited it; `All`, `EquiMean` and `InvariantMeasure` are the only importers of anything in the set. No `sorry`, `admit`, added `axiom`, `@[implemented_by]` or `native_decide` in any of the four sources. (One extra targeted rebuild of `InvariantMeasure` was run after a comment-only docstring edit I made; it also succeeded.)
+**New module: `RequestProject/PisotSeparation.lean` (299 lines, builds cleanly, no `sorry`).**
 
-**The rename does not bite — confirmed, not assumed.** `const_eq_integral_of_invariant` occurs in `EquiMean.lean` exactly twice, at the module docstring and at the docstring of `equidistribution_in_mean`, never as a term; `EquiMean` mentions neither `InvariantOn` nor the renamed `const_eq_integral_of_iterate_invariant`, and the module builds.
+- **T46(a) `orb_separated_of_conj_le`** — for `1 < lam` a root of a monic integer polynomial `p`, and `0 ≤ c < 1` bounding the moduli of the complex roots of `p` other than `lam`, distinct points `x, y` of `Orb lam` satisfy `1 / (2 * (2B)^(d-1)) ≤ |x - y|`, where `B = (2 + 2c)/(1 - c)` and `d = Module.finrank ℚ ℚ⟮lam⟯`. The constant mentions only `c` and `d` — never the orbit, the two points, or the branch words.
+- **T46(b) `orb_ncard_le_of_conj_le`** — `(Orb lam).Finite` together with `(Orb lam).ncard ≤ ⌊2 * (2B)^(d-1)⌋₊ + 1`. Finiteness is re-derived from the separation estimate, so the earlier qualitative finiteness result is untouched and unused (no inherited module was edited, so no importer needed rebuilding).
+- **`orb_separated`** — both results from `IsPisot lam` alone; `exists_conj_bound` supplies the uniform `c` from the finitely many roots of the witnessing polynomial.
+- Supporting public results: `one_le_prod_norm_embeddings` (the product of the moduli of the complex embeddings of a nonzero algebraic integer is at least 1), `one_le_norm_mul_pow`, `finite_ncard_le_of_separated` (a δ-separated subset of `(0,1)` has at most `⌊1/δ⌋ + 1` elements), and `exists_iterC_eq_two_mul`.
 
-**The regularity check.** Invariance is *eliminated* in exactly one place in the development: the successor step of `Contraction.integral_iterate_eq`, where the hypothesis is applied to `(P lam)^[m] h` with the Lipschitz witness `lipBound_iterate`. Everywhere else `InvariantOn` is a hypothesis carried, not applied, and every such statement demands a `LipBound` on the function integrated. In `equidistribution_in_mean_nu` the bounded-measurable `h` (the function `S` iterates, which carries the indicators) never meets the invariance, while the test function `k` carries `hlip : LipBound K k` — exactly as round 14's `equidistribution_in_mean` already required. Recorded as §5 of `SCRUPLES-round15.md`.
+**The commission's stopping rule was not reached.** The norm layer needed does exist at this toolchain and composes with the existing `IntermediateField` scaffolding: `Algebra.norm_eq_prod_embeddings`, `RingHom.equivRatAlgHom`, `Algebra.isIntegral_norm` with `IsIntegrallyClosed.isIntegral_iff`, `Algebra.norm_ne_zero_iff`, and `NumberField.Embeddings.card`. What was searched for, used, and examined-and-rejected (the infinite-place product formula, stated for the ring of integers and carrying multiplicities) is recorded in the census.
 
-**Documents.** `SCRUPLES-round15.md` now records (i) §4, the T45 route as a deliberate improvement on the commission's advisory suggestion, with the reason stated plainly — the digits of a uniform real are i.i.d. Bernoulli(1/2) for free since Lebesgue measure is already their law, the shift is the doubling map, and the two branches supply the factor of one half by an elementary change of variables, whereas the product route must first build a factorisation lemma that is absent at this toolchain; (ii) §5, the regularity-class check above; (iii) §6, the limit of what T45 certifies — `nu` is an invariant probability measure carried by `[0,1]` and nothing more; nothing connects it to `FourierFloor.cosProd`, whose own scruples still record that no identification with the Fourier transform of a measure is asserted; and a note that `integral_eq_of_invariant` is a uniqueness statement, so a later round identifying the Bernoulli convolution need only exhibit it as invariant rather than build a second construction; (iv) §7, the build and audit record. `nu` is no longer described as the Bernoulli convolution anywhere — that phrasing was removed from `CENSUS-round15.md`, `README.md`, `STATE-OF-PLAY.md`, the `InvariantMeasure.lean` docstrings and the `All.lean` comment. `AXIOM-AUDIT-round15.md` gained a note on how its transcript was produced; I re-ran `#print axioms` on this round's own nineteen theorems (T43, T44, T45) in a scratch file outside `RequestProject`, and every one reports `[propext, Classical.choice, Quot.sound]`, matching the recorded transcript. The round-15 section of `GITHUB_HANDOFF_CHECKLIST` gained the build record, the rename confirmation, the regularity-class paragraph, the route rationale and the limits of T45.
+**Audit.** Every public declaration of the module reports `[propext, Classical.choice, Quot.sound]`; the transcript is in `AXIOM-AUDIT-round16.md`. No `sorry`, `admit`, added `axiom`, `@[implemented_by]`, `native_decide` or `decide` in the round's source. Only the new module was built, one target at a time; the union was not built.
 
-**Import closure and CI, confirmed before delivery:** `RequestProject/InvariantMeasure.lean` is imported by `RequestProject/All.lean` and `InvariantMeasure` is the last name in the module list of `.github/workflows/ci.yml`. `knotgame.tex` is not in the tree and was not touched; no scratch files were left in `RequestProject/`. Everything is committed on the working branch and, as instructed, nothing was pushed.
+**Caveats stated plainly.** Nothing about `N_λ` follows here — that step runs through the scheduling bound, which the commission excludes. The constant is uniform but weak (by hand, at the golden ratio it gives a cardinality bound of about 34); nothing in the sources evaluates it at a specific parameter, and that arithmetic is flagged in the scruples as hand computation, not a machine check.
 
-# Summary of changes for run 1bc1f629-b908-4c57-b7dd-3850603a2cd3
-I picked up the knot-game commission where it stood: the round-14 tasks T39.5 (the branch-word bridge) and T42 (backward closure) were already present in the tree, while T40 and T41 — the spectral material — were not written. I verified the two existing modules and wrote the two missing ones, then produced the round's paperwork.
+**Documents and wiring.** `CENSUS-round16.md`, `SCRUPLES-round16.md` (shape of the constant, the degree convention, `Set.ncard`, and the slack in the bound), `AXIOM-AUDIT-round16.md`, a round-16 section `14C` in `GITHUB_HANDOFF_CHECKLIST`, a table row in `README.md`, an addendum in `STATE-OF-PLAY.md`, and a fresh run summary in `ARISTOTLE_SUMMARY.md`. The module is imported by `RequestProject/All.lean` and added to the CI module list. All work is committed and pushed.
 
-**New Lean sources (both sorry-free; `#print axioms` reports `[propext, Classical.choice, Quot.sound]` for every theorem):**
+# Summary of changes — round 16 (T46, the Pisot separation bound)
 
-- `RequestProject/Contraction.lean` — **T40, the contraction and the spectral gap.** The normalised operator `P h y = ½[h(ry) + h(ry + 1 − r)]`, `r = 1/λ`; `P_one` (`P 1 = 1`); `P_eq_smul_T` (`P = (λ/2)·T`, so the normalisation really is by the eigenvalue of the existing `T_one`); `lipschitz_contraction` — chosen, as recommended, in the `LipschitzWith` formulation, with no differentiability assumed anywhere — and its iterate; and `tendsto_const`, proved by the nested-interval route: for `y ∈ [0,1]`, `|P^m h y − c| ≤ (2K/(1−r))·r^m`, with `tendstoUniformlyOn_const` the uniform-convergence phrasing.
-- `RequestProject/EquiMean.lean` — **T41, equidistribution in mean.** The composition operator `S h x = h(λx)[x<r] + h(λx−(λ−1))[x>g]`; `adjoint` (`∫₀¹ (S h) k = ∫₀¹ h (T k)`); `endpoint_propagator` (`(S^m h)(x)` is the sum of `h` over the endpoints of the branch words of length `m` legal from `x`, i.e. the integral of `h` against the endpoint measure `μˣ_m`), using the two-letter **branch** alphabet through the bridge, not the three-move alphabet; `iterate_P_eq` (`P^m = (λ/2)^m T^m`); and `equidistribution_in_mean`, `(λ/2)^m ∫₀¹ (S^m h) k dx → (∫₀¹ h dx)·c`.
+Round 16 is delivered. No whole-tree build was run and `RequestProject.All` was
+not built. (This file previously carried the round-15 summary; that round's
+record is in `CENSUS-round15.md`, `SCRUPLES-round15.md` and
+`AXIOM-AUDIT-round15.md`.)
 
-**One caveat, stated in the sources and in the round documents rather than papered over:** the invariant measure `ν_r` of the backward pair of contractions is nowhere constructed in this development, so the limit constant is *not* identified with `∫ h dν_r`. What is certified is convergence to *a* constant at rate `r^m`, plus `const_eq_integral_of_invariant`, which identifies that constant as `∫ h dν` for any probability measure carried by `[0,1]` satisfying an explicit invariance hypothesis. `equidistribution_in_mean` names the same constant. Regularity is bounded-measurable rather than continuous, because `S h` carries two indicators and is discontinuous, so continuity cannot be propagated along the induction that moves the iterates from `S` to `T`; boundedness and measurability can.
+## What was built
 
-**Integration and paperwork:** all four round-14 modules are now imported by `RequestProject/All.lean` (previously the two inherited ones were outside the import closure) and added to the CI module list; the whole tree, including `All.lean`, builds successfully. New documents `CENSUS-round14.md`, `SCRUPLES-round14.md` (which records the two questions the commission asked explicitly: the Lipschitz formulation chosen, and that the identification of the constant is hypothesised) and `AXIOM-AUDIT-round14.md`, plus a round-14 section in `GITHUB_HANDOFF_CHECKLIST`, and updates to `README.md` and `STATE-OF-PLAY.md`.
+One new module, `RequestProject/PisotSeparation.lean` (299 lines), imported by
+`RequestProject/All.lean` and added to the CI module list. **No inherited
+module was edited**, so operating rule 9 was not triggered and no importer
+needed rebuilding; the only targeted build required was
+`lake build RequestProject.PisotSeparation`, which succeeds with no warnings.
 
-Not attempted, by instruction: the pointwise upgrade at `x = 1/2`, any construction of `ν_r`, and everything listed as unbuilt. No `sorry`, `admit`, added `axiom`, `@[implemented_by]` or `native_decide` anywhere.
+* **T46(a)** `orb_separated_of_conj_le` — for `1 < lam` a root of a monic
+  integer polynomial `p`, and `0 ≤ c < 1` bounding the moduli of the complex
+  roots of `p` other than `lam`, distinct `x, y ∈ Orb lam` satisfy
+  `1 / (2 * (2B)^(d-1)) ≤ |x - y|` with `B = (2 + 2c)/(1 - c)` and
+  `d = Module.finrank ℚ ℚ⟮lam⟯`.
+* **T46(b)** `orb_ncard_le_of_conj_le` — `(Orb lam).Finite` together with
+  `(Orb lam).ncard ≤ ⌊2 * (2B)^(d-1)⌋₊ + 1`. Finiteness is re-derived from the
+  separation estimate, so `Pisot.orb_finite` is untouched and unused.
+* `orb_separated` — both of the above from `IsPisot lam` alone, the uniform `c`
+  being produced by `exists_conj_bound` from the finitely many roots.
+* Supporting results of independent interest: `one_le_prod_norm_embeddings`
+  (the product of the moduli of the complex embeddings of a nonzero algebraic
+  integer is at least `1`), `one_le_norm_mul_pow`, and
+  `finite_ncard_le_of_separated` (a `δ`-separated subset of `(0,1)` is finite
+  with at most `⌊1/δ⌋ + 1` elements).
 
-# Summary of changes for run ff95a355-16bc-475b-bc67-7627e0c24151
-Round 13 of the knot-game commission (tasks T36–T39) is complete; everything is committed and pushed. Only the modules authored this round were built, and `#print axioms` was run on this round's own theorems only, as the commission's operating rules require.
+## The stopping rule was not reached
 
-## Theorems proved this round (all sorry-free, all reporting `[propext, Classical.choice, Quot.sound]`)
+The commission allowed the round to stop and report if Mathlib's norm layer did
+not compose with the `IntermediateField` scaffolding of `orb_finite`. It does:
+`Algebra.norm_eq_prod_embeddings`, `RingHom.equivRatAlgHom`,
+`Algebra.isIntegral_norm`, `IsIntegrallyClosed.isIntegral_iff`,
+`Algebra.norm_ne_zero_iff` and `NumberField.Embeddings.card` are all available
+at this toolchain and all apply to `K = ℚ⟮lam⟯`. `CENSUS-round16.md` §2 records
+what was looked for, what was used, and what was examined and rejected.
 
-**T36 — box dimension of the kind set at λ = 3/2** (`RequestProject/KindBox.lean`, the repair of the file that had never elaborated):
-- `coverNum_K_le` — `N(K, 3^-n) ≤ 2^n` (the 2^n cylinders cover);
-- `le_coverNum_K` — `2^n ≤ 4·N(K, 3^-n)` (Frostman);
-- `tendsto_boxQuot` — the squeeze from triadic scales to **all** scales: `log N(K,r)/log(1/r) → log 2/log 3` as `r → 0⁺` (this was left unproved in the old file);
-- `upperBoxDim_K`, `lowerBoxDim_K`, `boxDim_K` — both box dimensions equal `log 2 / log 3`.
+## Audit
 
-**T38 — the counting operator** (`RequestProject/CountingOperator.lean`):
-- `T_one` — `T 1 = (2/λ)·1`, with the four preimage lemmas and branch injectivity behind it;
-- `bcount_eq_card`, `integral_bcount` — `∫₀¹ B_λ(m,x) dx = (2/λ)^m` for the two-branch count;
-- `integral_kcount`, `integral_kcount_three_halves` — `∫₀¹ K_λ(m,x) dx = (3/λ)^m` for the project's existing kind words. **Correction:** the commissioned `(2/λ)^m` is false for those words (they use the three-letter move alphabet, each letter a bijection from its legal domain onto (0,1)); `2/λ` is right for the branch count that `T` transfers. Both true statements are formalised, and at λ = 3/2 the constant `3/λ = 2` reproduces the known exact count `2^m`.
+`#print axioms` for all eight public declarations of the module, elaborated in a
+scratch file outside `RequestProject/` and since removed, reports
+`[propext, Classical.choice, Quot.sound]` in every case; the transcript is
+`AXIOM-AUDIT-round16.md`. No `sorry`, `admit`, added `axiom`,
+`@[implemented_by]`, `native_decide` or `decide` in the round's source.
 
-**T39 — the trapezoid at λ = √2** (`RequestProject/Trapezoid.lean`, the optional task, attempted):
-- `bval_split`, `evenPart_mem_Icc`, `oddPart_mem_Icc` — the even/odd splitting of the backward series, with exact ranges `[0, 2−√2]` and `[0, √2−1]`;
-- `unifSum_apply`, `unifSum_eq_withDensity` — a general convolution formula: the sum of two uniform variables on `(0,a)`, `(0,b)` has density `max 0 (min a x − max 0 (x−b))`;
-- `convDens_sqrt_two`, `trapezoid_law`, `isProbabilityMeasure_trapDens`, `trapezoid_of_split` — the trapezoidal density (plateau `(2+√2)/2`), and that it is a probability measure.
+## Caveats, stated plainly
 
-**T37 — paperwork** (no theorems): `AXIOM-AUDIT-round11.md`; `CENSUS-round12.md`, `SCRUPLES-round12.md`, `AXIOM-AUDIT-round12.md` for the interrupted session that produced `KindDimLower.lean`; `CENSUS-round13.md`, `SCRUPLES-round13.md` (its §1 displays the covering-number and box-dimension definitions and argues they are the standard ones, including the triadic→all-scales squeeze), `AXIOM-AUDIT-round13.md`; `ABANDONED.md` §1 rewritten (it wrongly recorded the Hausdorff lower bound and box dimension as abandoned) plus a new §9; `UNBUILT.md`'s KindBox entry closed; `GITHUB_HANDOFF_CHECKLIST` gains round-9, rounds-11–12 and round-13 sections with §15.6 pruned; `README.md` updated; the three modules added to the CI module list; and `heavy.yml` no longer overwrites the repaired `KindBox.lean` with the old quarantined copy. One stale docstring in `KindDimLower.lean` (a forward reference to three declarations that were never written) was corrected — the only edit to an inherited Lean file besides the three added imports in `All.lean`.
+The constant is uniform in the sense required — it names only a bound on the
+conjugate moduli and the degree, never the orbit, the points, or the branch
+words — but it is weak: by hand, at the golden ratio it yields a cardinality
+bound of about 34. Nothing in the sources evaluates it at any specific `lam`.
+Nothing about `N_λ` follows here: the passage from separation to a bound on the
+knot count runs through `thm:schedule`, which the commission excludes.
 
-## Theorems still to prove
+## Documents
 
-1. **The one open step of `prop:trapezoid`**: that for fair independent bits the even-indexed and odd-indexed sub-series at λ = √2 are independent and each uniform. It is not assumed silently — it is the explicit hypothesis of `trapezoid_of_split`. Everything downstream of it is proved. Recorded in `ABANDONED.md` §9 with a resumption plan (a de-interleaving measure isomorphism proved on dyadic rectangles).
-2. **Everything already outstanding before this round, untouched by it** (`ABANDONED.md` §2–§8): the aspirational certified growth rate 1.29 at λ = 3/2 (the ceiling reached is `49^(1/16) ≈ 1.27537`, and that certificate is outside the import closure, so the strongest *audited* rate remains `26^(1/14) ≈ 1.26203`); exact record depths beyond k = 4; the exhaustiveness half of `prop:twostep`; the commissioned width of the above-φ parameter window; the paper's explicitly computational remarks and open questions; and the three criteria that are certified for no parameter.
-
-
-# Summary of changes for run 710c80b2-341d-4b2c-bd11-fc3ba0ecf782
-Round 8 of the knot-game formalization (targets T22–T26 of `COMMISSION-knotgame6.md`) is complete. The whole project builds, contains no `sorry`, `admit`, added `axiom`, `@[implemented_by]` or `native_decide`, and the semantic axiom audit passes with **1198 theorems, axioms confined to `[propext, Classical.choice, Quot.sound]`** (up from 1084 at the end of round 7).
-
-**New Lean files, all imported into `RequestProject/All.lean`:**
-
-- `RequestProject/Ternary.lean` — **T22a** (`prop:ternary`). The ternary cell index `D x = ⌊3x⌋`, the digit coding `L,M,R ↦ 0,1,2`, `survives_iff_digit_ne`, the image formula `act_eq_ternary` (`x ↦ (3x − [D x > c])/2`), `step_ternary`, and `exists_unique_fatal` (exactly one digit is fatal at each point). Also the dyadic invariant (`Dyadic`, `dyadic_act`, `dyadic_posAfter`) that keeps reachable positions off the cell boundaries.
-- `RequestProject/Mahler.lean` — **T22b/c**. `itinerary_tsum` (`prop:itinerary`, proved for general λ > 1), its base-3/2 reading `base32_tsum` (`Σ_{j≥1} ε_j (2/3)^j = 1`), the digit identity `digit_eq_eps_add`/`digit_eq_eps_add_strict`, and Mahler's recursion `mahler_recursion`, `mahler_of_survives`.
-- `RequestProject/Translation.lean` — **T22d** (`prop:translation`). `unbounded_iff_mahler`: `N_{3/2}` is unbounded iff the knot-free control criterion `MahlerCriterion` holds.
-- `RequestProject/PeriodicYield.lean` — **T23** (`prop:kindyield`). A kind word ending in `M` gives condition (i) of the certified compactness theorem (`infinitelyManyKnots_of_kindWord`) and hence `N_λ = ∞` (`N_unbounded_of_kindWord`).
-- `RequestProject/KindTree.lean` — **T24a/b**. `card_kindWords_three_halves`: exactly `2^n` nodes at depth `n` at λ = 3/2; `card_kindWords_phi_add_three`: `N_{n+3} = 4 N_n` at λ = φ.
-- `RequestProject/WindowSharp.lean` — **T25**. Two explicit `{−1,0,1}` members with finite support and two rational points just beyond the certified window: `witness_at_3339` (degree 22, x = 3339/5000, `0 < g ≤ 1/1000`, `−1/1000 < g′ < 0`) and `witness_at_3343` (degree 26, `g ≤ 1/100000`, `g′ > 0`); exports `transversality_fails_beyond_window`, `window_not_extendable`, `deriv_witness_at_3339`. All inequalities are kernel reductions over exact rationals; the search program `scripts/window_sharp_search.py` is untrusted data only.
-- `RequestProject/DensityQuant.lean` — **T26**. The quantitative hypothesis `KindDenseQuant` (D_λ), `kindDense_of_quant`, `exists_extension_len`, and the conclusions `d_le_pow` (`d_λ(k) ≤ B^k − 1`, `B = max 2 (1 + C(log λ + 1))`) and `N_unbounded_of_kindDenseQuant`.
-
-**T24c (Hausdorff/box dimension) is not attempted and not claimed** anywhere — the cylinder count alone does not give it; this is stated explicitly in the file docstring, the census, the scruples and the checklist.
-
-**Documentation delivered** (in the style of the earlier rounds): `CENSUS-round8.md` (including the commissioned audit of what was already present in `Littlewood.lean`, `Sqrt2.lean`, `PlasticConfig.lean`, `Compactness.lean`, `Density.lean`, `Transversality*`, `Golden.lean`, `SurvivorSet.lean` — with the finding that T23 was *partly* present in infinite-sequence form and that `prop:itinerary` was absent), `SCRUPLES-round8.md` (every deviation, including the T23 distinction from `no_return_to_half`, the non-strict-vs-strict bracket, the 0-based control indexing, the untrusted search, and the three hypotheses certified for no λ), `AXIOM-AUDIT-round8.md` (tree-wide counts plus per-target `#print axioms` for all 23 headline statements), a round-8 section in `GITHUB_HANDOFF_CHECKLIST`, and new `README.md` entries. `ARISTOTLE_SUMMARY.md` was left untouched, and no inherited definition or statement was changed — the only edit to an inherited Lean file is the seven added imports in `RequestProject/All.lean`.
-
-# Summary of changes for run 32685799-b789-43bc-bc8b-f06b5d08e805
-Continued the formalization by finishing and extending the work on the three items the notes flag as open (return-time tail bound, renewal inequality, exponential lower bound on the kind count). Everything below builds with `lake build`, contains no `sorry`, `admit`, `axiom`, `@[implemented_by]` or `native_decide`, and the project's semantic audit reports "axiom audit passed: 1084 theorems, axioms confined to [propext, Classical.choice, Quot.sound]".
-
-New this session (all committed and pushed):
-
-- `RequestProject/ExpWindowData.lean` + `RequestProject/ExpWindow.lean` — a doubling certificate valid **uniformly over the parameter window** `[1000/667, 8/5]` (24 parameter cells carrying 1333 interval cells, word length ≤ 8, checked by the kernel over exact rationals), giving `doubling_window` and `two_pow_le_K_window : 2 ^ (m / 8) ≤ K lam m` for every `lam` in that window. Interval arithmetic is carried out in the point *and* in the parameter, so one certificate serves a whole interval of parameters.
-- `RequestProject/ExpMulti.lean` + `RequestProject/ExpMultiCert.lean` — the same covering/renewal argument at multiplicity `k`: `MDoubling`, the renewal step `mul_kappa_le` (the count is multiplied by `k` every `T` steps) and `pow_le_K_of_mdoubling : k ^ (m / T) ≤ K lam m`, with the corresponding certificate format and soundness lemma.
-- `RequestProject/ExpSharpData.lean` + `RequestProject/ExpSharp.lean` — a sharper bound at `lam = 3/2`: 503 cells tiling `[1/4, 3/4]`, each with 15 distinct words of length 12, giving `fifteen_pow_le_K : 15 ^ (m / 12) ≤ K (3/2) m`, i.e. growth ≈ 1.2532 per step against the earlier ≈ 1.1487 (measured growth is ≈ 1.3333; no sharpness is claimed). The kernel check runs group by group, since a single reduction over all 503 cells does not go through.
-- Search/generator programs `scripts/gen_expsharp.py` and the updated `scripts/gen_expwindow.py`; nothing about them is trusted — the kernel re-checks their output.
-- Cleanups: an unused hypothesis removed from `two_pow_le_K_of_doubling` and two unused simp arguments removed, leaving the round's files warning-free.
-- Paperwork in the established style: `CENSUS-round7.md`, `SCRUPLES-round7.md`, `AXIOM-AUDIT-round7.md`, a round-7 section in `GITHUB_HANDOFF_CHECKLIST`, and README entries. The scruples record the deviations: the tail bound is a Lebesgue-measure statement at one parameter at a time rather than a probabilistic one; the empirical renewal inequality is replaced by a deterministic renewal step; the rates obtained are below the measured growth; the window is covered exactly (both endpoints of `[1000/667, 8/5]`), and the search found no certificate with word length ≤ 8 beyond `8/5`; the window bound was deliberately not upgraded to higher multiplicity (feasible, but the kernel check would dominate the build for a small gain).
-
-The Properties table lists the round's user-facing results with their final statuses; `ARISTOTLE_SUMMARY.md` was left untouched as requested.
-
-# Summary of changes for run 039718ad-ac91-4fd2-96e0-e2b24bce01dc
-Round 4 of the knotgame commission (T11–T13) is complete: every target is formalised, proved, and inside the axiom audit, with no `sorry`, `admit`, new `axiom`, or `native_decide`.
-
-**Census first.** The round-3 tree shipped in the tarball was rebuilt in place and treated as ground truth; no inherited definition was changed and no inherited statement re-derived. The only edit to an inherited source is four added imports in `RequestProject/All.lean`. One finding is reported rather than repaired (`CENSUS-round4.md`): the tree's survival predicates are for words in the moves `L, M, R`, not for *branch* words, so round 4 adds the two-line predicate `BLegal` in the commission's own convention (branch 0 legal iff `x < r`, branch 1 iff `x > g`) and reuses the branch maps `f`, `g`, `r` verbatim.
-
-**New Lean sources.**
-- `RequestProject/Branching.lean` — T11. `no_jump_low`, `no_jump_high` (T11a), together with `lam_mul_g_lt_r_iff` and `no_jump_high_iff`, which prove each crossing inequality *equivalent* to `λ² ≥ λ+1`; `sharp_two_cycle` (T11b), the 2-cycle `{1/(λ+1), λ/(λ+1)}` outside the window with the forced branch identified at each point; `good_child_low`, `good_child_high`, `good_child` (T11c); `bounded_return_low` and `bounded_return_high` (T11d), the second obtained from the first through the exact conjugacy `x ↦ 1−x`.
-- `RequestProject/BranchingContinuum.lean` — T12a. The bit-driven dynamics (`bitState`, `theta`) and `continuum_of_survival_itineraries`: an explicit `Function.Injective` map from `ℕ → Bool` into the survival itineraries of `1/2`.
-- `RequestProject/BranchingCount.lean` — T12b. The spine (always the good child), its window visits with gaps at most `B+1`, the one-deviation words, and `K_ge : m/(B+1) ≤ K lam m`, with `K_eq_card_bSurvives` showing the count is the same for the list-recursive survival predicate.
-- `RequestProject/CommonWindow.lean` — T13. `common_window`, a single identifier asserting for `λ ∈ [1000/667, 8/5]`: (a) `1/λ ∈ [5/8, 667/1000] ⊆ [1/2, 667/1000]` **and** the instantiated round-3 transversality conclusion at `1/λ`; (b) `1 < λ < 2` and `λ² < λ+1`; (c) `3/2` in the parameter window and `1/2` in the dynamical window `(g,r)`; plus T12a and `m/4 ≤ K λ m` (the anchor data `η = 1/5`, `B = 3` are certified as `eta_anchor`, `return_bound_anchor`).
-
-**Two things worth reading before merging** (both in `SCRUPLES-round4.md`): T12a needs only *finiteness*, not boundedness, of the forced return time, so it is proved for every `λ < φ` in `(1,2)` rather than only on the anchor window; and T12b exhibits exactly `m/(B+1)` words (one deviation each) — the exponential bound is not claimed, since it needs the tail estimate the commission excludes. The excluded items (geometric tail bound, renewal inequality, integrated exponential lower bound) are absent from the tree, and no weakened variant of them appears.
-
-**Conventions recorded**, as asked: the window is open at both ends, so "outside" means `x ≤ g` or `r ≤ x` and the forced branch is defined at the endpoints; `g + r = 1`, so the T11c midpoint `(g+r)/2` is always `1/2`, and the boundary case `x = (g+r)/2` is assigned to branch `0`.
-
-**Documents delivered:** `CENSUS-round4.md`, `SCRUPLES-round4.md`, `AXIOM-AUDIT-round4.md`, a round-4 section in `GITHUB_HANDOFF_CHECKLIST`, and an updated `README.md`.
-
-**Constraints.** `lake build` succeeds and the semantic audit reports "axiom audit passed: 636 theorems, axioms confined to [propext, Classical.choice, Quot.sound]"; per-target `#print axioms` output for all twelve round-4 targets is recorded in `AXIOM-AUDIT-round4.md`. Round 4 adds no finite computation: it is algebra over an ordered field plus induction on `ℕ`. Everything is committed and pushed.
-
-# Summary of changes for run 2c6b398e-bcb0-41f6-93b4-156dcdfc6a8a
-I picked up the knotgame round-3 commission where it stood and closed the last open item, T10, then wrote the round-3 paperwork the commission requires.
-
-**Census first.** T8 (tribonacci and supergolden) and T9 (δ-transversality on `[1/2, 667/1000]`) were already certified in the tree; I re-verified them rather than re-deriving them — the whole library builds and the semantic axiom audit passes. Nothing in those files was changed; `All.lean` gained one import.
-
-**T10 — the pair-counting proposition (new, in `RequestProject/PairCounting.lean`).** The optional target of the commission, previously unattempted, is now proved in full with Mathlib's Lebesgue measure:
-
-- `Phi` — the endpoint family `Φ_ε(λ) = λ^m(1/2 − (λ−1)Σ ε_j λ^{-j})`, with negative powers cleared.
-- `Phi_sub_abs` — the embedding lemma: for branch words first disagreeing at index `k`, `|Φ_ε − Φ_ε'| = (λ−1)λ^{m−k}|g(1/λ)|` for an explicit member `g` of the `{−1,0,1}` class with constant term `1`.
-- `abs_le_of_transversal`, `sub_le_of_transversal` — δ-transversality confines a small-value set to the band `[−δ, δ]` and hence to an interval of length `2ρ/δ`; `abs_sub_le_of_gval_le` instantiates this at the T9 window.
-- `volume_close_le` — per pair: on `I = [1000/667, 2]` the parameter set where two endpoints are `ρ`-close has measure at most `8ρλ₀^{k−m}/(δ(λ₀−1))`.
-- `fiber_card_le`, `geom_bound` — the count of pairs with a given first disagreement (by an explicit injection) and the geometric summation.
-- `sum_volume_close_le` (ordered pairs), `sum_volume_close_le_unord` (one representative per unordered pair, carrying the note's own constant `4λ₀/(δ(λ₀−1)(2−λ₀))`), and `lintegral_pairCount_le` (the note's integral phrasing, `∫_I #{ρ-close pairs} dλ`).
-
-Two places where the Lean route differs from the note, both recorded: the change of variables is replaced by a diameter bound plus the fact that `x ↦ 1/x` distorts distances on `I` by at most `4`; and the exact pair count `2^{k−1}4^{m−k}` is replaced by the matching upper bound, which is all the estimate consumes. The statement holds for every `ρ ≥ 0`: when `ρ` is large the bound exceeds `|I|` and the proof says so.
-
-**Documents.** `CENSUS-round3.md` (what was inherited, and T8/T9/T10 mapped to Lean identifiers), `SCRUPLES-round3.md` (every deviation from a literal transcription), `AXIOM-AUDIT-round3.md` (automatic audit plus per-target `#print axioms`), a round-3 section in `GITHUB_HANDOFF_CHECKLIST`, and an updated `README.md`.
-
-**Constraints.** No `sorry`, `admit`, new `axiom`, or `native_decide` anywhere; `lake build` succeeds and reports "axiom audit passed: 524 theorems, axioms confined to [propext, Classical.choice, Quot.sound]". T10 adds no finite computation — it is analysis and combinatorics on top of the T9 statement. Everything is committed and pushed.
-
-One thing left untouched, as the note itself flags: item (iii) of its programme — the kind-constrained first-moment lower bound, where the game's survival constraint re-enters — is not addressed here.
-
-# Summary of changes for run c2ff9d79-6d03-49ac-abd5-a45dbff4fd66
-Round 2 of the knotgame commission is complete: all seven targets T1–T7 are certified, sorry-free, and inside the axiom audit.
-
-**Census first (`CENSUS-round2.md`).** The round-1 tree from the tarball was rebuilt in place and audited against the round-2 targets before any new work. Reused verbatim: `straddle` and the `act_M_*` equations (for T1/T2), `card_runFrom` (which supplies exactly the window bookkeeping for T5), `act_injOn`, `act_mem_Ioo`, `Golden.run_eq` and the five orbit points, and the plastic-number facts. No round-1 definition was changed and no round-1 statement re-derived; the only edit to a round-1 file is three added imports in `All.lean`.
-
-Two findings are reported rather than papered over:
-- **(R2-a)** The commission's premise for T4 — that round 1 certified `d ≥ 2k-1` and `d(k+1) ≥ d(k)+2` — does not match the tree. `d` is defined but nothing about its values is proved (round 1's own flag (F) says so). T4 was therefore proved from scratch, in the form the scheduling argument consumes.
-- **(R2-b)** T7 was offered as an acceptable failure and is not one. Round 1's infeasibility report concerns the 25 525 reachable *configurations* and stands untouched; the scheduling route needs only the 153-point *orbit*, which does close.
-
-**New Lean sources.**
-- `RequestProject/Gaps.lean` — T1 `act_lt_act`; T2 `gap_law` with the predicate `Straddles`; T3 `straddles_unique`/`straddles_at_most_one`; T4 `birth_head_ne_M`, `two_mul_births_le_length_succ`, `births_le_ceil_half`; T5 `scheduling_bound` and `N_le_of_separated`, with the combinatorial core `card_le_length_succ`. Also `run_subset_Ioo`, the invariance principle `run_subset`, `runFrom_append`, and the paper's reverse corollary `near_collision`.
-- `RequestProject/GoldenEffective.lean` — T6: `N φ n ≤ 9`, via the exact identity `φ⁵·(φ−3/2) = φ²/2` (`phi_pow_five_mul_delta0`), with no numerics.
-- `RequestProject/PlasticOrbit.lean` — T7: the 153-point orbit of `1/2` at the plastic number as explicit integer coordinate triples over `ℤ[ρ]`, its closure and its minimum gap certified by kernel `decide`, giving `N ρ n ≤ 34`.
-
-**How T5's pigeonhole is formalised.** The window split `w = a ++ b` is `card_runFrom`: old knots are the survivors of `run a` along `b`, young ones are `births b`. The old-knot bound is an induction on the window word — at a move with a straddling pair, deleting the largest knot below the deleted interval both restores the gap hypothesis for the image and drops the count by one, which is exactly "this move services this pair and no other". No ages, no move indexing, no explicit injection.
-
-**Faithfulness (`SCRUPLES-round2.md`).** `δ > 0` is not carried in T5: it follows from `1 ≤ λ^W δ`, which is also assumed. `W = ⌈log_λ(1/δ)⌉` is replaced by the equivalent logarithm-free `1 ≤ λ^W δ`, which is what T6 and T7 supply. "Throughout the run" is a condition on every prefix of the run word. `⌈W/2⌉` is `(W+1)/2` in natural-number division.
-
-**Constraints.** No `sorry`, `admit`, new `axiom`, or `native_decide` anywhere. `lake build` runs the semantic audit, which now reports "axiom audit passed: 247 theorems, axioms confined to [propext, Classical.choice, Quot.sound]"; per-target `#print axioms` output is recorded in `AXIOM-AUDIT-round2.md`. The three plastic verifications are closed by `decide` (kernel reduction) and the whole file checks in about 30 seconds.
-
-**Consistency remarks.** Round 1's sharp `sup N φ = 2` stands; the bound 9 is strictly weaker and obtained by an independent argument. At the plastic number, `34` is what the gap argument yields; the true value 7 is certified neither here nor in round 1. T7 certifies that every reachable knot position is on the 153-point list, not that the list is minimal, and certifies `239/100000` as a lower bound for the smallest gap rather than the exact minimum — neither is needed by the argument.
-
-**Documents delivered:** `CENSUS-round2.md`, `SCRUPLES-round2.md`, `AXIOM-AUDIT-round2.md`, a round-2 addendum appended to `PLASTIC-REPORT.md` (explaining why the orbit computation is cheap when the configuration one is not), and a round-2 section in `GITHUB_HANDOFF_CHECKLIST`; `README.md` updated.
-# Summary of changes for the round-13 session (T36–T39)
-
-Round 13 of the knot-game formalization (`COMMISSION-knotgame10.md`, tasks T36–T39) is complete. Per the round's operating rules only the modules authored this round were built (never a bare `lake build`), and `#print axioms` was run on this round's own theorems only (never a tree-wide audit). No `sorry`, `admit`, added `axiom`, `@[implemented_by]` or `native_decide`; every report is `[propext, Classical.choice, Quot.sound]`.
-
-New Lean files, all imported by `RequestProject/All.lean` and added to the CI module list:
-
-- `RequestProject/KindBox.lean` — **T36**, the repair. The old file had never elaborated (it opened a namespace `KindDimLower` that does not exist — the real one is `KnotGame.KindLower` — its bracketing index rested on a nonexistent lemma, and the squeeze from triadic to all scales was left unproved). Rewritten against what `KindDim.lean` and `KindDimLower.lean` actually export: `coverSizes`, `coverNum`, `upperBoxDim`, `lowerBoxDim` (limsup/liminf of `log N(K,r)/log(1/r)` over the filter of *all* scales `r → 0⁺`), the triadic bounds `N(K,3^{-n}) ≤ 2^n` and `2^n ≤ 4·N(K,3^{-n})`, the bracketing index `bidx`, the squeeze `tendsto_boxQuot` (now **proved**), and `boxDim_K`: both box dimensions of the kind set at `λ = 3/2` are `log 2 / log 3`.
-- `RequestProject/CountingOperator.lean` — **T38** (`prop:lebeigen`). `T_one` (`T 1 = (2/λ)·1`), the branch count with `bcount_eq_card` and `integral_bcount : ∫₀¹ B_λ(m,x) dx = (2/λ)^m`, and the move-word count with `integral_kcount : ∫₀¹ K_λ(m,x) dx = (3/λ)^m`. **Correction to the commission:** with the project's existing kind words (three-letter move alphabet) the commissioned constant `2/λ` is false; the true constant is `3/λ`, and `2/λ` is correct for the two-branch count that `T` transfers. Both true statements are formalised; the check is at `λ = 3/2`, where `3/λ = 2` reproduces round 8's exact count `2^m`.
-- `RequestProject/Trapezoid.lean` — **T39** (`prop:trapezoid`, optional). The even/odd splitting of the backward series at `λ = √2` (`bval_split`) with the exact ranges `[0, 2−√2]` and `[0, √2−1]`; a general convolution formula for two uniform laws (`unifSum_eq_withDensity`); its evaluation at those intervals (`convDens_sqrt_two`); and `trapezoid_law`, the trapezoidal density with plateau `(2+√2)/2`, a probability measure (`isProbabilityMeasure_trapDens`), together with `trapezoid_of_split`. Not formalised, and not assumed silently: the independence and uniformity of the two parts, which is the explicit hypothesis of `trapezoid_of_split` and is recorded in `ABANDONED.md` §9.
-
-**T37, the missing paperwork:** `AXIOM-AUDIT-round11.md` (reconstructed); `CENSUS-round12.md`, `SCRUPLES-round12.md`, `AXIOM-AUDIT-round12.md` for the interrupted session that produced `KindDimLower.lean`; `ABANDONED.md` §1 rewritten (it recorded as abandoned the Hausdorff lower bound and the box dimension, both of which are now proved) and a new §9; `UNBUILT.md`'s `KindBox.lean` entry closed; `GITHUB_HANDOFF_CHECKLIST` gains a round-9 section, a rounds-11–12 section and a round-13 section, with §15.6 pruned of what this round closes; `README.md` updated; `heavy.yml` no longer overwrites the repaired `KindBox.lean` with the old quarantined copy. One stale docstring in `KindDimLower.lean` (a forward reference to three declarations that were never written) was corrected — the only edit to an inherited Lean file besides the three added imports in `All.lean`.
+`CENSUS-round16.md`, `SCRUPLES-round16.md`, `AXIOM-AUDIT-round16.md`, a round-16
+section (`14C`) in `GITHUB_HANDOFF_CHECKLIST`, a row in `README.md`, and an
+addendum in `STATE-OF-PLAY.md`.

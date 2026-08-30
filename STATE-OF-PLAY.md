@@ -128,3 +128,34 @@ replaces them.
 The live frontier is unchanged: Question 50, the pointwise upgrade at `x = 1/2`,
 is untouched, and the Lasota–Yorke route to it is still closed.  The remaining
 open items are as ranked above, minus the construction of `ν_r`.
+
+## Addendum — round 16 (T46)
+
+`Pisot.orb_finite` is no longer the only thing known about the orbit at a Pisot
+parameter.  `RequestProject/PisotSeparation.lean` makes it quantitative:
+
+1. **Separation.**  `orb_separated_of_conj_le`: with `c < 1` a bound on the
+   moduli of the conjugates of `λ`, `B = (2 + 2c)/(1 − c)` and
+   `d = [ℚ(λ) : ℚ]`, distinct points of `Orb λ` are at distance at least
+   `1 / (2·(2B)^(d−1))`.  The constant names only `c` and `d` — not the orbit,
+   not the two points, not the branch words.  The mechanism is the field norm:
+   `2(x − y)` is a nonzero algebraic integer of `ℚ(λ)`, every conjugate of it is
+   bounded by `2B` (round 14's `conj_bound`), and the product of the moduli of
+   its complex embeddings is at least `1` (`one_le_prod_norm_embeddings`, proved
+   here from Mathlib's `Algebra.norm_eq_prod_embeddings`).
+2. **A count, not just finiteness.**  `orb_ncard_le_of_conj_le`:
+   `Orb λ` is finite with `ncard ≤ ⌊2·(2B)^(d−1)⌋ + 1`, by the elementary fact
+   that a `δ`-separated subset of `(0,1)` has at most `1/δ + 1` elements
+   (`finite_ncard_le_of_separated`).  Finiteness is re-derived rather than
+   inherited, so `orb_finite` is untouched and unused by the new module.
+3. **Packaged from `IsPisot`.**  `orb_separated` supplies the uniform `c` from
+   the finitely many roots of the witnessing polynomial.
+
+What this does **not** do: it says nothing about `N_λ`.  The passage from
+separation to a bound on the knot count runs through `thm:schedule`, which is
+not formalised in the shape that step needs.  The constant is also weak — at the
+golden ratio it gives a cardinality bound of about 34 by hand, against orbit
+sizes of 5, 7, 43, 153 in the paper's table — and nothing in the sources
+evaluates it at a specific `λ`.
+
+The live frontier is unchanged: Question 50, the pointwise upgrade at `x = 1/2`.

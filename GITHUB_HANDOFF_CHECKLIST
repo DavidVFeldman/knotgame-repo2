@@ -1060,6 +1060,72 @@ ROUND 13 -- box dimension, the counting operator, the trapezoid, and the
 
 
 ================================================================================
+14C. ROUND 16 (T46 -- THE PISOT SEPARATION BOUND)
+================================================================================
+
+  One new module (RequestProject/PisotSeparation.lean, 299 lines), imported by
+  All.lean and added to the CI module list. No inherited module was edited, so
+  operating rule 9 was not triggered and no importer needed rebuilding.
+
+  [x] T46(a) (the separation estimate). orb_separated_of_conj_le. For 1 < lam
+      a root of a monic integer polynomial p, and c with 0 <= c < 1 bounding
+      the moduli of all complex roots of p other than lam, put
+      B = (2 + 2c)/(1 - c) and d = finrank Q of Q(lam). Then distinct points
+      x, y of Orb lam satisfy 1 / (2 * (2B)^(d-1)) <= |x - y|. The constant
+      names only c and d: the branch words are introduced after B is fixed and
+      occur in no bound.
+      The argument: 2x and 2y are values of iterC (Pisot.two_mul_branchIter),
+      so a = iterC lamK w 1 - iterC lamK w' 1 is a nonzero algebraic integer of
+      K = Q(lam) whose image under the real embedding is 2x - 2y; every complex
+      embedding sends it into the disc of radius 2B (conj_bound for the
+      conjugates, |2x - 2y| <= 2 <= 2B for the real one); and the product of
+      the moduli of the embeddings is at least 1.
+
+  [x] The norm step -- the commission's stopping rule was NOT reached.
+      one_le_prod_norm_embeddings: for a nonzero a of a number field K,
+      integral over Z, 1 <= product over psi : K ->+* C of ||psi a||. Mathlib
+      at this toolchain supplies every piece and they compose with the
+      IntermediateField scaffolding orb_finite already uses:
+      Algebra.norm_eq_prod_embeddings (norm as a product over the C-algebra
+      homs), RingHom.equivRatAlgHom (transport to ring homs, the form
+      conj_bound is stated in), Algebra.isIntegral_norm with
+      IsIntegrallyClosed.isIntegral_iff (the norm is a rational integer),
+      Algebra.norm_ne_zero_iff with Int.one_le_abs (it is nonzero, hence at
+      least 1 in absolute value), NumberField.Embeddings.card (the number of
+      embeddings is the degree). See CENSUS-round16.md sec 2 for what was
+      looked for and rejected (the infinite-place product formula, which is
+      stated for the ring of integers and carries multiplicities).
+
+  [x] T46(b) (the cardinality bound). orb_ncard_le_of_conj_le:
+      (Orb lam).Finite and (Orb lam).ncard <= floor(2 * (2B)^(d-1)) + 1, via
+      finite_ncard_le_of_separated, which injects a delta-separated subset of
+      (0,1) into Iic (floor (1/delta)) by x |-> floor (x/delta). Finiteness is
+      re-derived, not inherited: the statement does not depend on orb_finite,
+      which is left standing untouched.
+
+  [x] Packaged from IsPisot alone. exists_conj_bound turns the root-by-root
+      ||z|| < 1 of IsPisot into a single c < 1 (a maximum over the finitely
+      many roots of p mapped to C), and orb_separated states: there is B >= 2
+      such that Orb lam is 1/(2*(2B)^(d-1))-separated, finite, and of
+      cardinality at most floor(2*(2B)^(d-1)) + 1. B is existentially
+      quantified but fixed before x and y.
+
+  Constraints respected: no sorry, no admit, no axiom, no @[implemented_by],
+  no native_decide, no decide. Per-theorem #print axioms output is in
+  AXIOM-AUDIT-round16.md; every report is [propext, Classical.choice,
+  Quot.sound].
+
+  What T46 does NOT certify: nothing about N_lam. The passage from separation
+  to a bound on the knot count goes through thm:schedule, which is not
+  formalised in the shape that step needs, and the commission excludes it.
+  The constant is uniform but weak -- by hand, at the golden ratio it gives a
+  cardinality bound of about 34 -- and nothing in the sources evaluates it at
+  any specific lam; see SCRUPLES-round16.md sec 4.
+
+  Builds run for this round: RequestProject.PisotSeparation, on its own.
+  RequestProject.All is deliberately NOT built; the union is CI's job.
+
+================================================================================
 15. OPERATIONS: PACKAGING, CI, AND WHAT COUNTS AS DONE
 ================================================================================
 

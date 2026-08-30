@@ -203,6 +203,7 @@ Start here:
 | `RequestProject/BackwardClosure.lean` | round 14, T42: branch words as `M`-free move words (`toMove`, `survivesWord_map_toMove`, `posAfter_map_toMove`); `denseFrom_half_imp_kindDense` and `N_unbounded_of_denseFrom_half`; the prepending lemma `endpoints_subset_of_legal`, the backward closure `denseFrom_of_image` and the forward invariance `compl_D_forward_invariant`.  Round 15, T44: the converse `kindDense_imp_denseFrom_half` (via `branchLegal_branch`, `branchWordOf`) and the biconditional `denseFrom_half_iff_kindDense` |
 | `RequestProject/Contraction.lean` | round 14, T40 (`prop:gap`): the normalised operator `P h y = ½[h(ry) + h(ry+1−r)]`, `P_one`, `P_eq_smul_T`, the Lipschitz contraction `lipschitz_contraction` (and its iterate), and `tendsto_const` — `P^m h` is within `2K r^m/(1−r)` of a constant on `[0,1]`; the constant is identified under the invariance hypothesis of `const_eq_integral_of_invariant`.  Round 15, T43: `integrable_of_lipBound` and `integrable_iterate` remove the integrability hypothesis, `InvariantOn` states invariance one step at a time against Lipschitz test functions and `integral_iterate_eq` iterates it, `integral_eq_of_invariant` gives uniqueness on that test class |
 | `RequestProject/InvariantMeasure.lean` | round 15, T45: the binary digits `digit`, the digit series `bval`, the measure `nu = map bval (volume.restrict (Ioc 0 1))`, the law of the digit series under a uniform point of `(0,1]` — no identification with any measure named elsewhere is asserted — with `isProbabilityMeasure_nu`, `nu_compl_Icc` and **`invariantOn_nu`**; the consequences `const_eq_integral_nu`, `tendsto_integral_nu` and `equidistribution_in_mean_nu`, in which no hypothesis beyond `1 < λ` remains |
+| `RequestProject/PisotSeparation.lean` | round 16, T46: the quantitative form of Pisot finiteness — the norm step (`one_le_prod_norm_embeddings`, `one_le_norm_mul_pow`), the separated-set count (`finite_ncard_le_of_separated`), the separation estimate `1/(2·(2B)^(d−1)) ≤ |x − y|` for distinct orbit points (`orb_separated_of_conj_le`), the explicit cardinality bound (`orb_ncard_le_of_conj_le`) and the packaged form from `IsPisot` alone (`orb_separated`); `orb_finite` is left standing and is not used |
 | `RequestProject/EquiMean.lean` | round 14, T41 (`thm:equimean`): the composition operator `S`, the adjoint relation `adjoint`, the endpoint propagator `endpoint_propagator`, `iterate_P_eq` (`P^m = (λ/2)^m T^m`) and `equidistribution_in_mean` |
 | `RequestProject/AxiomAudit.lean` | semantic audit of the axioms of every public theorem |
 
@@ -241,7 +242,7 @@ Both are untrusted; the kernel re-checks every cell they emit.
 Each round leaves three documents: a census of what was inherited and what is
 new (`CENSUS-round*.md`), a record of every deviation from the paper
 (`SCRUPLES-round*.md`), and the axiom report (`AXIOM-AUDIT-round*.md`).  The
-latest round is round 15 (`CENSUS-round15.md`, `SCRUPLES-round15.md`,
-`AXIOM-AUDIT-round15.md`); `GITHUB_HANDOFF_CHECKLIST` carries the per-round
+latest round is round 16 (`CENSUS-round16.md`, `SCRUPLES-round16.md`,
+`AXIOM-AUDIT-round16.md`); `GITHUB_HANDOFF_CHECKLIST` carries the per-round
 checklists, and `ABANDONED.md` collects, once and for all, what the
 development does not deliver and why.
