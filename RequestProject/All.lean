@@ -88,6 +88,22 @@ import RequestProject.RecordGaps
 import RequestProject.ImmortalMahler
 import RequestProject.FourierGeneral
 import RequestProject.FourierReflect
+-- BranchBridge (round 14, T39.5): the three copies of the branch-word layer
+-- are identified with one another.
+import RequestProject.BranchBridge
+-- BackwardClosure (round 14, T42): branch words as M-free move words, density
+-- from 1/2 implies KindDense, and the backward closure of the density set.
+import RequestProject.BackwardClosure
+-- Contraction (round 14, T40): the normalised counting operator P, its
+-- contraction of the Lipschitz seminorm, and uniform convergence to a constant.
+import RequestProject.Contraction
+-- EquiMean (round 14, T41): the adjoint S of T, the endpoint propagator, and
+-- equidistribution in mean.
+import RequestProject.EquiMean
+-- InvariantMeasure (round 15, T45): an invariant probability measure carried by
+-- the unit interval, the law of the binary digit series of a uniform real, and
+-- its invariance for the normalised counting operator.
+import RequestProject.InvariantMeasure
 
 /-!
 # Knot counts in an interval deletion game

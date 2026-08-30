@@ -91,6 +91,22 @@ Start here:
   (T37), the counting operator (T38) and the trapezoid at `λ = √2` (T39).
   `SCRUPLES-round13.md` §1 displays the definitions of covering number and box
   dimension and argues that they are the standard ones.
+* [`CENSUS-round14.md`](CENSUS-round14.md), [`SCRUPLES-round14.md`](SCRUPLES-round14.md),
+  [`AXIOM-AUDIT-round14.md`](AXIOM-AUDIT-round14.md) — round 14: the bridge
+  between the three copies of the branch-word layer (T39.5), the spectral gap
+  of the normalised counting operator (T40), equidistribution in mean (T41),
+  and the backward closure of the density set together with the two-letter
+  reduction (T42).  `SCRUPLES-round14.md` records that the limit constant is
+  *hypothesised*, not identified: the Bernoulli convolution `ν_r` is nowhere
+  constructed in this development.  **Round 15 supersedes that caveat**; see
+  below.
+* [`CENSUS-round15.md`](CENSUS-round15.md), [`SCRUPLES-round15.md`](SCRUPLES-round15.md),
+  [`AXIOM-AUDIT-round15.md`](AXIOM-AUDIT-round15.md) — round 15: the
+  integrability and invariance hypotheses of round 14 discharged (T43), the
+  converse inclusion making the two density hypotheses equivalent (T44), and
+  **an invariant probability measure constructed** (T45), so that the limit
+  constant of the spectral gap is now an honest integral against a measure the
+  development owns.  No regularity of that measure is claimed.
 * [`ABANDONED.md`](ABANDONED.md) — **everything this development does not
   deliver**, in one place: the growth rate beyond `49^(1/16)`, the record
   depths beyond `k = 4`, the exhaustiveness half of `prop:twostep`, the
@@ -183,6 +199,11 @@ Start here:
 | `RequestProject/KindBox.lean` | round 13, T36: covering numbers (`coverSizes`, `coverNum`), the box dimensions (`upperBoxDim`, `lowerBoxDim`) over *all* scales `r → 0⁺`, the triadic bounds, the squeeze `tendsto_boxQuot`, and `boxDim_K`: both box dimensions of the kind set at `λ = 3/2` are `log 2 / log 3` |
 | `RequestProject/CountingOperator.lean` | round 13, T38 (`prop:lebeigen`): the transfer operator `T` and its eigenvalue (`T_one`, `T 1 = (2/λ)·1`); the branch count with `∫₀¹ B_λ(m,x) dx = (2/λ)^m` (`integral_bcount`, `bcount_eq_card`); the move-word count with `∫₀¹ K_λ(m,x) dx = (3/λ)^m` (`integral_kcount`) — the constant is `3/λ`, not `2/λ`, for the three-letter alphabet, and at `λ = 3/2` it reproduces the known `2^m` |
 | `RequestProject/Trapezoid.lean` | round 13, T39 (`prop:trapezoid`): the even/odd splitting of the backward series at `λ = √2` (`bval_split`) with ranges `[0, 2−√2]` and `[0, √2−1]`; the convolution of two uniform laws (`unifSum_eq_withDensity`); and the trapezoidal density with plateau `(2+√2)/2` (`trapDens`, `trapezoid_law`, `trapezoid_of_split`) |
+| `RequestProject/BranchBridge.lean` | round 14, T39.5: the three copies of the branch-word layer are identified (`branchLegal_iff_BLegal`, `branchSurvivesWord_iff_bSurvives`, `rapp_eq_branchIter`, `branchWords_eq_SW`, `bcount_eq_Kx`), with the append laws on the operator side |
+| `RequestProject/BackwardClosure.lean` | round 14, T42: branch words as `M`-free move words (`toMove`, `survivesWord_map_toMove`, `posAfter_map_toMove`); `denseFrom_half_imp_kindDense` and `N_unbounded_of_denseFrom_half`; the prepending lemma `endpoints_subset_of_legal`, the backward closure `denseFrom_of_image` and the forward invariance `compl_D_forward_invariant`.  Round 15, T44: the converse `kindDense_imp_denseFrom_half` (via `branchLegal_branch`, `branchWordOf`) and the biconditional `denseFrom_half_iff_kindDense` |
+| `RequestProject/Contraction.lean` | round 14, T40 (`prop:gap`): the normalised operator `P h y = ½[h(ry) + h(ry+1−r)]`, `P_one`, `P_eq_smul_T`, the Lipschitz contraction `lipschitz_contraction` (and its iterate), and `tendsto_const` — `P^m h` is within `2K r^m/(1−r)` of a constant on `[0,1]`; the constant is identified under the invariance hypothesis of `const_eq_integral_of_invariant`.  Round 15, T43: `integrable_of_lipBound` and `integrable_iterate` remove the integrability hypothesis, `InvariantOn` states invariance one step at a time against Lipschitz test functions and `integral_iterate_eq` iterates it, `integral_eq_of_invariant` gives uniqueness on that test class |
+| `RequestProject/InvariantMeasure.lean` | round 15, T45: the binary digits `digit`, the digit series `bval`, the measure `nu = map bval (volume.restrict (Ioc 0 1))`, the law of the digit series under a uniform point of `(0,1]` — no identification with any measure named elsewhere is asserted — with `isProbabilityMeasure_nu`, `nu_compl_Icc` and **`invariantOn_nu`**; the consequences `const_eq_integral_nu`, `tendsto_integral_nu` and `equidistribution_in_mean_nu`, in which no hypothesis beyond `1 < λ` remains |
+| `RequestProject/EquiMean.lean` | round 14, T41 (`thm:equimean`): the composition operator `S`, the adjoint relation `adjoint`, the endpoint propagator `endpoint_propagator`, `iterate_P_eq` (`P^m = (λ/2)^m T^m`) and `equidistribution_in_mean` |
 | `RequestProject/AxiomAudit.lean` | semantic audit of the axioms of every public theorem |
 
 ## Building
@@ -220,7 +241,7 @@ Both are untrusted; the kernel re-checks every cell they emit.
 Each round leaves three documents: a census of what was inherited and what is
 new (`CENSUS-round*.md`), a record of every deviation from the paper
 (`SCRUPLES-round*.md`), and the axiom report (`AXIOM-AUDIT-round*.md`).  The
-latest round is round 13 (`CENSUS-round13.md`, `SCRUPLES-round13.md`,
-`AXIOM-AUDIT-round13.md`); `GITHUB_HANDOFF_CHECKLIST` carries the per-round
+latest round is round 15 (`CENSUS-round15.md`, `SCRUPLES-round15.md`,
+`AXIOM-AUDIT-round15.md`); `GITHUB_HANDOFF_CHECKLIST` carries the per-round
 checklists, and `ABANDONED.md` collects, once and for all, what the
 development does not deliver and why.

@@ -97,13 +97,18 @@ would give unboundedness at once, remains open.
 
 \maketitle
 
+\begin{center}
+\emph{To the memory of Steven Rudich, who passed the problem on.}
+\end{center}
+
 \tableofcontents
 
 
 \section{The game}\label{sec:game}
 
-The problem treated here is recalled as having circulated among theoretical
-computer scientists at Berkeley, attributed to Eugene Lawler. No published
+The problem treated here was communicated to one of us by Steven Rudich, who
+recalled it as having circulated among theoretical computer scientists at
+Berkeley, attributed to Eugene Lawler. No published
 source has been located, and what follows is a reconstruction. We take the
 original to be the case in which the deleted piece is a third of the strip ---
 so that the three possible deletions exactly tile it, which is what makes the
@@ -973,11 +978,21 @@ $\eta$; a forced orbit multiplies that distance by $\lambda$ at each step and,
 by Lemma~\ref{lem:nojump}, enters the window rather than crossing it.
 \end{proof}
 
+Two counts must be kept apart here, and we fix the notation now. A run is a
+word in the three moves, but a \emph{single} knot experiences each move as one
+of the two branch maps, and different moves may act on it identically: a knot
+below $r/2$ is carried to the same place by $R$ and by $M$. Write
+$K_\lambda(m)$ for the number of \emph{branch} words of length $m$ along which
+$1/2$ survives --- the survival itineraries of a single knot --- and reserve
+\emph{kind word} for a word in $\{L,M,R\}$ along which $1/2$ survives, whose
+count is the cylinder count of Proposition~\ref{prop:kinddim}. The two differ
+by exactly the coincidences just described, and it is $K_\lambda(m)$ that the
+first-moment programme consumes.
+
 \begin{proposition}[machine-verified]\label{prop:continuum}
 For every $\lambda\in(1,\varphi)$ there is an explicit injection of
 $\{0,1\}^{\mathbb N}$ into the survival itineraries of $1/2$: uncountably many
-kind sequences. Moreover $K_\lambda(m)$, the number of kind words of length
-$m$, satisfies $K_\lambda(m)\geq\lfloor m/(B+1)\rfloor$ on any window as in
+of them. Moreover $K_\lambda(m)\geq\lfloor m/(B+1)\rfloor$ on any window as in
 Lemma~\ref{lem:goodchild}.
 \end{proposition}
 
@@ -996,8 +1011,9 @@ For every $\lambda\in[\tfrac{1000}{667},\tfrac85]$ and every $m$,
 \[
   K_\lambda(m)\ \geq\ 2^{\lfloor m/8\rfloor},
 \]
-and at $\lambda=3/2$, $K_{3/2}(m)\geq15^{\lfloor m/12\rfloor}$, a growth rate
-of $15^{1/12}\approx1.2532$ per move against the measured $4/3$.
+and at $\lambda=3/2$, $K_{3/2}(m)\geq15^{\lfloor m/12\rfloor}$, since improved
+in certified stages to $K_{3/2}(m)\geq49^{\lfloor m/16\rfloor}$, a growth rate
+of $49^{1/16}\approx1.2754$ per move against the measured $4/3$.
 \end{proposition}
 
 The mechanism is a self-reproducing interval. Say that an interval
@@ -1014,6 +1030,16 @@ interval of $\lambda$. Underlying it is a small structural simplification: a
 branch word issued from a point of $(0,1)$ is legal exactly when its final
 image lies again in $(0,1)$, so a certificate need only control images and
 never legality.
+
+A certificate of the same kind now exists \emph{above} the golden ratio, on
+the window $[\tfrac{3457}{2000},\tfrac{4331}{2500}]=[1.7285,1.7324]$, which
+contains $\sqrt3$: exponentially many kind words there too, where the
+branching lemmas provably do not apply. The window is narrow --- the
+commissioned target was ten times wider --- and the narrowness is the
+two-cycle's shadow made quantitative: above $\varphi$ the certified two-cycle
+avoids the branching window, returns near it are slow, and the search for
+parameter-uniform certificates was reported to fail beyond this width for
+reasons of cost, not of certified obstruction.
 
 Two things this does and does not settle. It settles the counting half of the
 first-moment problem, unconditionally and uniformly on a window containing
@@ -1372,10 +1398,10 @@ Coding a run in base three by $L,M,R\mapsto0,1,2$ realises the kind sequences
 as a subset $K_\lambda$ of $[0,1]$, and the threshold of
 Section~\ref{sec:thresholds} governs its size.
 
-\begin{proposition}[counts machine-verified]\label{prop:kinddim}
+\begin{proposition}[machine-verified, except the box dimension]\label{prop:kinddim}
 $K_{3/2}$ has exactly $2^n$ cylinders of length $3^{-n}$ at every level $n$;
-hence it has Lebesgue measure zero and Hausdorff and box dimension exactly
-$\log2/\log3$. It is not self-similar. For $\lambda<3/2$ the dimension is
+hence it has Lebesgue measure zero and Hausdorff dimension exactly
+$\log2/\log3$, and the same value for its box dimension. It is not self-similar. For $\lambda<3/2$ the dimension is
 larger and for $\lambda>3/2$ smaller; at $\varphi$ the set is \emph{sofic} ---
 its sequences are exactly the paths through a finite directed graph, here the
 five-state one of Theorem~\ref{thm:phi} --- with
@@ -1667,6 +1693,251 @@ unbounded supply eventually meets any fixed open target; Hypothesis
 bound on $d_\lambda(k)$ in Theorem~\ref{thm:density} costs.
 \end{remark}
 
+\subsection{The counting operator, and what the endpoints converge to}
+The candidates remark suggests looking at all such endpoints of length $m$ at
+once, as a measure: put unit mass at $\Phi_\varepsilon(1/2)$ for each branch
+word $\varepsilon$ of length $m$ along which $1/2$ survives. This measure evolves by the \emph{counting operator}, which pushes
+a density forward through every legal branch:
+\[
+  (Th)(y)=\frac1\lambda\Bigl[h\bigl(\tfrac y\lambda\bigr)
+  +h\bigl(\tfrac{y+\lambda-1}\lambda\bigr)\Bigr].
+\]
+
+\begin{proposition}[machine-verified]\label{prop:lebeigen}
+For every $\lambda\in(1,2)$ the uniform density is an exact eigenfunction of
+$T$, with eigenvalue $2/\lambda$. Consequently, with $K_\lambda(m,x)$ the
+number of branch words of length $m$ legal from $x$,
+\[
+  \int_0^1K_\lambda(m,x)\,dx=\Bigl(\frac2\lambda\Bigr)^{m},
+  \qquad\text{while}\qquad
+  \int_0^1\#\{\text{kind words of length }m\text{ from }x\}\,dx
+  =\Bigl(\frac3\lambda\Bigr)^{m}.
+\]
+\end{proposition}
+
+\begin{proof}
+The first branch is a bijection from $(0,r)$ onto $(0,1)$ and the second from
+$(g,1)$ onto $(0,1)$, so every $y\in(0,1)$ has exactly one legal preimage
+under each: $y/\lambda\in(0,r)$ and $(y+\lambda-1)/\lambda\in(g,1)$, always.
+Hence $T1=(2/\lambda)\cdot1$, and the first identity follows by iterating and
+pairing with the constant function. For the second, each of the three moves is
+likewise a bijection from its legal domain onto $(0,1)$ --- $R$ from $(0,r)$,
+$L$ from $(g,1)$, and $M$ from $(0,r/2)\cup(1-r/2,1)$ in two pieces onto the
+two halves --- so the mean factor per step is $3/\lambda$ rather than
+$2/\lambda$.
+\end{proof}
+
+The two constants are a useful check on each other. At $\lambda=3/2$ the kind
+words number exactly $2^m$ at \emph{every} point of the survival tree
+(Proposition~\ref{prop:kinddim}), and indeed $3/\lambda=2$ there; a mean of
+$(2/\lambda)^m=(4/3)^m$ would be smaller than a pointwise-attained value,
+which is impossible. The discrepancy is exactly the double counting described
+above: $R$ and $M$ agree below $r/2$, and $L$ and $M$ agree above $1-r/2$.
+
+So the measured growth rate $2/\lambda$ of the kind count is not merely
+measured: it is the exact growth of the count \emph{averaged over the starting
+point}, at every parameter, and the natural candidate for the limiting shape
+of the endpoint distribution is the eigenfunction itself --- the uniform
+density. At $\lambda=\sqrt2$, in exact arithmetic (positions there have the
+closed form $(a+b\sqrt2)/2$), the counts from $1/2$ are
+\[
+2,\,2,\,4,\,6,\,8,\,12,\,18,\,26,\,38,\,54,\,76,\,108,\dots,\,27968\ (m=28),
+\]
+obeying $K(m)=2K(m-2)+\varepsilon_m$ with $\varepsilon_m\in\{0,2\}$ and the
+corrections striking sporadically ($m=10,13,14,17,18,29,30,\dots$) --- no
+finite recurrence emerges, as befits a parameter that is not Pisot --- while
+$K(m)/(2/\lambda)^m$ holds near $1.707$. And the endpoints do flatten: the
+worst relative error against the uniform density over dyadic intervals of
+lengths $2^{-3}$ through $2^{-6}$ falls from $0.098$ at $m=20$ to $0.016$ at
+$m=24$ to $0.0046$ at $m=28$, a geometric collapse.
+
+\subsection{A spectral gap, and what it delivers}
+The operator $T$ has an adjoint with respect to Lebesgue measure, namely the
+composition operator
+\[
+  (Sh)(x)=h(\lambda x)\mathbf 1_{x<r}+h(\lambda x-(\lambda-1))\mathbf 1_{x>g},
+\]
+which is exactly the propagator of the endpoint counts: $\int h\,d\mu^x_m
+=(S^mh)(x)$, where $\mu^x_m$ is the endpoint measure of the branch words of
+length $m$ legal from $x$. Normalise $T$ by its eigenvalue, $P=(\lambda/2)T$,
+so that $P1=1$; explicitly $(Ph)(y)=\tfrac12[h(ry)+h(ry+1-r)]$, the Markov
+operator of the backward pair of contractions with equal weights.
+
+\begin{proposition}[machine-verified]\label{prop:gap}
+For every differentiable $h$ one has
+$\|(Ph)'\|_\infty\leq r\,\|h'\|_\infty$, and the constant is best possible,
+being attained at $h(y)=y$. Consequently, for every Lipschitz $h$,
+$P^mh$ converges uniformly, at the geometric rate $r^m$, to the constant
+$\int h\,d\nu_r$, where $\nu_r$ is the Bernoulli convolution.
+\end{proposition}
+
+\begin{proof}
+$(Ph)'(y)=\tfrac r2[h'(ry)+h'(ry+1-r)]$, whence the bound. Iterating, the
+Lipschitz constant of $P^mh$ is at most $r^m\|h'\|_\infty\to0$, so $P^mh$
+converges uniformly to a constant, say $c$. Call a Borel probability measure
+$\nu$ carried by $[0,1]$ \emph{invariant} if $\int P\varphi\,d\nu
+=\int\varphi\,d\nu$ for every Lipschitz $\varphi$. For such a $\nu$ one has
+$\int P^mh\,d\nu=\int h\,d\nu$ for every $m$ --- the induction applies
+invariance to $P^{m-1}h$, which is Lipschitz because $P$ preserves that class
+--- and the left side converges to $c$, so $c=\int h\,d\nu$. In particular the
+value $\int h\,d\nu$ does not depend on which invariant measure is used, so it
+suffices to exhibit one.
+
+There is one, and it is $\nu_r$. Let $d_j(t)$ denote the $j$th binary
+digit of $t$ and set $b(t)=(1-r)\sum_{j\geq0}d_j(t)r^j$. Then
+$b(t)=(1-r)d_0(t)+r\,b(\{2t\})$, where $\{2t\}$ is the doubling map; the
+doubling map preserves Lebesgue measure on $(0,1]$, and its two branches carry
+$b$ to $ry$ and to $ry+1-r$ with weight $\tfrac12$ each. So the law of $b$
+under a uniform $t\in(0,1]$ is invariant. Since the binary digits of a uniform
+point are independent and fair, that law is the distribution of
+$(1-r)\sum_j\varepsilon_jr^j$ with $\varepsilon_j$ i.i.d.\ fair bits, which is
+$\nu_r$.
+\end{proof}
+
+\begin{theorem}[equidistribution in mean; machine-verified]\label{thm:equimean}
+For continuous $h$ and $g$ on $[0,1]$,
+\[
+  \Bigl(\frac\lambda2\Bigr)^{m}\int_0^1(S^mh)(x)\,g(x)\,dx
+  \ \longrightarrow\ \Bigl(\int_0^1h\,dx\Bigr)\Bigl(\int g\,d\nu_r\Bigr).
+\]
+That is: averaged over the starting point, the normalised endpoint measures
+converge weakly to \emph{Lebesgue} measure; the total mass is governed
+instead by the \emph{Bernoulli convolution}, in that the ratio
+$K_\lambda(m,x)/(2/\lambda)^m$ tends weakly in $x$ to the density of
+$\nu_r$.
+\end{theorem}
+
+\begin{proof}
+$S=T^*$, so $\int(S^mh)g\,dx=\int h\,(T^mg)\,dx$, and
+$(\lambda/2)^mT^mg=P^mg\to\int g\,d\nu_r$ uniformly by
+Proposition~\ref{prop:gap}.
+\end{proof}
+
+Both are certified, and so is the measure they refer to. The development
+constructs the law of the digit series $b$ above under a uniform point of
+$(0,1]$, proves it invariant in the sense of the proof just given, and proves
+that any two invariant probability measures carried by $[0,1]$ integrate every
+Lipschitz function alike; the constant is then identified at the explicit rate
+$(2K/(1-r))\,r^m$, with no hypothesis on the measure left standing beyond
+$\lambda>1$. Two limits are recorded rather than hidden. The measure certified
+to be invariant is the pushforward itself; that it \emph{is} the Bernoulli
+convolution rests on the binary digits of a uniform real being independent and
+fair, which is classical but is not part of the formal development. And nothing
+there connects it to the cosine products of Section~\ref{sec:conjugate}, which
+remain statements about those products alone, so the appearance of $\nu_r$ in
+the two sections is a single object only on paper. The certified regularity is also weaker than stated above and, for
+once, in the useful direction: in Theorem~\ref{thm:equimean} the iterated
+function need only be bounded measurable, since $Sh$ carries indicators and
+continuity cannot be propagated along the induction that moves iterates from
+$S$ to $T$; the Lipschitz hypothesis is needed only of the second function,
+which is the one $P$ acts on.
+
+Two things follow, one clarifying and one strategic. The clarifying one is that
+the Bernoulli convolution, which Remark~\ref{rem:noac} showed cannot see the
+survival constraint, reappears here in its correct role: not as the shape of
+the constrained endpoint distribution --- that is Lebesgue --- but as the
+\emph{multiplicity}, the local density of surviving words. Numerically at
+$\lambda=\sqrt2$ the ratio $K(m,x)/(2/\lambda)^m$ matches the exact trapezoid
+of Proposition~\ref{prop:trapezoid} to a relative $L^1$ error of $0.0037$ by
+$m=20$, while the endpoints from the single point $1/2$ flatten towards
+Lebesgue with maximum deviation over sixteen bins falling
+$0.185$, $0.0275$, $0.0114$, $0.0046$ at $m=12$, $16$, $20$, $24$: the rate
+$r^m$ that the proposition predicts.
+
+The strategic one is that Theorem~\ref{thm:equimean} is one upgrade away from
+Hypothesis (D$_\lambda$). If the convergence held pointwise at $x=1/2$ rather
+than merely in mean, the limit measure would be Lebesgue times the positive
+number $\tfrac{d\nu_r}{dx}(1/2)$, and a measure of full support forces its
+approximants to place points in every interval: the endpoints would be dense
+and Theorem~\ref{thm:density0} would apply. What blocks the upgrade is worth stating precisely, because the obvious route
+is closed. One would like a Lasota--Yorke inequality for $S$ on the functions
+of bounded variation, giving quasi-compactness and hence a genuine spectral
+gap. But $S$ carries $(0,g]$ by one branch, $[r,1)$ by the other, and the
+window by both, so in the worst case
+\[
+  \operatorname{Var}(Sh)\ \leq\ 2\operatorname{Var}(h),
+\]
+with the constant $2$ attained; and $2$ exceeds the peripheral eigenvalue
+$2/\lambda$ at every $\lambda>1$. Iterating does not help, since the $n$th
+iterate has $2^n$ branches against expansion $\lambda^n$ and the ratio is
+unchanged. A Lasota--Yorke bound in this space would therefore place the
+essential radius above the eigenvalue it is meant to isolate. The gap of
+Proposition~\ref{prop:gap} is real, but it lives on the Lipschitz functions,
+where $P$ acts, and does not transfer to the dual side by this route: the
+functions $(\lambda/2)^mS^m1=K_\lambda(m,\cdot)/(2/\lambda)^m$ oscillate at
+scale $\lambda^{-m}$, so no equicontinuity is available either.
+
+\begin{question}\label{q:LY}
+Find a space on which $S$ is quasi-compact with essential radius below
+$2/\lambda$ --- necessarily one adapted to the expanding direction rather than
+$BV$ --- or prove by other means that
+$K_\lambda(m,1/2)/(2/\lambda)^m$ stays bounded away from $0$. Either would
+give $N_\lambda=\infty$ at every $\lambda$ where $\nu_r$ has a density
+positive at $1/2$, hence at almost every $\lambda$ by Solomyak's theorem.
+\end{question}
+
+Two structural facts simplify the target. The first is that the branch words,
+which is what this section counts, are already kind words: branch $0$ is the
+map $x\mapsto\lambda x$, which is the action of the move $R$, and branch $1$
+is $x\mapsto\lambda x-(\lambda-1)$, the action of $L$. So a legal branch word
+of length $m$ is a kind word of length $m$ in which $M$ never occurs, and
+density of the endpoints $\Phi_\varepsilon(1/2)$ over legal branch words
+already gives the hypothesis of Theorem~\ref{thm:density0} and hence
+$N_\lambda=\infty$. That implication is certified
+(\texttt{N\_unbounded\_of\_denseFrom\_half}).
+
+In fact the two hypotheses coincide. One inclusion is the remark just made:
+an $M$-free kind word is a branch word, so branch endpoints are kind
+endpoints. For the other, suppose a point survives a move. If the move is $L$
+or $R$ it acts by $f_1$ or $f_0$, legally by definition. If it is $M$, the
+survivor lies in $(0,r/2)\cup(1-r/2,1)$, and $M$ acts on it by $f_0$ on the
+left piece and by $f_1$ on the right; since $r/2<r$ and $1-r/2>g$, both of
+those branches are legal there as well. So every kind word acts on $1/2$
+exactly as some legal branch word does, the two endpoint sets are equal, and
+the two-letter analysis of this section is not a simplification of the
+spreading problem but the whole of it. Both inclusions are certified, and with
+them the equivalence of the two density hypotheses
+(\texttt{denseFrom\_half\_iff\_kindDense}); the second uses $\lambda>1$, for
+the middle move, where the first uses nothing.
+
+The second fact is a symmetry. Write $D$ for the set of starting
+points whose endpoint sets become dense in $(0,1)$. If $y=\Phi_\varepsilon(x)$
+for some branch word $\varepsilon$ legal from $x$, then every word legal from
+$y$ prepends to one legal from $x$, so the endpoints from $y$ at level $m$ are
+among those from $x$ at level $m+|\varepsilon|$. Hence
+\[
+  y\in D\ \text{ for some legal image }y\text{ of }x
+  \quad\Longrightarrow\quad x\in D,
+\]
+so $D$ is closed under passing to preimages, and its complement is forward
+invariant. It would therefore suffice to place a \emph{single} point of the
+forward orbit of $1/2$ in $D$ --- a set which, by
+Theorem~\ref{thm:equimean}, has positive measure whenever $\nu_r$ has a
+density. The difficulty is that the orbit of $1/2$ is countable, so the
+measure statement alone does not reach it.
+
+The last clause is worth dwelling on, because it identifies the obstruction
+exactly. At a Pisot parameter $\nu_r$ is singular, by Erd\H{o}s's theorem, and
+no density $\psi$ exists; at those parameters the game is bounded. At the
+parameters where absolute continuity is known --- almost every
+$\lambda\in(1,2)$, by Solomyak's theorem --- the density exists, and the only
+thing standing between that and unboundedness for almost every $\lambda$ is
+the passage from mean to pointwise. The Bernoulli convolution does not decide
+the problem, as Remark~\ref{rem:noac} insisted; but its regularity is exactly
+what the multiplicity function inherits.
+
+\begin{question}\label{q:equi}
+Prove, for a single non-Pisot $\lambda$, that the endpoint measures of kind
+words converge weak-$*$ to Lebesgue measure. This is stronger than the
+density hypothesis of Theorem~\ref{thm:density0} --- convergence to a
+full-support limit puts an endpoint in every interval eventually --- so it
+implies $N_\lambda=\infty$. The eigenfunction is free by
+Proposition~\ref{prop:lebeigen}; what is missing is that the evolution
+started from the single atom at $1/2$ is drawn to it. The spreading half of
+the programme of Section~\ref{sec:transversality} is exactly this question in
+integrated form.
+\end{question}
+
 Both criteria are certified: the topological form as stated, and the
 quantitative form with the explicit bound $d_\lambda(k)\leq B^k-1$ for
 $B=\max\bigl(2,\,1+C(\log\lambda+1)\bigr)$, each carrying its unproved
@@ -1741,7 +2012,17 @@ For Pisot $\lambda$ this limit is positive: the factors with $m\to-\infty$
 tend to $1$ because $\lambda^m\to0$, and those with $m\to+\infty$ tend to $\pm1$
 because $\|\lambda^m\|\to0$. That positivity is Erd\H{o}s's theorem
 \cite{Erdos1939}; what the product adds is a \emph{number}, and the number
-turns out to be informative. Write $\|\lambda^m\|$ for the distance to the
+turns out to be informative. At all four parameters of the table this is now
+certified rather than classical: the two-sided product converges, is positive,
+and is the limit of the transform along the frequencies $\xi_N$, each proved
+in Lean --- entirely inside the reals, with the nearness of $\lambda^m$ to an
+integer obtained from the integer recurrence satisfied by the trace (at the
+plastic number, the Perrin recurrence) and a quadratic form invariant under
+it, rather than from complex conjugates. At the golden ratio the value itself
+is certified: the floor lies in $[0.0066,\,0.0067]$, enclosing the measured
+$6.6135\times10^{-3}$. At the three cubic parameters the numerical values in
+the table remain floating-point computations, and the precision warning below
+applies to them with full force. Write $\|\lambda^m\|$ for the distance to the
 nearest integer and $c(\lambda)$ for the maximum modulus of the conjugates of
 $\lambda$, so that $\|\lambda^m\|$ decays like $c(\lambda)^m$.
 
@@ -1777,17 +2058,80 @@ not a proof, and we do not know a bound on $N_\lambda$ in terms of
 $c(\lambda)$ directly. What the table does establish is that the size of the
 bound is a question about conjugates rather than about $\lambda$ itself.
 
+At one parameter the profile is not merely measured but known exactly.
+
+\begin{proposition}[machine-verified below one step]\label{prop:trapezoid}
+At $\lambda=\sqrt2$ the backward measure has the piecewise linear density
+that rises linearly on $[0,\sqrt2-1]$, is constant at height $(2+\sqrt2)/2$ on
+$[\sqrt2-1,\,2-\sqrt2]$, and falls linearly on $[2-\sqrt2,1]$: the trapezoid
+obtained by convolving the uniform distributions on intervals of lengths
+$2-\sqrt2$ and $\sqrt2-1$.
+\end{proposition}
+
+\begin{proof}
+The backward point is $(1-r)\sum_{j\geq0}\varepsilon_jr^j$ with fair
+independent bits $\varepsilon_j$ and $r=1/\sqrt2$. Split the sum over even and
+odd $j$: since $r^2=\tfrac12$, each half is a fair binary expansion, so
+$\sum_i\varepsilon_{2i}2^{-i}$ and $\sum_i\varepsilon_{2i+1}2^{-i}$ are
+independent and uniform on $[0,2]$. The point is therefore distributed as an
+independent sum $U_1+U_2$ with $U_1$ uniform on $[0,2(1-r)]=[0,2-\sqrt2]$ and
+$U_2$ uniform on $[0,2r(1-r)]=[0,\sqrt2-1]$, and the convolution of two
+uniform densities is the stated trapezoid.
+\end{proof}
+
+The formalisation of this proposition stops one step short, and the step is
+worth naming: that for fair independent bits the even-indexed and odd-indexed
+sub-series are themselves independent and each uniform. Everything downstream
+of it --- the exact ranges $[0,2-\sqrt2]$ and $[0,\sqrt2-1]$, the convolution
+formula for two uniform densities, the trapezoid and its being a probability
+measure --- is certified, with that statement an explicit hypothesis rather
+than a silent assumption. It is a de-interleaving isomorphism of measure
+spaces, provable on dyadic rectangles.
+
+The same split at $\lambda=2^{1/k}$ expresses the backward measure as a
+convolution of $k$ uniform distributions, with a piecewise polynomial density
+of degree $k-1$; absolute continuity along this sequence of parameters is a
+theorem of Wintner \cite{Wintner1935}. The transfer-operator profile in
+Figure~\ref{fig:densities} agrees with the trapezoid to the resolution of the
+computation, and the plateau height $1.7071$ had in fact been appearing in our
+measurements all along, unrecognised.
+
+\begin{remark}[what a formula for the measure does not buy]\label{rem:noac}
+It is tempting to conclude more. The trapezoid has full support, so the
+unconstrained backward points are dense in $(0,1)$ --- but that is trivially
+true at every $\lambda<2$, formula or no formula, since the two backward maps
+together cover the interval. What Theorem~\ref{thm:density0} requires is
+density of the endpoints of \emph{kind} words, the ones along which a knot
+survives, and the survival constraint is precisely what the Bernoulli
+convolution does not see: it weights all words equally, dead or alive. Indeed,
+if absolute continuity of the unconstrained measure implied the density
+criterion, Solomyak's theorem would already give $N_\lambda=\infty$ for almost
+every $\lambda$, and at $\sqrt2$ itself, where the game is a binary shift in
+two coordinates (Section~\ref{sec:sqrt2}), it would settle questions adjacent
+to the distribution of the binary digits of $\sqrt2$. The formula sharpens the
+picture without touching the constraint --- the clearest illustration in this
+paper that the difficulty lives in the conditioning, not in the measure. What
+the conditioning itself converges to is taken up in
+Section~\ref{sec:density}: the constrained endpoints appear to equidistribute
+not to the trapezoid but to the \emph{uniform} density, which is an exact
+eigenfunction of the relevant operator (Proposition~\ref{prop:lebeigen}) ---
+the constraint, far from roughening the distribution, appears to iron it
+flat.
+\end{remark}
+
 \begin{figure}[ht]
 \centering
 \includegraphics{densities.pdf}
 \caption{The limit distribution of the backward set --- the Bernoulli
 convolution $\nu_r$ --- computed by iterating the transfer operator, at
 resolution $300$. Below each panel is the mean absolute difference between
-adjacent bins, relative to the mean, at resolutions $3000$ and $12000$. Only
-the behaviour under refinement is diagnostic: at $\varphi$ it does not move,
-the signature of a singular measure; at the plastic number it falls and then
+adjacent bins, relative to the mean, at two successive refinements. Only the
+behaviour under refinement is diagnostic: at $\varphi$ it does not move, the
+signature of a singular measure; at the plastic number it falls and then
 stops, so that a profile which looks smooth to the eye is singular as well; at
-half the silver ratio it continues to fall, as an actual density must.}
+$\sqrt2$ and at half the silver ratio it continues to fall, as an actual
+density must. At $\sqrt2$ the thin line is the exact trapezoid of
+Proposition~\ref{prop:trapezoid}, drawn over the measured profile.}
 \label{fig:densities}
 \end{figure}
 
@@ -1958,7 +2302,7 @@ the control.
 We record a consequence of the dyadic structure which strengthens the
 no-return theorem of Section~\ref{sec:kind} from one point to all of them.
 
-\begin{proposition}\label{prop:norecur}
+\begin{proposition}[machine-verified]\label{prop:norecur}
 At $\lambda=3/2$ no knot ever occupies the same position twice.
 \end{proposition}
 
@@ -2010,7 +2354,7 @@ game with this recursion, and Lemma~\ref{lem:suffix} identifies the knot count
 with the number of births whose trajectories run to completion.
 \end{proof}
 
-\begin{proposition}\label{prop:immortal32}
+\begin{proposition}[machine-verified]\label{prop:immortal32}
 If some $c\in\{0,1,2\}^{\mathbb N}$ has infinitely many indices $t$ with $c_t=1$
 whose trajectories never meet the control, then $N_{3/2}=\infty$.
 \end{proposition}
@@ -2030,6 +2374,10 @@ lifetime is not excluded.
 \end{remark}
 
 \section{\texorpdfstring{The case $\lambda=\sqrt2$}{The case lambda = sqrt 2}}\label{sec:sqrt2}
+
+At this parameter the unconstrained backward measure is known in closed form
+--- the trapezoid of Proposition~\ref{prop:trapezoid} --- and
+Remark~\ref{rem:noac} explains why that, by itself, decides nothing here.
 
 For $\lambda=\sqrt2$ the positions lie in $\tfrac12\Z[\sqrt2]$ and the
 denominators do not grow: writing $x=(a+b\sqrt2)/2$ with $a,b\in\Z$, one has
@@ -2395,7 +2743,141 @@ proved equivalent to $\lambda^2\geq\lambda+1$),
 Proposition~\ref{prop:continuum} -- the injection valid for all
 $\lambda\in(1,\varphi)$, since only finiteness of the forced return time is
 required -- and Proposition~\ref{prop:commonwindow}; after it the audit
-reports $636$ theorems, axioms confined to the same three. One plan recorded in earlier commissions --- a probabilistic bound on the
+reports $636$ theorems, axioms confined to the same three. A ninth round certifies Proposition~\ref{prop:immortal32}; the exact
+minimum-gap and membership facts stated in the caption of
+Figure~\ref{fig:records32}, for the exhibited configurations; and the
+Fourier-floor theorems of Section~\ref{sec:conjugate} at all four Pisot
+parameters --- convergence, positivity, and the identification of the floor as
+the limit of the transform along $\xi_N$ --- together with the rational
+enclosure $[66/10^4,\,67/10^4]$ of the golden floor, whose tails are bounded
+through the Lucas recurrence and whose finitely many cosines are enclosed by
+Taylor bounds in exact rational arithmetic. Three honest limits are recorded
+in that round's audit: no numerical enclosure is certified at the three cubic
+parameters; the integer sequences used there (Perrin and its analogues) enter
+as definitions satisfying their recurrences, not as identified traces; and the
+Bernoulli convolution itself is nowhere constructed --- the certified
+statements concern the cosine products directly. The third of these is
+superseded only in part: the fifteenth round below constructs a measure with
+the defining invariance, but nothing identifies it with the products of this
+section. The audit after this round
+reports $1435$ theorems, axioms confined to the same three.
+
+A word on what verifying a large computation means here, since two readings
+are possible and the difference matters. It does not mean writing the
+arithmetic out as proof text. For each certificate there is a small checking
+program and a soundness theorem, proved once, that the checker's acceptance
+entails the mathematical statement; the certificate data itself is produced
+by untrusted search programs at native speed. What distinguishes the regime
+of this paper is where the checker then runs: not as a compiled binary, whose
+output would be trustworthy only if the compiler and runtime were --- Lean
+offers that trade, and it is among the four things every commission here has
+banned --- but inside the proof kernel itself, by term reduction, so that
+every step of the computation is a primitive of the proof theory. This is
+why certification is expensive: the kernel is an interpreter, and the
+certified growth rate at $3/2$ stops at $49^{1/16}$ not because better
+certificates are unknown --- the search finds them --- but because checking
+them at kernel speed is what does not fit. The alternatives are cheaper
+checkers, or admitting compiled execution under a declared enlargement of
+the trusted base; this paper does neither, and says so.
+
+A tenth round, run in parallel with the ninth from a common base, certifies
+Proposition~\ref{prop:norecur} with its identity-block corollary, the
+improvement of the exponential rate at $3/2$ to $26^{1/14}$ recorded in
+Section~\ref{sec:transversality}, and the certificate above the golden ratio
+stated there. A sharper certificate at rate $49^{1/16}$ was drafted in a later
+session and recorded as complete in that session's census, but no audit of it
+was ever written, and its kernel checks have since proved too large to carry
+through on the hardware available; it is excluded from the verified
+development, and the rate claimed above is the audited one. The episode is
+the reason this project distinguishes, in every round, between what a session
+reports and what an audit certifies. A continuation of the same lineage, working from the project's
+own census rather than a commission, then added: the exact-overlap lemma
+behind Figure~\ref{fig:reachable}, by a single Gauss's-lemma argument
+replacing the paper's two ad-hoc reductions; the decidability packaging at
+Pisot parameters; the circle normal form of Proposition~\ref{prop:circle};
+the record-length lower bounds; and a repair of the binary-square file, which
+--- a process lesson worth recording --- had never compiled and had sat
+invisible to every build and audit because nothing imported it: audits cover
+the import closure, and the closure had holes, since closed, with the
+invariant \emph{file set equals import closure} adopted. The repair also
+caught a missing hypothesis: one of the five survival-region tables requires
+$\lambda<3/2$, harmless here since Section~\ref{sec:sqrt2} uses it only at
+$\sqrt2$. That session ended interrupted: a certified proof that the kind set
+at $3/2$ has Hausdorff dimension \emph{exactly} $\log2/\log3$ --- the lower
+bound by a mass distribution transported through the survival tree, the
+statement round~$8$ had correctly declined on the count alone --- is present
+in the delivered files but was not, at the time, covered by a completed audit.
+The two parallel trees have since been united by file union and put under
+continuous integration, which builds the union from a fixed toolchain and runs
+the semantic audit on every commit; that audit now reports $1667$ theorems
+with axioms confined to \texttt{propext}, \texttt{Classical.choice} and
+\texttt{Quot.sound}, and it covers the Hausdorff statement, which the paper
+therefore claims. The same process rejected a third file, on the \emph{box}
+dimension of the same set, which the session that wrote it reported as
+complete and free of gaps and which proves never to have been elaborated at
+all: the second file in this project found broken by the rule that every file
+must lie in the import closure, and a caution about the difference between a
+report and a check. The box-dimension statement of
+Proposition~\ref{prop:kinddim} is accordingly not claimed as verified, and
+neither are the results of two further files held outside the closure because
+their kernel computations exceed the memory of the available hardware --- the
+$25{,}525$-state closure at the plastic number, whose conclusions rest instead
+on the earlier audit that did cover them, and the sharper exponential
+certificate discussed above.
+
+A thirteenth round, the first run under a division of labour in which the
+prover builds only the modules it writes and the union is built and audited
+separately, certified the box dimension of Proposition~\ref{prop:kinddim} ---
+including the squeeze from triadic scales to all scales, which the earlier
+broken file had left unproved --- the counting operator of
+Proposition~\ref{prop:lebeigen}, and the trapezoid of
+Proposition~\ref{prop:trapezoid} below the one step noted there. It also
+corrected this paper: the identity commissioned for the counting operator was
+stated for the wrong one of two counts that the text had been conflating under
+a single name, and the constants $2/\lambda$ and $3/\lambda$ now appear where
+each belongs.
+
+A fourteenth round certifies the spectral material of
+Section~\ref{sec:density}: the contraction of Proposition~\ref{prop:gap} in
+the form ``$h$ Lipschitz with constant $K$ implies $Ph$ Lipschitz with
+constant $rK$'', with no differentiability assumed; the convergence to a
+constant at the stated rate, obtained by applying a geometric Cauchy
+criterion to the values at the midpoint and spreading the estimate over
+$[0,1]$ by the contraction itself; the adjoint
+relation and the endpoint propagator on the two-letter branch alphabet; and
+Theorem~\ref{thm:equimean}. It also certifies the passage from density of the
+branch endpoints at $1/2$ to unboundedness. What is certified in Proposition~\ref{prop:gap} is
+the inequality; the sharpness of the constant, one line on paper, is not part
+of the formal development. Two of the round's four modules had been
+written in an earlier session and lay outside the import closure until this
+round placed them inside it --- the same oversight the closure invariant
+exists to catch, corrected here by the round that inherited the files rather
+than by an audit.
+
+A fifteenth round closes the hypotheses the fourteenth had to leave standing.
+It constructs the invariant measure of Proposition~\ref{prop:gap} as the law of
+the digit series under a uniform point of $(0,1]$ --- the shift on digits being
+the doubling map, whose two branches supply the two contractions with weight
+$\tfrac12$ each, so that no infinite product measure is needed --- proves it
+invariant, and proves that any two invariant probability measures carried by
+$[0,1]$ integrate every Lipschitz function alike. With it the constant of
+Proposition~\ref{prop:gap} and of
+Theorem~\ref{thm:equimean} is identified with no hypothesis on the measure
+beyond $\lambda>1$. The same round certifies the second inclusion of the equality of
+endpoint sets, hence the equivalence of the two density hypotheses, and
+restates the invariance hypothesis one step at a time over Lipschitz test
+functions rather than as an assumption about every iterate, which is what let a
+construction discharge it at all. Four limits are recorded. What is certified
+invariant is the pushforward; its identification with the Bernoulli
+convolution, and hence with the $\nu_r$ of the statements above, uses the
+independence of the digits and stays on paper. Nothing connects the constructed
+measure to the cosine products of
+Section~\ref{sec:conjugate}, as noted above; no regularity of it is claimed ---
+not absolute continuity, not a density, not Fourier decay, so nothing here
+bears on the Pisot dichotomy; and the sharpness of the contraction constant
+remains unformalised.
+
+One plan recorded in earlier commissions --- a probabilistic bound on the
 return time of the discarded child, feeding a renewal inequality --- was
 deliberately fenced off from formalisation because it was never proved on
 paper, and it remains absent; the exponential count of
@@ -2627,6 +3109,11 @@ B.~Solomyak,
 Y.~Peres and B.~Solomyak,
 \newblock Absolute continuity of Bernoulli convolutions, a simple proof,
 \newblock \emph{Math.\ Res.\ Lett.} \textbf{3} (1996), 231--239.
+
+\bibitem{Wintner1935}
+A.~Wintner,
+\newblock On convergent Poisson convolutions,
+\newblock \emph{Amer.\ J.\ Math.} \textbf{57} (1935), 827--838.
 
 \bibitem{Salem1944}
 R. Salem,

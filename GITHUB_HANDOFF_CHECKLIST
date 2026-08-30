@@ -885,6 +885,181 @@ ROUND 13 -- box dimension, the counting operator, the trapezoid, and the
 
 
 ================================================================================
+14A. ROUND 14 (T39.5, T40, T41, T42 -- THE SPECTRAL MATERIAL)
+================================================================================
+
+  Four modules, all in the import closure of All.lean and all four added to
+  the CI module list in .github/workflows/ci.yml.
+
+  [x] T39.5 (the bridge, first). RequestProject/BranchBridge.lean. The
+      branch-word layer existed three times in modules with disjoint import
+      paths; the bridge identifies them and adds no fourth copy:
+      branchLegal_iff_BLegal, branchSurvivesWord_iff_bSurvives,
+      rapp_eq_branchIter, branchIter_append, branchSurvivesWord_append,
+      branchWords_eq_SW, bcount_eq_Kx. It is a short module, as the
+      commission hoped.
+
+  [x] T40 (prop:gap). RequestProject/Contraction.lean. P h y =
+      (1/2)[h(r y) + h(r y + 1 - r)]; P_one; P_eq_smul_T (P = (lam/2) T, so
+      the normalisation is by the eigenvalue of T_one);
+      lipschitz_contraction in the LipschitzWith formulation, as recommended,
+      with no differentiability anywhere; lipschitz_contraction_iterate; and
+      tendsto_const, the nested-interval route: for y in [0,1],
+      |P^[m] h y - c| <= (2K/(1-r)) r^m, with tendstoUniformlyOn_const the
+      uniform-convergence phrasing. The limit constant is NOT identified with
+      the integral against the Bernoulli convolution: nu_r is nowhere
+      constructed in this project, so const_eq_integral_of_invariant takes
+      the invariance of a probability measure carried by [0,1] as an EXPLICIT
+      hypothesis and concludes from it, precisely as round 13 did for the
+      trapezoid.
+
+  [x] T41 (thm:equimean). RequestProject/EquiMean.lean. S h x =
+      h(lam x)[x < r] + h(lam x - (lam-1))[x > g]; adjoint (integral of
+      (S h) k over (0,1) equals integral of h (T k)); endpoint_propagator
+      ((S^[m] h)(x) is the sum of h over the endpoints of the branch words of
+      length m legal from x, so it is the paper's integral of h against
+      mu^x_m); iterate_P_eq (P^[m] = (lam/2)^m T^[m]); and
+      equidistribution_in_mean, (lam/2)^m times the integral of (S^m h) k
+      tending to (integral of h) times c, with c the constant of T40. The
+      BRANCH alphabet is used, through the T39.5 bridge, not the three-move
+      alphabet. h and k are bounded measurable rather than continuous:
+      S h is discontinuous, so continuity cannot be propagated along the
+      induction, while boundedness and measurability can.
+
+  [x] T42 (backward closure, and the two-letter reduction).
+      RequestProject/BackwardClosure.lean. toMove realises branch words as
+      M-free move words with the same survival condition and the same
+      endpoints (survivesWord_map_toMove, posAfter_map_toMove); hence
+      denseFrom_half_imp_kindDense and, composing with the certified
+      N_unbounded_of_kindDense, N_unbounded_of_denseFrom_half. Also the
+      prepending lemma endpoints_subset_of_legal, the backward closure
+      denseFrom_of_image / mem_D_of_image_mem_D, the forward invariance of
+      the complement compl_D_forward_invariant, and
+      N_unbounded_of_orbit_point_denseFrom.
+
+  Constraints respected: no sorry, no admit, no axiom, no @[implemented_by],
+  no native_decide, and no decide at all (the round is analytic and
+  combinatorial). Per-theorem #print axioms output for all four modules is in
+  AXIOM-AUDIT-round14.md; every report is [propext, Classical.choice,
+  Quot.sound]. Each module was built on its own; no tree-wide audit was run.
+
+  Explicitly not attempted, by instruction: the pointwise upgrade at x = 1/2
+  (Question 50), any construction of nu_r, and everything in UNBUILT.md.
+
+
+================================================================================
+14B. ROUND 15 (T43, T44, T45 -- CLOSING THE ROUND-14 HYPOTHESES)
+================================================================================
+
+  One new module (RequestProject/InvariantMeasure.lean), imported by All.lean
+  and added to the CI module list; two inherited modules extended.
+
+  [x] T43 (making const_eq_integral_of_invariant dischargeable).
+      RequestProject/Contraction.lean. (a) The integrability hypothesis is
+      GONE: integrable_of_lipBound proves that a function with a Lipschitz
+      bound is integrable against any probability measure carried by [0,1]
+      (continuous hence measurable, and bounded there by |h(1/2)| + K), and
+      integrable_iterate composes this with lipBound_iterate. (b) The m-fold
+      invariance is replaced by one-step invariance quantified over LIPSCHITZ
+      test functions (Lip, InvariantOn) -- the class is closed under P with
+      the constant improving, which is what the induction of
+      integral_iterate_eq needs, since it applies invariance to P^[m] h and
+      not to h. Round 14's statement survives verbatim under the name
+      const_eq_integral_of_iterate_invariant; the new
+      const_eq_integral_of_invariant is derived from it.
+      Two free additions: integral_eq_of_invariant (uniqueness of the
+      invariant measure on Lipschitz test functions) and
+      tendsto_integral_of_invariant (the packaged rate statement).
+      EquiMean.equidistribution_in_mean compiles unchanged in substance; it
+      never called the theorem, it takes c and its estimate as hypotheses.
+
+  [x] T44 (the converse inclusion). RequestProject/BackwardClosure.lean.
+      branchLegal_branch is the step lemma: a surviving move is a legal
+      branch. For L and R the predicates are identical; for M survival puts
+      x in (0, r/2) union (1 - r/2, 1), where r/2 < r and 1 - r/2 > g make
+      the branch actually taken legal -- which is the ONLY use of 1 < lam,
+      and the reason this direction carries the hypothesis while
+      denseFrom_half_imp_kindDense does not. branchWordOf is the branch word
+      taken along a move word; rapp_branchWordOf says it has the same
+      endpoint (act = f of branch, definitionally) and
+      branchSurvivesWord_branchWordOf that it is legal. Hence
+      kindDense_imp_denseFrom_half and the biconditional
+      denseFrom_half_iff_kindDense: the two density hypotheses are
+      equivalent, so the two-letter analysis is the whole of the spreading
+      problem on a certified biconditional.
+
+  [x] T45 (an invariant measure -- the stopping rule was NOT reached).
+      RequestProject/InvariantMeasure.lean, under 400 lines, no product-measure
+      layer. nu lam = map (bval lam) (volume.restrict (Ioc 0 1)) where
+      bval lam t = (1-r) * sum over j of digit j t * r^j and digit j t is the
+      j-th binary digit of t. It is a probability measure
+      (isProbabilityMeasure_nu) carried by [0,1] (nu_compl_Icc), and
+      invariantOn_nu proves Contraction.InvariantOn. The commission's
+      suggested route (the product of Bernoulli(1/2) laws on (N -> Fin 2)) was
+      advisory and is rejected on the merits, not for want of availability:
+      Measure.infinitePi DOES exist at this toolchain, but the factorisation
+      of the product into the first coordinate and the shift does not, and
+      building it (a measurable equivalence (N -> X) = X x (N -> X) plus the
+      identification of the push-forward) is the whole of the work and none of
+      it is about P. The digits of a uniform REAL are strictly better: they
+      are i.i.d. Bernoulli(1/2) for free because Lebesgue measure on (0,1] is
+      already their law, the shift is the doubling map, and the two branches
+      of the doubling map supply the factor of one half in P by the elementary
+      change of variables s = 2t on each half of (0,1]. A later round should
+      not re-derive the product-measure route; see SCRUPLES-round15.md sec 4.
+      The self-similarity bval_rec holds for every t; its
+      two branch forms fail at the single point t = 1, so the change of
+      variables uses an a.e. congruence -- exact, not approximate.
+      Consequences, with no hypothesis left beyond 1 < lam:
+      const_eq_integral_nu, tendsto_integral_nu (P^[m] h converges uniformly
+      on [0,1] to the integral of h against nu at rate r^m), and
+      equidistribution_in_mean_nu (thm:equimean with its constant identified).
+
+  Constraints respected: no sorry, no admit, no axiom, no @[implemented_by],
+  no native_decide, no decide. Per-theorem #print axioms output is in
+  AXIOM-AUDIT-round15.md; every report is [propext, Classical.choice,
+  Quot.sound].
+
+  What T45 certifies, and no more: nu is an invariant probability measure
+  carried by [0,1], and that is all. Nothing connects it to
+  FourierFloor.cosProd, whose own scruples still record that no identification
+  of that cosine product with the Fourier transform of a measure is asserted.
+  For that reason nu is nowhere described in the sources or the documents as
+  the Bernoulli convolution. No regularity of nu (density, singularity,
+  Fourier decay, Pisot dichotomy) is claimed. A later round can make the
+  identification cheaply: integral_eq_of_invariant is a UNIQUENESS statement,
+  so exhibiting the Bernoulli convolution as a probability measure carried by
+  [0,1] and invariant for P identifies it with nu on the Lipschitz test class,
+  rather than requiring a second construction.
+
+  Regularity classes, the one place they meet: Contraction.InvariantOn
+  quantifies over Lipschitz test functions, while EquiMean works in the
+  bounded measurable class BddMeas because S h carries indicators. Checked,
+  not assumed: the only place the InvariantOn hypothesis is APPLIED is the
+  successor step of Contraction.integral_iterate_eq, and it is applied to
+  P^[m] h with the witness lipBound_iterate. Every downstream statement
+  requires a LipBound on the function integrated, and in
+  equidistribution_in_mean_nu the bounded measurable h never meets the
+  invariance while the test function k carries hlip. See
+  SCRUPLES-round15.md sec 5.
+
+  Builds run for this round, one module at a time, never the union:
+  Contraction, InvariantMeasure, EquiMean, BackwardClosure -- all four
+  succeed. Those four are the blast radius: the only modules whose import
+  list names RequestProject.Contraction are EquiMean, InvariantMeasure and
+  All, and BackwardClosure is in the list because T44 edited it.
+  RequestProject.All is deliberately NOT built here; it imports the whole
+  tree, so building it is a tree build under another name, and the union is
+  CI's job. Also confirmed: const_eq_integral_of_invariant occurs in EquiMean
+  only in two docstrings and never as a term, so the round-15 rename of the
+  round-14 statement to const_eq_integral_of_iterate_invariant does not bite.
+
+  Explicitly not attempted, by instruction: the pointwise upgrade at x = 1/2
+  (Question 50), the sharpness of the contraction constant, and everything in
+  UNBUILT.md.
+
+
+================================================================================
 15. OPERATIONS: PACKAGING, CI, AND WHAT COUNTS AS DONE
 ================================================================================
 
