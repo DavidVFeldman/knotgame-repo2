@@ -108,6 +108,7 @@ import RequestProject.InvariantMeasure
 -- an explicit separation constant for the orbit of 1/2 and an explicit bound on
 -- its cardinality.
 import RequestProject.PisotSeparation
+import RequestProject.Closures17
 
 /-!
 # Knot counts in an interval deletion game

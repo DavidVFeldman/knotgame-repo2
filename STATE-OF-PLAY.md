@@ -159,3 +159,40 @@ sizes of 5, 7, 43, 153 in the paper's table — and nothing in the sources
 evaluates it at a specific `λ`.
 
 The live frontier is unchanged: Question 50, the pointwise upgrade at `x = 1/2`.
+
+## Addendum — round 17 (T47, T48, T49)
+
+Three small closures, in `RequestProject/Closures17.lean`, none depending on
+the others.
+
+1. **No Lyapunov weight can work.**  `no_contracting_weight`: for
+   `1 < lam < 2` there is no `w : ℝ → ℝ` with `1 ≤ w` on `(0,1)` and a fixed
+   `θ < 1` such that `w(act lam m x) ≤ θ·w(x)` at every `x ∈ (0,1)` and every
+   move `m` legal at `x`.  The reason is that `g lam < r lam` exactly when
+   `lam < 2`, so the moves `R` and `L` between them are legal everywhere on
+   `(0,1)`; the module builds an explicit infinite legal orbit and the weight
+   would decay to zero along it.  The lower bound `1 ≤ w` is essential: with
+   `inf w = 0` a contracting weight exists trivially.
+2. **The contraction constant is sharp.**  `P_id` computes `P lam id` to be
+   the affine map `y ↦ r·y + (1−r)/2`, and `dist_P_id` gives
+   `dist (P lam id y) (P lam id z) = r · dist y z` — an equality, so the
+   factor `r` of `Contraction.lipschitz_contraction` cannot be improved
+   (`not_lipschitzWith_P_id` states this negatively).  The appendix line
+   saying that this sharpness "remains unformalised" is now due for removal;
+   see `GITHUB_HANDOFF_CHECKLIST` §14D.
+3. **The density criterion fails at every Pisot parameter.**
+   `not_kindDense_of_orb_finite` (no hypothesis on `lam`) refutes `KindDense`
+   from finiteness of `Orb lam` by pigeonhole on `|Orb|+1` disjoint
+   subintervals; `not_denseFrom_half_of_finite` transports this to the
+   branch-word form through round 15's `denseFrom_half_imp_kindDense`; and
+   `not_kindDense_of_isPisot` composes with `Pisot.orb_finite`.  `Orb` and the
+   endpoint set of `KindDense` turned out to be literally the same data, so
+   the bridge between them is `Iff.rfl` and no definition was duplicated.
+
+What this does **not** say: the failure of the density criterion at a Pisot
+parameter is the failure of a *sufficient* condition for unboundedness, and is
+not evidence for boundedness — boundedness there is the separate inherited
+`PisotDecide.N_le_card_orb`.  Nothing here touches non-Pisot parameters, `nu`,
+or Question 50.
+
+The live frontier is unchanged: Question 50, the pointwise upgrade at `x = 1/2`.

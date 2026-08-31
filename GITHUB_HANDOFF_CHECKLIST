@@ -1126,6 +1126,69 @@ ROUND 13 -- box dimension, the counting operator, the trapezoid, and the
   RequestProject.All is deliberately NOT built; the union is CI's job.
 
 ================================================================================
+14D. ROUND 17 (T47-T49 -- THREE SMALL CLOSURES)
+================================================================================
+
+  One new module (RequestProject/Closures17.lean, namespace
+  KnotGame.Closures17), imported by All.lean and added to the CI module list.
+  No inherited module was edited, so operating rule 9 was not triggered and no
+  importer needed rebuilding.
+
+  [x] T47 (no contracting weight exists). no_contracting_weight. For
+      1 < lam < 2, no w : R -> R with 1 <= w on (0,1) satisfies
+      w (act lam m x) <= th * w x for every x in (0,1) and every move m legal
+      at x, with th < 1 fixed.
+      The mechanism: g lam < r lam exactly when lam < 2 (g_lt_r), so the move
+      R (legal below r lam) and the move L (legal above g lam) between them
+      cover (0,1); nextMove picks one, survives_nextMove certifies it, and
+      act_mem_Ioo (inherited, Pisot.lean) keeps the orbit inside (0,1). The
+      weight would then satisfy w (orbit n) <= th^n * w (orbit 0), which is
+      below 1 for large n. Negative th is disposed of in one step.
+      The orbit is an explicit recursion, not a choice function.
+
+  [x] T48 (sharpness of the contraction constant). P_id:
+      Contraction.P lam id = fun y => r lam * y + (1 - r lam)/2, with no
+      hypothesis on lam. dist_P_id (for 1 < lam):
+      dist (P lam id y) (P lam id z) = r lam * dist y z -- an equality, so the
+      factor r lam of Contraction.lipschitz_contraction is attained.
+      not_lipschitzWith_P_id: P lam id is not LipschitzWith K for any K with
+      (K : R) < r lam.
+
+  [x] PAPER EDIT MADE DUE BY T48. The appendix line recording that the
+      sharpness of the contraction constant in prop:gap "remains
+      unformalised" is now false and should be removed, with a reference to
+      KnotGame.Closures17.dist_P_id put in its place. There is no
+      knotgame.tex in this tarball, so the edit is recorded here and not made.
+
+  [x] T49 (the density criterion fails at every Pisot parameter).
+      not_kindDense_of_orb_finite: (Orb lam).Finite -> not KindDense lam, with
+      no hypothesis on lam. not_denseFrom_half_of_finite: the same against
+      BackwardClosure.DenseFrom lam (1/2), through
+      denseFrom_half_imp_kindDense -- the direction of round 15's equivalence
+      that needs no hypothesis on lam, so the commission's 1 < lam is dropped
+      (SCRUPLES-round17.md sec 3). not_kindDense_of_isPisot and
+      not_denseFrom_half_of_isPisot compose these with Pisot.orb_finite.
+      Orb and the endpoint set of KindDense are literally the same data --
+      both are survivesWord/posAfter from 1/2 -- so mem_orb_iff is Iff.rfl and
+      no definition was duplicated. Finiteness is refuted by pigeonhole:
+      |Orb| + 1 disjoint intervals (k/n, (k+1)/n) each contain an orbit point,
+      and the map is injective.
+
+  Constraints respected: no sorry, no admit, no axiom, no @[implemented_by],
+  no native_decide, no decide. Per-theorem #print axioms output is in
+  AXIOM-AUDIT-round17.md; every report is [propext, Classical.choice,
+  Quot.sound].
+
+  What round 17 does NOT certify: nothing about Question 50, nothing about
+  N lam at non-Pisot parameters, nothing about nu. The failure of the density
+  criterion at a Pisot parameter is the failure of a SUFFICIENT condition for
+  unboundedness and is not evidence for boundedness; boundedness there is the
+  separate inherited result PisotDecide.N_le_card_orb.
+
+  Builds run for this round: RequestProject.Closures17, on its own.
+  RequestProject.All is deliberately NOT built; the union is CI's job.
+
+================================================================================
 15. OPERATIONS: PACKAGING, CI, AND WHAT COUNTS AS DONE
 ================================================================================
 
